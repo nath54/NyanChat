@@ -5,19 +5,23 @@ Code suivant à adapter:
     il y a base recepteur TCP
 
 */
-
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <sys/poll.h>
 #include <sys/errno.h>
+#include <sys/ioctl.h>
+#include <sys/time.h>
+
+#include <netinet/in.h>
+
+#include <arpa/inet.h>
+
 #include <netdb.h>
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
-
-#include <netinet/in.h>
-#include <arpa/inet.h>
 #include <unistd.h>
+
 
 #define INVALID_SOCKET -1
 #define SOCKET_ERROR -1
