@@ -1,15 +1,15 @@
 # Projet Messagerie
 
+by CERIARA Nathan, (FOULON Valentin)? JACQUET Ysée and JAYAT Adrien
 
 ## Description Rapide du projet
 
-Chat multi-user avec détection et correction d’erreurs.
+Multi-user chat with error detection and correction.
 
 ## Architecture Rapide du projet
 
-Un seul serveur, un seul proxy, et pleins de clients.
-Le proxy pourra ajouter des erreurs sur les messages des clients.
+Only one server, only one proxy and many clients.
+The proxy will be able to add errors on messages from clients.
 
 
-
-TODO: Faire le Readme.md
+[TODO: Faire le Readme.md]
