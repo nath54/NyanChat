@@ -6,13 +6,15 @@
 #include <sys/time.h>
 #include <netinet/in.h>
 #include <errno.h>
+#include <unistd.h>
+#include <string.h>
 
 #define SERVER_PORT  12345
 
 #define TRUE             1
 #define FALSE            0
 
-main (int argc, char *argv[])
+int main (int argc, char *argv[])
 {
   int    len, rc, on = 1;
   int    listen_sd = -1, new_sd = -1;
