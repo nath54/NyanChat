@@ -71,8 +71,12 @@ void tcp_connection_init(TcpConnection* con,
     con->nb_poll_fds = 1;
 
     // Valeur du timeout en milisecondes
-    con->timeout = timeout_server * 60 * 1000;
-
+    if(timeout_server > 0){
+        con->timeout = timeout_server * 60 * 1000;
+    }
+    else {
+        con->timeout = -1;
+    }
 }
 
 // Test des erreurs potentielles lors de l'appel à la fonction poll
@@ -123,6 +127,7 @@ void new_clients_acceptation(TcpConnection* con, bool* end_server){
             con->poll_fds[con->nb_poll_fds].fd = new_sock;
             con->poll_fds[con->nb_poll_fds].events = POLLIN;
             con->nb_poll_fds++;
+            printf("Nb poll file descriptors : %ld\n", con->nb_poll_fds);
         } else {
             printf("  New incoming connection refused:"
                     " maximum connection reached.\n");
@@ -155,6 +160,8 @@ void tcp_connection_mainloop(TcpConnection* con, fn_on_msg on_msg){
 
         // On écoute les sockets avec poll
         rc = poll(con->poll_fds, con->nb_poll_fds, con->timeout);
+
+        printf("test, rc=%d\n", rc);
         if(test_poll_errors(rc))
             break;
 
@@ -185,6 +192,8 @@ void tcp_connection_mainloop(TcpConnection* con, fn_on_msg on_msg){
 
             } else {
 
+                printf("Readable socket : %d\n", con->poll_fds[i].fd);
+
                 // SOCKET lisible
                 // On reçoit des données tant que possible
 
@@ -211,6 +220,8 @@ void tcp_connection_mainloop(TcpConnection* con, fn_on_msg on_msg){
 
                     // On a reçu des données
                     size_t msg_len = rc;
+
+                    printf("Msg reçu : %s\n", buffer);
 
                     on_msg(con, con->poll_fds[i].fd, buffer, msg_len);
                     
