@@ -28,7 +28,7 @@ void tcp_connection_init(TcpConnection* con,
 {
 
     // Création du socket
-    con->sockfd = socket(AF_INET, SOCK_STREAM, 0);
+    con->sockfd = socket(AF_INET, SOCK_STREAM | SOCK_NONBLOCK, 0);
 
     // Test de bonne création
     if(con->sockfd == INVALID_SOCKET){
@@ -103,11 +103,10 @@ bool test_poll_errors(int rc){
 }
 
 // On écoute toutes les nouvelles demandes de connections
-void new_clients_acceptation(TcpConnection* con, bool* end_server) {
+void new_clients_acceptation(TcpConnection* con) {
     // Variable pour stoquer des sockets
     SOCKET new_sock;
 
-    // Tant que l'on a de nouveaux sockets
     do{
 
         if(con->nb_poll_fds < MAX_POLL_SOCKETS){
@@ -115,9 +114,10 @@ void new_clients_acceptation(TcpConnection* con, bool* end_server) {
             SOCKADDR_IN connected_addr;
             socklen_t con_addr_len;
 
+            printf("On accepte.\n");
             // Acceptation de la nouvelle connection
             new_sock = accept(con->sockfd,
-                              (SOCKADDR*)&connected_addr, &con_addr_len);
+                                (SOCKADDR*)&connected_addr, &con_addr_len);
 
             // Test erreur
             if(new_sock < 0){
@@ -125,9 +125,8 @@ void new_clients_acceptation(TcpConnection* con, bool* end_server) {
                 // Erreur grave, on quitte le serveur
                 if (errno != EWOULDBLOCK){
                     perror("  accept() failed");
-                    *end_server = true;
+                    con->end_server = true;
                 }
-                break;
             }
 
             printf("  New incoming connection - %d - %d\n",
@@ -145,7 +144,11 @@ void new_clients_acceptation(TcpConnection* con, bool* end_server) {
                     " maximum connection reached.\n");
         }
 
-    } while(new_sock != -1);
+    }
+    while(new_sock != -1);
+
+    printf("Fin acceptation\n");
+
 }
 
 
@@ -194,8 +197,10 @@ void read_poll_socket(TcpConnection* con, int id_poll, fn_on_msg on_msg){
     bool close_conn = false;
 
     do{
+        // On lit sur le socket
+        // rc pour Return Code
         int rc = recv(con->poll_fds[id_poll].fd,
-                      con->buffer, sizeof(con->buffer), 0);
+                      con->buffer, sizeof(con->buffer), MSG_DONTWAIT);
 
         // 
         if(rc < 0){
@@ -236,6 +241,8 @@ void tcp_connection_mainloop(TcpConnection* con, fn_on_msg on_msg){
     // Tant que le serveur tourne
     do{
 
+        printf("Waiting for poll\n");
+
         // On écoute les sockets avec poll
         // rc pour Return Code
         int rc = poll(con->poll_fds, con->nb_poll_fds, con->timeout);
@@ -266,7 +273,7 @@ void tcp_connection_mainloop(TcpConnection* con, fn_on_msg on_msg){
             if(con->poll_fds[i].fd == con->sockfd){
 
                 // Socket qui écoute les connections entrantes 
-                new_clients_acceptation(con, &con->end_server);
+                new_clients_acceptation(con);
 
             } else {
 
