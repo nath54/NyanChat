@@ -39,14 +39,20 @@ typedef struct TcpConnection{
     // Base TCP Socket Connection
     SOCKET sockfd;              // Descripteur du fichier du socket
     SOCKADDR_IN addr_recep;     // Adresse du recepteur
-    SOCKADDR_IN addr_exped;     // Adresse de l'expediteur
 
     // Polling
     struct pollfd poll_fds[MAX_POLL_SOCKETS]; // Tableau des sockets du polling
+    SOCKADDR_IN poll_addrs[MAX_POLL_SOCKETS]; // Adresses de ces sockets
+    socklen_t poll_ad_len[MAX_POLL_SOCKETS];  // Taille véritable de ces addrs
     nfds_t nb_poll_fds;    // Nombre actuel de sockets de polling
+
+    // Variables pour le serveur
+    char buffer[BUFFER_SIZE];
 
     // Paramètres du serveur
     int timeout;    // Temps maximal d'inactivité avant fermeture du serveur
+    bool end_server; // S'il faut éteindre le serveur
+    bool need_compress_poll_arr; // S'il faut compresser `this->poll_fds`
 } TcpConnection;
 
 typedef void(fn_on_msg)(TcpConnection* con, SOCKET sock,

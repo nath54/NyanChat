@@ -64,6 +64,8 @@ void tcp_connection_init(TcpConnection* con,
     
     // - Mise à zéro 
     memset(con->poll_fds, 0 , sizeof(con->poll_fds));
+    memset(con->poll_addrs, 0 , sizeof(con->poll_addrs));
+    memset(con->poll_ad_len, 0 , sizeof(con->poll_ad_len));
 
     // - Initialisaiton du socket écouteur initial
     con->poll_fds[0].fd = con->sockfd;
@@ -77,6 +79,9 @@ void tcp_connection_init(TcpConnection* con,
     else {
         con->timeout = -1;
     }
+
+    con->end_server = false;
+    con->need_compress_poll_arr = false;
 }
 
 // Test des erreurs potentielles lors de l'appel à la fonction poll
@@ -98,7 +103,7 @@ bool test_poll_errors(int rc){
 }
 
 // On écoute toutes les nouvelles demandes de connections
-void new_clients_acceptation(TcpConnection* con, bool* end_server){
+void new_clients_acceptation(TcpConnection* con, bool* end_server) {
     // Variable pour stoquer des sockets
     SOCKET new_sock;
 
@@ -107,8 +112,12 @@ void new_clients_acceptation(TcpConnection* con, bool* end_server){
 
         if(con->nb_poll_fds < MAX_POLL_SOCKETS){
 
+            SOCKADDR_IN connected_addr;
+            socklen_t con_addr_len;
+
             // Acceptation de la nouvelle connection
-            new_sock = accept(con->sockfd, NULL, NULL);
+            new_sock = accept(con->sockfd,
+                              (SOCKADDR*)&connected_addr, &con_addr_len);
 
             // Test erreur
             if(new_sock < 0){
@@ -121,11 +130,14 @@ void new_clients_acceptation(TcpConnection* con, bool* end_server){
                 break;
             }
 
-            printf("  New incoming connection - %d\n", new_sock);
+            printf("  New incoming connection - %d - %d\n",
+                        new_sock, connected_addr.sin_addr.s_addr);
 
             // Enregistrement de la nouvelle connection
             con->poll_fds[con->nb_poll_fds].fd = new_sock;
             con->poll_fds[con->nb_poll_fds].events = POLLIN;
+            con->poll_addrs[con->nb_poll_fds] = connected_addr;
+            con->poll_ad_len[con->nb_poll_fds] = con_addr_len;
             con->nb_poll_fds++;
             printf("Nb poll file descriptors : %ld\n", con->nb_poll_fds);
         } else {
@@ -137,29 +149,96 @@ void new_clients_acceptation(TcpConnection* con, bool* end_server){
 }
 
 
-// Boucle principale d'une connection tcp
-void tcp_connection_mainloop(TcpConnection* con, fn_on_msg on_msg){
+void compress_poll_socket_array(TcpConnection* con, int current_nb_poll_socks){
 
-    // Pour savoir quand le serveur est fini (à cause d'une erreur par exemple)
-    bool end_server;
+    // last_ok_sock contient l'index du dernier socket non fermé
+    int last_ok_sock = current_nb_poll_socks;            
+    while(last_ok_sock > 0 && con->poll_fds[last_ok_sock].fd == -1){
+        last_ok_sock--;
+    }
 
-    // rc pour Return Code, sert pour tester le retour de différentes fonctions
-    int rc;
+    // On teste chaque descripteur de socket
+    for(int i=0; i < last_ok_sock; i++){
+        
+        // Si socket fermé
+        //   -> on met à la place le dernier socket non fermé trouvé
+        if(con->poll_fds[i].fd == -1){
+            con->poll_fds[i].fd = con->poll_fds[last_ok_sock].fd;
+            con->poll_addrs[i] = con->poll_addrs[last_ok_sock];
+            con->poll_ad_len[i] = con->poll_ad_len[last_ok_sock];
+            con->poll_fds[last_ok_sock].fd = -1;
+            // On remet à jour le dernier socket non fermé
+            while(last_ok_sock > 0
+                    && con->poll_fds[last_ok_sock].fd == -1)
+            {
+                last_ok_sock--;
+            }
+        }
+    }
+
+    // S'il n'y a plus de sockets actifs, on ferme le serveur
+    if(con->poll_fds[0].fd == -1){
+        con->nb_poll_fds = 0;
+        con->end_server = true;
+    }
+    else{
+        // On met à jour le nombre de sockets toujours ouverts
+        con->nb_poll_fds = last_ok_sock + 1;
+    }
+}
+
+
+void read_poll_socket(TcpConnection* con, int id_poll, fn_on_msg on_msg){
 
     // Variable pour savoir si un socket du poll se coupe ou pas
-    bool close_conn;
+    bool close_conn = false;
 
-    // Buffer, pour récupérer les messages qui ont étés envoyés à ce serveur
-    char buffer[BUFFER_SIZE];
+    do{
+        int rc = recv(con->poll_fds[id_poll].fd,
+                      con->buffer, sizeof(con->buffer), 0);
 
-    // Besoin de compresser le tableau con->poll_fds
-    bool need_compress_poll_fds = false;
+        // 
+        if(rc < 0){
+            if (errno != EWOULDBLOCK) {
+                perror("  recv() failed");
+                close_conn = true;
+            }
+            break;
+        }
+
+        // Connection fermée par le client
+        if(rc == 0){
+            printf("  Connection closed\n");
+            close_conn = true;
+            break;
+        }
+
+        // On a reçu des données
+        size_t msg_len = rc;
+
+        printf("Msg reçu : %s\n", con->buffer);
+
+        on_msg(con, con->poll_fds[id_poll].fd, con->buffer, msg_len);
+
+    } while(true);
+
+    if(close_conn){
+        close(con->poll_fds[id_poll].fd);
+        con->poll_fds[id_poll].fd = -1;
+        con->need_compress_poll_arr = true;
+    }
+}
+
+
+// Boucle principale d'une connection tcp
+void tcp_connection_mainloop(TcpConnection* con, fn_on_msg on_msg){
 
     // Tant que le serveur tourne
     do{
 
         // On écoute les sockets avec poll
-        rc = poll(con->poll_fds, con->nb_poll_fds, con->timeout);
+        // rc pour Return Code
+        int rc = poll(con->poll_fds, con->nb_poll_fds, con->timeout);
 
         printf("test, rc=%d\n", rc);
         if(test_poll_errors(rc))
@@ -180,15 +259,14 @@ void tcp_connection_mainloop(TcpConnection* con, fn_on_msg on_msg){
             if(con->poll_fds[i].revents != POLLIN){
                 fprintf(stderr, "  Error! revents = %d\n",
                                     con->poll_fds[i].revents);
-                end_server = true;
+                con->end_server = true;
                 break;
             }
-            
 
             if(con->poll_fds[i].fd == con->sockfd){
-                
+
                 // Socket qui écoute les connections entrantes 
-                new_clients_acceptation(con, &end_server);
+                new_clients_acceptation(con, &con->end_server);
 
             } else {
 
@@ -197,86 +275,26 @@ void tcp_connection_mainloop(TcpConnection* con, fn_on_msg on_msg){
                 // SOCKET lisible
                 // On reçoit des données tant que possible
 
-                close_conn = false;
-
-                do{
-                    rc = recv(con->poll_fds[i].fd, buffer, sizeof(buffer), 0);
-
-                    // 
-                    if(rc < 0){
-                        if (errno != EWOULDBLOCK) {
-                            perror("  recv() failed");
-                            close_conn = true;
-                        }
-                        break;
-                    }
-
-                    // Connection fermée par le client
-                    if(rc == 0){
-                        printf("  Connection closed\n");
-                        close_conn = true;
-                        break;
-                    }
-
-                    // On a reçu des données
-                    size_t msg_len = rc;
-
-                    printf("Msg reçu : %s\n", buffer);
-
-                    on_msg(con, con->poll_fds[i].fd, buffer, msg_len);
-                    
-                } while(true);
-
-                if(close_conn){
-                    close(con->poll_fds[i].fd);
-                    con->poll_fds[i].fd = -1;
-                    need_compress_poll_fds = true;
-                }
+                read_poll_socket(con, i, on_msg);
 
             }
 
         }
 
+        // S'il y a besoin de compresser le tableau des sockets du polling
+        //  on remet ensemble côtes à côtes tous les sockets 
+        //  on n'a pas besoin de toucher aux attributs revent,
+        //  ils sont normalement tous à la valeur POLLIN
+        if(con->need_compress_poll_arr){
 
-        if(need_compress_poll_fds){
+            printf("Compress polls sockets array.\n");
+            con->need_compress_poll_arr = false;
 
-            need_compress_poll_fds = false;
+            compress_poll_socket_array(con, current_nb_poll_socks);
 
-            // last_ok_sock contient l'index du dernier socket non fermé
-            int last_ok_sock = current_nb_poll_socks;            
-            while(last_ok_sock > 0 && con->poll_fds[last_ok_sock].fd == -1){
-                last_ok_sock--;
-            }
-
-            // On teste chaque descripteur de socket
-            for(int i=0; i < last_ok_sock; i++){
-                
-                // Si socket fermé
-                //   -> on met à la place le dernier socket non fermé trouvé
-                if(con->poll_fds[i].fd == -1){
-                    con->poll_fds[i].fd = con->poll_fds[last_ok_sock].fd;
-                    con->poll_fds[last_ok_sock].fd = -1;
-                    // On remet à jour le dernier socket non fermé
-                    while(last_ok_sock > 0
-                            && con->poll_fds[last_ok_sock].fd == -1)
-                    {
-                        last_ok_sock--;
-                    }
-                }
-            }
-
-            // S'il n'y a plus de sockets actifs, on ferme le serveur
-            if(con->poll_fds[0].fd == -1){
-                con->nb_poll_fds = 0;
-                end_server = true;
-            }
-            else{
-                // On met à jour le nombre de sockets toujours ouverts
-                con->nb_poll_fds = last_ok_sock + 1;
-            }
         }
 
-    } while(end_server == false);
+    } while(con->end_server == false);
 
 }
 
