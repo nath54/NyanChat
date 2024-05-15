@@ -1,17 +1,16 @@
 IDIR = ../include
 CC=gcc
-CFLAGS=-I$(IDIR) -Wall -Werror
+CFLAGS=-I$(IDIR) -Wall
 
 ODIR=obj/
 SDIR=src/
 BDIR=bin/
 
-_OBJ = bits.o, tcp_connection.o
+_OBJ = bits.o tcp_connection.o
 OBJ = $(patsubst %,$(ODIR)%,$(_OBJ))
 
 
 build:
-	
 	$(CC) -c -o $(ODIR)bits.o $(SDIR)bits.c $(CFLAGS)
 	$(CC) -c -o $(ODIR)tcp_connection.o $(SDIR)tcp_connection.c $(CFLAGS)
 

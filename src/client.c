@@ -102,6 +102,9 @@ int main(int argc, char* argv[]) {
       // Send message to server
       buffer[bytes_read - 1] = '\0'; // Replace newline with null terminator
       int bytes_sent = send(sockfd, buffer, bytes_read, 0);
+
+      printf("Message sent!\n");
+
       if (bytes_sent == -1) {
         perror("send");
         break;
