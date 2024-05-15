@@ -150,7 +150,7 @@ void tcp_connection_mainloop(TcpConnection* con, fn_on_msg on_msg){
     bool close_conn;
 
     // Buffer, pour récupérer les messages qui ont étés envoyés à ce serveur
-    char buffer[TAILLE_BUF];
+    char buffer[BUFFER_SIZE];
 
     // Besoin de compresser le tableau con->poll_fds
     bool need_compress_poll_fds = false;

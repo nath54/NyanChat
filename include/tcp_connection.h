@@ -28,7 +28,7 @@ typedef struct sockaddr SOCKADDR;
 typedef struct in_addr IN_ADDR;
 
 
-#define TAILLE_BUF 1024
+#define BUFFER_SIZE 1024
 
 #define MAX_POLL_SOCKETS 200
 
@@ -50,7 +50,7 @@ typedef struct TcpConnection{
 } TcpConnection;
 
 typedef void(fn_on_msg)(TcpConnection* con, SOCKET sock,
-                        char msg[TAILLE_BUF], size_t msg_len);
+                        char msg[BUFFER_SIZE], size_t msg_len);
 
 static socklen_t sockaddr_size = sizeof(SOCKADDR_IN);
 

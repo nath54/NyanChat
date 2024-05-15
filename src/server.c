@@ -21,14 +21,14 @@
 
 // Fonction qui traite les messages reçus
 void on_msg_received(TcpConnection* con, SOCKET sock,
-                     char msg[TAILLE_BUF], size_t msg_length)
+                     char msg[BUFFER_SIZE], size_t msg_length)
 {
     // On affiche juste le message reçu   
-    if(msg[TAILLE_BUF-1] != '\0'){
-        char last_c = msg[TAILLE_BUF-1];
-        msg[TAILLE_BUF-1] = '\0';
+    if(msg[BUFFER_SIZE-1] != '\0'){
+        char last_c = msg[BUFFER_SIZE-1];
+        msg[BUFFER_SIZE-1] = '\0';
         printf("Message reçu : \"%s%c\"\n", msg, last_c);
-        msg[TAILLE_BUF-1] = last_c;
+        msg[BUFFER_SIZE-1] = last_c;
     }
     else{
         printf("Message reçu : \"%s\"\n", msg);

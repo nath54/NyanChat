@@ -10,13 +10,9 @@
 #include <stdlib.h>
 #include <unistd.h>
 
-#define INVALID_SOCKET -1
-#define SOCKET_ERROR -1
-#define BUFFER_SIZE 1024
 
-typedef int SOCKET;
-typedef struct sockaddr_in SOCKADDR_IN;
-typedef struct sockaddr SOCKADDR;
+#include "../include/tcp_connection.h"
+
 
 int main(int argc, char* argv[]) {
   // Socket descriptor
