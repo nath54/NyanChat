@@ -1,6 +1,6 @@
-#pragma once
 #include <stdio.h>
 #include <stdint.h>
+#include "../include/bits.h"
 
 uint16_t set_nth_bit(int n, uint16_t m)
 {

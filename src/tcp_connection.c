@@ -16,41 +16,8 @@
 #include <stdbool.h>
 #include <unistd.h>
 
+#include "../include/tcp_connection.h"
 
-#define INVALID_SOCKET -1
-#define SOCKET_ERROR -1
-
-
-typedef int SOCKET;
-typedef struct sockaddr_in SOCKADDR_IN;
-typedef struct sockaddr SOCKADDR;
-typedef struct in_addr IN_ADDR;
-
-
-#define TAILLE_BUF 1024
-
-#define MAX_POLL_SOCKETS 200
-
-// Forward declaration
-struct TcpConnection;
-
-typedef struct TcpConnection{
-    // Base TCP Socket Connection
-    SOCKET sockfd;              // Descripteur du fichier du socket
-    SOCKADDR_IN addr_recep;     // Adresse du recepteur
-    SOCKADDR_IN addr_exped;     // Adresse de l'expediteur
-
-    // Polling
-    struct pollfd poll_fds[MAX_POLL_SOCKETS]; // Tableau des sockets du polling
-    nfds_t nb_poll_fds;    // Nombre actuel de sockets de polling
-
-    // Paramètres du serveur
-    int timeout;    // Temps maximal d'inactivité avant fermeture du serveur
-} TcpConnection;
-
-typedef void(fn_on_msg)(TcpConnection* con, SOCKET sock, char msg[TAILLE_BUF]);
-
-static socklen_t sockaddr_size = sizeof(SOCKADDR_IN);
 
 
 // Initialisation d'un socket pour un serveur tcp
@@ -82,7 +49,7 @@ void tcp_connection_init(TcpConnection* con,
     inet_aton(address_receptor, &(con->addr_recep.sin_addr));
 
     // association de la socket et des param reseaux du recepteur
-    if(bind(con->sockfd, (SOCKADDR *)&con->addr_recep, &sockaddr_size) != 0){
+    if(bind(con->sockfd, (SOCKADDR *)&con->addr_recep, sockaddr_size) != 0){
         perror("erreur lors de l'appel a bind -> ");
         exit(errno);
     }
@@ -245,7 +212,7 @@ void tcp_connection_mainloop(TcpConnection* con, fn_on_msg on_msg){
                     // On a reçu des données
                     size_t msg_len = rc;
 
-                    on_msg(con, con->poll_fds[i].fd, buffer);
+                    on_msg(con, con->poll_fds[i].fd, buffer, msg_len);
                     
                 } while(true);
 
@@ -313,52 +280,7 @@ void tcp_connection_close(TcpConnection* con){
     // Fermeture de tous les autres sockets ouverts
     for(int i=0; i<con->nb_poll_fds; i++){
         if(con->poll_fds[i].fd >= 0 && con->poll_fds[i].fd != con->sockfd){
-            clos(con->poll_fds[i].fd);
+            close(con->poll_fds[i].fd);
         }
     }
-}
-
-
-// Fonction qui traite les messages reçus
-void on_msg_received(TcpConnection* con, SOCKET sock, char msg[TAILLE_BUF]){
-
-    // On affiche juste le message reçu   
-    if(msg[TAILLE_BUF-1] != '\0'){
-        char last_c = msg[TAILLE_BUF-1];
-        msg[TAILLE_BUF-1] = '\0';
-        printf("Message reçu : \"%s%c\"\n", msg, last_c);
-        msg[TAILLE_BUF-1] = last_c;
-    }
-    else{
-        printf("Message reçu : \"%s\"\n", msg);
-    }
-}
-
-
-
-// Main
-int main(int argc, char **argv)
-{
-    
-    TcpConnection con;
-
-    // verification du nombre d'arguments sur la ligne de commande
-    if(argc != 2)
-    {
-        printf("Usage: %s port_local\n", argv[0]);
-        exit(-1);
-    }
-
-    int port = atoi(argv[1]);
-
-    // Initialisation de la connection tcp du côté serveur
-    tcp_connection_init(&con, "127.0.0.1", port, 20, 10);
-
-    // Boucle principale de la connection tcp
-    tcp_connection_mainloop(&con, on_msg_received);
-
-    // fermeture de la connection
-    tcp_connection_close(&con);
-
-    return 0;
 }
