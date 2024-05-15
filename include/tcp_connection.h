@@ -32,6 +32,9 @@ typedef struct in_addr IN_ADDR;
 
 #define MAX_POLL_SOCKETS 200
 
+#define TCP_CONNECTION_SERVER 0
+#define TCP_CONNECTION_CLIENT 1
+
 // Forward declaration
 struct TcpConnection;
 
@@ -49,9 +52,10 @@ typedef struct TcpConnection{
     // Variables pour le serveur
     char buffer[BUFFER_SIZE];
 
-    // Paramètres du serveur
-    int timeout;    // Temps maximal d'inactivité avant fermeture du serveur
-    bool end_server; // S'il faut éteindre le serveur
+    // Paramètres de la connexion
+    int type_connection;    // 0 = server, 1 = client
+    int timeout;    // Temps max d'inactivité avant fermeture de la connexion
+    bool end_connection; // S'il faut éteindre la connexion
     bool need_compress_poll_arr; // S'il faut compresser `this->poll_fds`
 } TcpConnection;
 
@@ -60,17 +64,18 @@ typedef void(fn_on_msg)(TcpConnection* con, SOCKET sock,
 
 static socklen_t sockaddr_size = sizeof(SOCKADDR_IN);
 
+static int stdin_fd = fileno(stdin);
 
 
 // Initialisation d'un socket pour un serveur tcp
-void tcp_connection_init(TcpConnection* con,
+void tcp_connection_server_init(TcpConnection* con,
                  char address_receptor[], int port_receptor,
                  int nb_max_connections_server,
                  int timeout_server);
 
 
 // Boucle principale d'une connection tcp
-void tcp_connection_mainloop(TcpConnection* con, fn_on_msg on_msg);
+void tcp_connection_server_mainloop(TcpConnection* con, fn_on_msg on_msg);
 
 
 

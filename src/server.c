@@ -53,10 +53,10 @@ int main(int argc, char **argv)
     int port = atoi(argv[1]);
 
     // Initialisation de la connection tcp du côté serveur
-    tcp_connection_init(&con, "127.0.0.1", port, 20, -1);
+    tcp_connection_server_init(&con, "127.0.0.1", port, 20, -1);
 
     // Boucle principale de la connection tcp
-    tcp_connection_mainloop(&con, on_msg_received);
+    tcp_connection_server_mainloop(&con, on_msg_received);
 
     // fermeture de la connection
     tcp_connection_close(&con);

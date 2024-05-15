@@ -21,11 +21,13 @@
 
 
 // Initialisation d'un socket pour un serveur tcp
-void tcp_connection_init(TcpConnection* con,
+void tcp_connection_server_init(TcpConnection* con,
                  char address_receptor[], int port_receptor,
                  int nb_max_connections_server,
                  int timeout_server)
 {
+
+    con->type_connection = TCP_CONNECTION_SERVER;
 
     // Création du socket
     con->sockfd = socket(AF_INET, SOCK_STREAM | SOCK_NONBLOCK, 0);
@@ -72,6 +74,11 @@ void tcp_connection_init(TcpConnection* con,
     con->poll_fds[0].events = POLLIN;
     con->nb_poll_fds = 1;
 
+    // - Initialisation de l'écoute des évenements stdin
+    con->poll_fds[1].fd = stdin_fd;
+    con->poll_fds[1].events = POLLIN;
+    con->nb_poll_fds = 2;
+
     // Valeur du timeout en milisecondes
     if(timeout_server > 0){
         con->timeout = timeout_server * 60 * 1000;
@@ -80,7 +87,7 @@ void tcp_connection_init(TcpConnection* con,
         con->timeout = -1;
     }
 
-    con->end_server = false;
+    con->end_connection = false;
     con->need_compress_poll_arr = false;
 }
 
@@ -125,7 +132,7 @@ void new_clients_acceptation(TcpConnection* con) {
                 // Erreur grave, on quitte le serveur
                 if (errno != EWOULDBLOCK){
                     perror("  accept() failed");
-                    con->end_server = true;
+                    con->end_connection = true;
                 }
             }
 
@@ -182,7 +189,7 @@ void compress_poll_socket_array(TcpConnection* con, int current_nb_poll_socks){
     // S'il n'y a plus de sockets actifs, on ferme le serveur
     if(con->poll_fds[0].fd == -1){
         con->nb_poll_fds = 0;
-        con->end_server = true;
+        con->end_connection = true;
     }
     else{
         // On met à jour le nombre de sockets toujours ouverts
@@ -202,8 +209,9 @@ void read_poll_socket(TcpConnection* con, int id_poll, fn_on_msg on_msg){
         int rc = recv(con->poll_fds[id_poll].fd,
                       con->buffer, sizeof(con->buffer), MSG_DONTWAIT);
 
-        // 
+        // Plus rien à lire
         if(rc < 0){
+            // Erreur lors de la lecture
             if (errno != EWOULDBLOCK) {
                 perror("  recv() failed");
                 close_conn = true;
@@ -236,7 +244,7 @@ void read_poll_socket(TcpConnection* con, int id_poll, fn_on_msg on_msg){
 
 
 // Boucle principale d'une connection tcp
-void tcp_connection_mainloop(TcpConnection* con, fn_on_msg on_msg){
+void tcp_connection_server_mainloop(TcpConnection* con, fn_on_msg on_msg){
 
     // Tant que le serveur tourne
     do{
@@ -266,7 +274,7 @@ void tcp_connection_mainloop(TcpConnection* con, fn_on_msg on_msg){
             if(con->poll_fds[i].revents != POLLIN){
                 fprintf(stderr, "  Error! revents = %d\n",
                                     con->poll_fds[i].revents);
-                con->end_server = true;
+                con->end_connection = true;
                 break;
             }
 
@@ -274,6 +282,25 @@ void tcp_connection_mainloop(TcpConnection* con, fn_on_msg on_msg){
 
                 // Socket qui écoute les connections entrantes 
                 new_clients_acceptation(con);
+
+            } else if(con->poll_fds[i].fd == stdin_fd) {
+
+                // Evenement stdin
+
+                // Read message from standard input
+                int bytes_read = read(stdin_fd, buffer, BUFFER_SIZE);
+                if (bytes_read == 0) {
+                    printf("User closed input\n");
+                    break;
+                } else if (bytes_read == -1) {
+                    perror("read");
+                    break;
+                }
+
+                // Replace the last \n by \0
+                buffer[bytes_read - 1] = '\0';
+
+                printf("Vous avez écrit: \"%s\"\n", buffer);
 
             } else {
 
@@ -301,7 +328,7 @@ void tcp_connection_mainloop(TcpConnection* con, fn_on_msg on_msg){
 
         }
 
-    } while(con->end_server == false);
+    } while(con->end_connection == false);
 
 }
 
@@ -315,7 +342,10 @@ void tcp_connection_close(TcpConnection* con){
 
     // Fermeture de tous les autres sockets ouverts
     for(int i=0; i<con->nb_poll_fds; i++){
-        if(con->poll_fds[i].fd >= 0 && con->poll_fds[i].fd != con->sockfd){
+        if(con->poll_fds[i].fd >= 0
+            && con->poll_fds[i].fd != con->sockfd
+            && con->poll_fds[i].fd != stdin_fd
+        ){
             close(con->poll_fds[i].fd);
         }
     }
