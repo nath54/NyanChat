@@ -192,6 +192,7 @@ void new_clients_acceptation(TcpConnection* con) {
                 if (errno != EWOULDBLOCK){
                     perror("  accept() failed");
                     con->end_connection = true;
+                    break;
                 }
             }
 
