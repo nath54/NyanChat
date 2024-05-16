@@ -78,7 +78,8 @@ void tcp_connection_server_init(TcpConnection* con,
                  int timeout_server);
 
 void tcp_connection_client_init(TcpConnection* con,
-                                char* ip_to_connect, int port_to_connect);
+                                char* ip_to_connect, int port_to_connect,
+                                int timeout_client);
 
 // Boucle principale d'une connection tcp
 void tcp_connection_mainloop(TcpConnection* con,
