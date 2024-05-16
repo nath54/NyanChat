@@ -16,7 +16,7 @@
 
 void on_stdin_client(TcpConnection* con,
                     char buffer[BUFFER_SIZE],
-                    int input_length)
+                    size_t input_length)
 {
     int bytes_sent = send(con->sockfd, buffer, input_length, 0);
 
@@ -30,7 +30,7 @@ void on_stdin_client(TcpConnection* con,
 
 
 void on_msg_client(TcpConnection* con, SOCKET sock, 
-                   char* msg, int msg_len){
+                   char* msg, size_t msg_len){
 
 }
 
@@ -49,7 +49,7 @@ int main(int argc, char* argv[]) {
     char* ip_proxy = argv[1];
     int port_proxy = atoi(argv[2]);
 
-    tcp_connection_client_init(&con, ip_proxy, port_proxy);
+    tcp_connection_client_init(&con, ip_proxy, port_proxy, -1);
 
     tcp_connection_mainloop(&con, on_msg_client, on_stdin_client);
 

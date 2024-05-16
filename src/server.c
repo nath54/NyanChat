@@ -37,7 +37,7 @@ void on_msg_received(TcpConnection* con, SOCKET sock,
 
 
 void on_stdin_server(TcpConnection* con,
-                     char msg[BUFFER_SIZE], int msg_len)
+                     char msg[BUFFER_SIZE], size_t msg_len)
 {
     // On affiche juste l'entrée reçue
     printf("Message écrit : \"%s\"\n", msg);
