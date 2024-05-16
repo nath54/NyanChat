@@ -95,6 +95,8 @@ void tcp_connection_client_init(TcpConnection* con,
                                 char* ip_to_connect, int port_to_connect,
                                 int timeout_client){
 
+    con->type_connection = TCP_CONNECTION_CLIENT;
+
     // Create socket
     con->sockfd = socket(AF_INET, SOCK_STREAM, 0);
     if (con->sockfd == INVALID_SOCKET) {
