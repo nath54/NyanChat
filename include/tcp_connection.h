@@ -41,7 +41,7 @@ struct TcpConnection;
 typedef struct TcpConnection{
     // Base TCP Socket Connection
     SOCKET sockfd;              // Descripteur du fichier du socket
-    SOCKADDR_IN addr_recep;     // Adresse du recepteur
+    SOCKADDR_IN addr;           // @ recepteur (serveur), @ serveur (client)
 
     // Polling
     struct pollfd poll_fds[MAX_POLL_SOCKETS]; // Tableau des sockets du polling
@@ -62,10 +62,14 @@ typedef struct TcpConnection{
 typedef void(fn_on_msg)(TcpConnection* con, SOCKET sock,
                         char msg[BUFFER_SIZE], size_t msg_len);
 
+typedef void(fn_on_stdin)(TcpConnection* con,
+                        char msg[BUFFER_SIZE], size_t msg_len);
+
+
 static socklen_t sockaddr_size = sizeof(SOCKADDR_IN);
 
-static int stdin_fd = fileno(stdin);
-
+// static int stdin_fd = fileno(stdin);
+#define stdin_fd fileno(stdin)
 
 // Initialisation d'un socket pour un serveur tcp
 void tcp_connection_server_init(TcpConnection* con,
@@ -73,9 +77,13 @@ void tcp_connection_server_init(TcpConnection* con,
                  int nb_max_connections_server,
                  int timeout_server);
 
+void tcp_connection_client_init(TcpConnection* con,
+                                char* ip_to_connect, int port_to_connect);
 
 // Boucle principale d'une connection tcp
-void tcp_connection_server_mainloop(TcpConnection* con, fn_on_msg on_msg);
+void tcp_connection_mainloop(TcpConnection* con,
+                                    fn_on_msg on_msg,
+                                    fn_on_stdin on_stdin);
 
 
 

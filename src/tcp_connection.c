@@ -39,19 +39,19 @@ void tcp_connection_server_init(TcpConnection* con,
     }
 
     // nous sommes un serveur, nous acceptons n'importe quelle adresse
-    con->addr_recep.sin_addr.s_addr = htonl(INADDR_ANY);
+    con->addr.sin_addr.s_addr = htonl(INADDR_ANY);
 
     // famille d'adresse
-    con->addr_recep.sin_family = AF_INET;
+    con->addr.sin_family = AF_INET;
 
     // recuperation du port du recepteur
-    con->addr_recep.sin_port = htons(port_receptor);
+    con->addr.sin_port = htons(port_receptor);
 
     // adresse IPv4 du recepteur
-    inet_aton(address_receptor, &(con->addr_recep.sin_addr));
+    inet_aton(address_receptor, &(con->addr.sin_addr));
 
     // association de la socket et des param reseaux du recepteur
-    if(bind(con->sockfd, (SOCKADDR *)&con->addr_recep, sockaddr_size) != 0){
+    if(bind(con->sockfd, (SOCKADDR *)&con->addr, sockaddr_size) != 0){
         perror("erreur lors de l'appel a bind -> ");
         exit(errno);
     }
@@ -90,6 +90,63 @@ void tcp_connection_server_init(TcpConnection* con,
     con->end_connection = false;
     con->need_compress_poll_arr = false;
 }
+
+void tcp_connection_client_init(TcpConnection* con,
+                                char* ip_to_connect, int port_to_connect,
+                                int timeout_client){
+
+    // Create socket
+    con->sockfd = socket(AF_INET, SOCK_STREAM, 0);
+    if (con->sockfd == INVALID_SOCKET) {
+        perror("socket");
+        exit(errno);
+    }
+
+    // Initialize server address
+    con->addr.sin_family = AF_INET;
+    inet_aton(ip_to_connect, &con->addr.sin_addr);
+    con->addr.sin_port = htons(port_to_connect);
+
+    // Connect to server
+    if (connect(con->sockfd,
+                    (SOCKADDR*)&con->addr, sizeof(SOCKADDR)) == SOCKET_ERROR)
+    {
+        perror("connect");
+        exit(errno);
+    }
+
+    
+    // Initialisation du polling
+    
+    // - Mise à zéro 
+    memset(con->poll_fds, 0 , sizeof(con->poll_fds));
+    memset(con->poll_addrs, 0 , sizeof(con->poll_addrs));
+    memset(con->poll_ad_len, 0 , sizeof(con->poll_ad_len));
+
+    // - Initialisaiton du socket écouteur initial
+    con->poll_fds[0].fd = con->sockfd;
+    con->poll_fds[0].events = POLLIN;
+    con->nb_poll_fds = 1;
+
+    // - Initialisation de l'écoute des évenements stdin
+    con->poll_fds[1].fd = stdin_fd;
+    con->poll_fds[1].events = POLLIN;
+    con->nb_poll_fds = 2;
+
+    // Valeur du timeout en milisecondes
+    if(timeout_client > 0){
+        con->timeout = timeout_client * 60 * 1000;
+    }
+    else {
+        con->timeout = -1;
+    }
+
+    con->end_connection = false;
+    con->need_compress_poll_arr = false;
+}
+
+
+
 
 // Test des erreurs potentielles lors de l'appel à la fonction poll
 bool test_poll_errors(int rc){
@@ -244,7 +301,10 @@ void read_poll_socket(TcpConnection* con, int id_poll, fn_on_msg on_msg){
 
 
 // Boucle principale d'une connection tcp
-void tcp_connection_server_mainloop(TcpConnection* con, fn_on_msg on_msg){
+void tcp_connection_mainloop(TcpConnection* con,
+                             fn_on_msg on_msg,
+                             fn_on_stdin on_stdin)
+{
 
     // Tant que le serveur tourne
     do{
@@ -278,17 +338,24 @@ void tcp_connection_server_mainloop(TcpConnection* con, fn_on_msg on_msg){
                 break;
             }
 
-            if(con->poll_fds[i].fd == con->sockfd){
+            if(con->type_connection == TCP_CONNECTION_SERVER &&
+                    con->poll_fds[i].fd == con->sockfd){
 
                 // Socket qui écoute les connections entrantes 
                 new_clients_acceptation(con);
+
+            } else if(con->type_connection == TCP_CONNECTION_CLIENT &&
+                    con->poll_fds[i].fd == con->sockfd){
+
+                // Socket qui écoute les connections entrantes 
+                read_poll_socket(con, i, on_msg);
 
             } else if(con->poll_fds[i].fd == stdin_fd) {
 
                 // Evenement stdin
 
                 // Read message from standard input
-                int bytes_read = read(stdin_fd, buffer, BUFFER_SIZE);
+                int bytes_read = read(stdin_fd, con->buffer, BUFFER_SIZE);
                 if (bytes_read == 0) {
                     printf("User closed input\n");
                     break;
@@ -298,9 +365,11 @@ void tcp_connection_server_mainloop(TcpConnection* con, fn_on_msg on_msg){
                 }
 
                 // Replace the last \n by \0
-                buffer[bytes_read - 1] = '\0';
+                con->buffer[bytes_read - 1] = '\0';
 
-                printf("Vous avez écrit: \"%s\"\n", buffer);
+                on_stdin(con, con->buffer, bytes_read);
+
+                printf("Vous avez écrit: \"%s\"\n", con->buffer);
 
             } else {
 
