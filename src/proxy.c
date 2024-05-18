@@ -55,6 +55,9 @@ char* ip_server;
 int port_server;
 int port_clients;
 
+TcpConnection con_server;
+TcpConnection con_clients;
+
 /* ------------------ FIN VARIABLES GLOBALES ------------------*/
 
 
@@ -62,43 +65,41 @@ int port_clients;
 void on_client_received(TcpConnection* con, SOCKET sock,
                         Message msg, size_t msg_length)
 {
-
+    tcp_connection_send_struct_message(&con_server, con_server.poll_fds[0].fd,
+                                       msg);
 }
 
 
 void on_server_received(TcpConnection* con, SOCKET sock,
                         Message msg, size_t msg_length)
 {
-
+    // TODO : récupérer le SOCKET DU CLIENT
 }
 
 
 void gestion_server(){
-    //
-    TcpConnection con;
 
-    //
-    tcp_connection_client_init(&con, ip_server, port_server, -1);
+    // Initialisation de la connection qui va écouter le serveur
+    tcp_connection_client_init(&con_server, ip_server, port_server, -1);
 
-    //
-    tcp_connection_mainloop(&con, on_server_received, NULL);
+    // Boucle principale de la connection tcp qui écoute le serveur
+    tcp_connection_mainloop(&con_server, on_server_received, NULL);
 
-    //
-    tcp_connection_close(&con);
+    // fermeture de la connection qui a écouté le serveur
+    tcp_connection_close(&con_server);
 }
 
+
 void gestion_clients(){
-    //
-    TcpConnection con;
 
-    // Initialisation de la connection tcp du côté serveur
-    tcp_connection_server_init(&con, "127.0.0.1", port_clients, 20, -1);
+    // Initialisation de la connection qui va écouter les clients
+    tcp_connection_server_init(&con_clients, "127.0.0.1", port_clients, 20, -1);
 
-    // Boucle principale de la connection tcp
-    tcp_connection_mainloop(&con, on_client_received, NULL);
+    // Boucle principale de la connection tcp qui écoute les clients
+    tcp_connection_mainloop(&con_clients, on_client_received, NULL);
 
-    // fermeture de la connection
-    tcp_connection_close(&con);
+    // fermeture de la connection qui a écouté les clients
+    tcp_connection_close(&con_clients);
 }
 
 

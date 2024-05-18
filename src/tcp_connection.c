@@ -433,7 +433,7 @@ void tcp_connection_close(TcpConnection* con){
 }
 
 
-void tcp_send_message(TcpConnection* con, SOCKET sock,
+void tcp_connection_send_message(TcpConnection* con, SOCKET sock,
                       char buffer[T_MAX], int message_size, int flags,
                       uint32 ip_src, uint32 ip_dest)
 {
@@ -454,3 +454,20 @@ void tcp_send_message(TcpConnection* con, SOCKET sock,
         con->end_connection = true;
     }
 }
+
+
+void tcp_connection_send_struct_message(TcpConnection* con, SOCKET sock,
+                                        Message msg)
+{
+
+    int bytes_sent = send(sock, &msg, sizeof(msg), 0);
+
+    printf("%d bytes sent!\n", bytes_sent);
+
+    if (bytes_sent == -1) {
+        perror("send");
+        con->end_connection = true;
+    }
+}
+
+

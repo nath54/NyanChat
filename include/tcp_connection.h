@@ -124,6 +124,11 @@ void tcp_connection_close(TcpConnection* con);
 
 
 // Envoi d'un message
-void tcp_send_message(TcpConnection* con, SOCKET sock,
+void tcp_connection_send_message(TcpConnection* con, SOCKET sock,
                       char buffer[T_MAX], int message_size, int flags,
                       uint32 ip_src, uint32 ip_dest);
+
+
+// Transmission d'un struct message
+void tcp_connection_send_struct_message(TcpConnection* con, SOCKET sock,
+                                        Message msg);
