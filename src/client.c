@@ -32,7 +32,7 @@ void on_stdin_client(TcpConnection* con,
 void on_msg_client(TcpConnection* con, SOCKET sock, 
                    Message msg, size_t msg_len){
 
-    printf("Message received: %s\n", msg);
+    printf("Message received: %s\n", msg.msg);
 
 }
 
