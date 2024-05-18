@@ -6,13 +6,14 @@ ODIR=obj/
 SDIR=src/
 BDIR=bin/
 
-_OBJ = bits.o tcp_connection.o
+_OBJ = bits.o tcp_connection.o rsa.o
 OBJ = $(patsubst %,$(ODIR)%,$(_OBJ))
 
 
 build:
 	$(CC) -c -o $(ODIR)bits.o $(SDIR)bits.c $(CFLAGS)
 	$(CC) -c -o $(ODIR)tcp_connection.o $(SDIR)tcp_connection.c $(CFLAGS)
+	$(CC) -c -o $(ODIR)rsa.o $(SDIR)rsa.c $(CFLAGS)
 
 
 	$(CC) -o $(BDIR)client $(SDIR)client.c $(OBJ) $(CFLAGS)
