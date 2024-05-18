@@ -17,6 +17,7 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include <unistd.h>
+#include <stdint.h>
 
 #define INVALID_SOCKET -1
 #define SOCKET_ERROR -1
@@ -27,13 +28,43 @@ typedef struct sockaddr_in SOCKADDR_IN;
 typedef struct sockaddr SOCKADDR;
 typedef struct in_addr IN_ADDR;
 
+typedef u_int32_t uint32;
 
-#define BUFFER_SIZE 1024
+// #define BUFFER_SIZE 1024
+
+#define T_MAX 1024
+#define NB_MAX_CLIENTS 200
+#define NB_MAX_MESSAGES 2000
 
 #define MAX_POLL_SOCKETS 200
 
 #define TCP_CONNECTION_SERVER 0
 #define TCP_CONNECTION_CLIENT 1
+
+
+typedef struct {	
+    // (0=je suis là, 1=msg normal,
+    //  2=demande qui est là, 3=au revoir, 4=erreur)
+	int 	type_msg;
+    
+    // ip du client
+	uint32 	ip_source;
+    
+    // 0 = msg privé, 1 = salon privé, 2 = salon par défaut
+	int 	flag_destination;
+    
+    // ip du client destinataire, ou alors id du salon
+	uint32 	destination;
+    
+    // Taille du message
+	uint32 	taille_msg;
+    
+    // Message de l’utilisateur
+	char msg[T_MAX];
+    
+    // (pour détection & correction)
+	// ???	code;
+} Message;
 
 // Forward declaration
 struct TcpConnection;
@@ -50,7 +81,7 @@ typedef struct TcpConnection{
     nfds_t nb_poll_fds;    // Nombre actuel de sockets de polling
 
     // Variables pour le serveur
-    char buffer[BUFFER_SIZE];
+    Message msg[1];
 
     // Paramètres de la connexion
     int type_connection;    // 0 = server, 1 = client
@@ -60,10 +91,10 @@ typedef struct TcpConnection{
 } TcpConnection;
 
 typedef void(fn_on_msg)(TcpConnection* con, SOCKET sock,
-                        char msg[BUFFER_SIZE], size_t msg_len);
+                        Message msg, size_t msg_len);
 
 typedef void(fn_on_stdin)(TcpConnection* con,
-                        char msg[BUFFER_SIZE], size_t msg_len);
+                          char msg[T_MAX], size_t msg_len);
 
 
 static socklen_t sockaddr_size = sizeof(SOCKADDR_IN);
@@ -92,3 +123,7 @@ void tcp_connection_mainloop(TcpConnection* con,
 void tcp_connection_close(TcpConnection* con);
 
 
+// Envoi d'un message
+void tcp_send_message(TcpConnection* con, SOCKET sock,
+                      char buffer[T_MAX], int message_size, int flags,
+                      uint32 ip_src, uint32 ip_dest)

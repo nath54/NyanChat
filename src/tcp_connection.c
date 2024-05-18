@@ -267,7 +267,7 @@ void read_poll_socket(TcpConnection* con, int id_poll, fn_on_msg on_msg){
         // On lit sur le socket
         // rc pour Return Code
         int rc = recv(con->poll_fds[id_poll].fd,
-                      con->buffer, sizeof(con->buffer), MSG_DONTWAIT);
+                      con->msg, sizeof(con->msg), MSG_DONTWAIT);
 
         // Plus rien à lire
         if(rc < 0){
@@ -289,9 +289,9 @@ void read_poll_socket(TcpConnection* con, int id_poll, fn_on_msg on_msg){
         // On a reçu des données
         size_t msg_len = rc;
 
-        printf("Msg reçu : %s\n", con->buffer);
+        printf("Msg reçu : %s\n", con->msg[0].msg);
 
-        on_msg(con, con->poll_fds[id_poll].fd, con->buffer, msg_len);
+        on_msg(con, con->poll_fds[id_poll].fd, con->msg[0], msg_len);
 
     } while(true);
 
@@ -358,7 +358,9 @@ void tcp_connection_mainloop(TcpConnection* con,
                 // Evenement stdin
 
                 // Read message from standard input
-                int bytes_read = read(stdin_fd, con->buffer, BUFFER_SIZE);
+                char buffer[T_MAX];
+
+                int bytes_read = read(stdin_fd, buffer, T_MAX);
                 if (bytes_read == 0) {
                     printf("User closed input\n");
                     break;
@@ -368,11 +370,11 @@ void tcp_connection_mainloop(TcpConnection* con,
                 }
 
                 // Replace the last \n by \0
-                con->buffer[bytes_read - 1] = '\0';
+                buffer[bytes_read - 1] = '\0';
 
-                on_stdin(con, con->buffer, bytes_read);
+                on_stdin(con, buffer, bytes_read);
 
-                printf("Vous avez écrit: \"%s\"\n", con->buffer);
+                printf("Vous avez écrit: \"%s\"\n", buffer);
 
             } else {
 
@@ -420,5 +422,28 @@ void tcp_connection_close(TcpConnection* con){
         ){
             close(con->poll_fds[i].fd);
         }
+    }
+}
+
+
+void tcp_send_message(TcpConnection* con, SOCKET sock,
+                      char buffer[T_MAX], int message_size, int flags,
+                      uint32 ip_src, uint32 ip_dest)
+{
+
+    Message msg[1];
+    strcpy(msg[0].msg, buffer);
+    msg[0].taille_msg = message_size;
+    msg[0].type_msg = 1;
+    msg[0].ip_source = ip_src;
+    msg[0].destination = ip_dest;
+
+    int bytes_sent = send(sock, msg, sizeof(msg), 0);
+
+    printf("%d bytes sent!\n", bytes_sent);
+
+    if (bytes_sent == -1) {
+        perror("send");
+        con->end_connection = true;
     }
 }
