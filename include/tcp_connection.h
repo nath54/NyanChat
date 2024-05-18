@@ -126,4 +126,4 @@ void tcp_connection_close(TcpConnection* con);
 // Envoi d'un message
 void tcp_send_message(TcpConnection* con, SOCKET sock,
                       char buffer[T_MAX], int message_size, int flags,
-                      uint32 ip_src, uint32 ip_dest)
+                      uint32 ip_src, uint32 ip_dest);
