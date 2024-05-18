@@ -363,9 +363,9 @@ void tcp_connection_mainloop(TcpConnection* con,
                 // Evenement stdin
 
                 // Read message from standard input
-                char buffer[T_MAX];
+                char buffer[T_MSG_MAX];
 
-                int bytes_read = read(stdin_fd, buffer, T_MAX);
+                int bytes_read = read(stdin_fd, buffer, T_MSG_MAX);
                 if (bytes_read == 0) {
                     printf("User closed input\n");
                     break;
@@ -434,7 +434,7 @@ void tcp_connection_close(TcpConnection* con){
 
 
 void tcp_connection_send_message(TcpConnection* con, SOCKET sock,
-                                 char buffer[T_MAX], int message_size,
+                                 char buffer[T_MSG_MAX], int message_size,
                                  int flags,
                                  char pseudo_src[T_NOM_MAX],
                                  int type_destination,

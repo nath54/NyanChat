@@ -32,11 +32,11 @@ typedef u_int32_t uint32;
 
 // #define BUFFER_SIZE 1024
 
+
+// Taille max d'un pseudo de clients ou d'un nom de salon
 #define T_NOM_MAX 256
 
-#define T_MAX 1024
-#define NB_MAX_CLIENTS 200
-#define NB_MAX_MESSAGES 2000
+#define T_MSG_MAX 1024
 
 #define MAX_POLL_SOCKETS 200
 
@@ -62,7 +62,7 @@ typedef struct {
 	uint32 taille_msg;
     
     // Message de l’utilisateur
-	char msg[T_MAX];
+	char msg[T_MSG_MAX];
     
     // (pour détection & correction)
 	// ???	code;
@@ -97,7 +97,7 @@ typedef void(fn_on_msg)(TcpConnection* con, SOCKET sock,
                         Message msg, size_t msg_len);
 
 typedef void(fn_on_stdin)(TcpConnection* con,
-                          char msg[T_MAX], size_t msg_len);
+                          char msg[T_MSG_MAX], size_t msg_len);
 
 
 // static socklen_t sockaddr_size = sizeof(SOCKADDR_IN);
@@ -107,9 +107,9 @@ typedef void(fn_on_stdin)(TcpConnection* con,
 
 // Initialisation d'un socket pour un serveur tcp
 void tcp_connection_server_init(TcpConnection* con,
-                 char address_receptor[], int port_receptor,
-                 int nb_max_connections_server,
-                 int timeout_server);
+                                char address_receptor[], int port_receptor,
+                                int nb_max_connections_server,
+                                int timeout_server);
 
 void tcp_connection_client_init(TcpConnection* con,
                                 char* ip_to_connect, int port_to_connect,
@@ -117,8 +117,8 @@ void tcp_connection_client_init(TcpConnection* con,
 
 // Boucle principale d'une connection tcp
 void tcp_connection_mainloop(TcpConnection* con,
-                                    fn_on_msg on_msg,
-                                    fn_on_stdin on_stdin);
+                             fn_on_msg on_msg,
+                             fn_on_stdin on_stdin);
 
 
 
@@ -128,7 +128,7 @@ void tcp_connection_close(TcpConnection* con);
 
 // Envoi d'un message
 void tcp_connection_send_message(TcpConnection* con, SOCKET sock,
-                                 char buffer[T_MAX], int message_size,
+                                 char buffer[T_MSG_MAX], int message_size,
                                  int flags,
                                  char pseudo_src[T_NOM_MAX],
                                  int type_destination,

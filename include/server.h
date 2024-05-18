@@ -2,6 +2,8 @@
 
 #include "../include/tcp_connection.h"
 
+#define NB_MAX_CLIENTS 200
+#define NB_MAX_MESSAGES 2000
 
 typedef struct {
     // Nom du salon textuel
@@ -27,3 +29,15 @@ typedef struct {
 	bool msgs_boucle;
 
 } Channel;
+
+
+#define NB_MAX_CHANNELS 128
+#define NB_MAX_CONNECTED_CLIENTS (MAX_POLL_SOCKETS - 4)
+
+
+typedef struct{
+
+    
+
+} MessagesServer;
+

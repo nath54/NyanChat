@@ -15,7 +15,7 @@
 
 
 void on_stdin_client(TcpConnection* con,
-                    char msg[T_MAX],
+                    char msg[T_MSG_MAX],
                     size_t msg_len)
 {
     int bytes_sent = send(con->sockfd, msg, msg_len, 0);
