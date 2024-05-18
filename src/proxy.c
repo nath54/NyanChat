@@ -87,7 +87,7 @@ void on_server_received(TcpConnection* con, SOCKET sock,
 }
 
 
-void* gestion_server(void* onsenfout){
+void* gestion_server(void* _){
 
     // Initialisation de la connection qui va écouter le serveur
     tcp_connection_client_init(&con_server, ip_server, port_server, -1);
@@ -102,8 +102,8 @@ void* gestion_server(void* onsenfout){
 }
 
 
-void* gestion_clients(void* onsenfout){
-    
+void* gestion_clients(void* _){
+
     // Initialisation de la connection qui va écouter les clients
     tcp_connection_server_init(&con_clients, "127.0.0.1", port_clients, 20, -1);
 

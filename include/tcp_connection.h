@@ -32,6 +32,8 @@ typedef u_int32_t uint32;
 
 // #define BUFFER_SIZE 1024
 
+#define T_NOM_MAX 256
+
 #define T_MAX 1024
 #define NB_MAX_CLIENTS 200
 #define NB_MAX_MESSAGES 2000
@@ -45,31 +47,57 @@ typedef u_int32_t uint32;
 typedef struct {	
     // (0=je suis là, 1=msg normal,
     //  2=demande qui est là, 3=au revoir, 4=erreur)
-	int 	type_msg;
+	int type_msg;
     
-    // ip du client
-	uint32 	ip_source;
+    // pseudo du client
+	char pseudo_source[T_NOM_MAX];
     
     // 0 = msg privé, 1 = salon privé, 2 = salon par défaut
-	int 	flag_destination;
+	int flag_destination;
     
-    // ip du client destinataire, ou alors id du salon
-	uint32 	destination;
+    // pseudo du client destinataire, ou alors nom du salon
+	char destination[T_NOM_MAX];
     
     // Taille du message
-	uint32 	taille_msg;
+	uint32 taille_msg;
     
     // Message de l’utilisateur
 	char msg[T_MAX];
     
     // (pour détection & correction)
 	// ???	code;
+
 } Message;
 
-// Forward declaration
-struct TcpConnection;
 
-typedef struct TcpConnection{
+
+typedef struct {
+    // Nom du salon textuel
+    char name[T_NOM_MAX];
+
+    // Pseudo du créateur du channel
+    char host[T_NOM_MAX];
+
+    // Liste des clients autorisés
+    char clients[T_NOM_MAX][NB_MAX_CLIENTS];
+
+    // Nombre de clients
+    int nb_clients;
+
+    // liste des messages
+    char msgs[T_MAX][NB_MAX_MESSAGES];
+
+    // Nombre de messages dans le salon
+    int nb_msgs;
+
+    // Indique qu’on a dépassé NB_MAX_MESSAGES messages dans le salon,
+    //  donc on active la périodicité du tableau msgs
+	bool msgs_boucle;
+
+} Channel;
+
+
+typedef struct {
     // Base TCP Socket Connection
     SOCKET sockfd;              // Descripteur du fichier du socket
     SOCKADDR_IN addr;           // @ recepteur (serveur), @ serveur (client)
@@ -87,8 +115,10 @@ typedef struct TcpConnection{
     int type_connection;    // 0 = server, 1 = client
     int timeout;    // Temps max d'inactivité avant fermeture de la connexion
     bool end_connection; // S'il faut éteindre la connexion
-    bool need_compress_poll_arr; // S'il faut compresser `this->poll_fds`
+    bool need_compress_poll_arr; // S'il faut compresser this->poll_fds
 } TcpConnection;
+
+
 
 typedef void(fn_on_msg)(TcpConnection* con, SOCKET sock,
                         Message msg, size_t msg_len);

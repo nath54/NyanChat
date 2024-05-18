@@ -6,11 +6,6 @@
 #include <openssl/bn.h>
 
 // Gemini code corrected by ChatGpt-4o
-#include <openssl/err.h>
-#include <openssl/pem.h>
-#include <openssl/evp.h>
-#include <openssl/rsa.h>
-#include <openssl/bn.h>
 
 
 /**
