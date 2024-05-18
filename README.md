@@ -1,6 +1,6 @@
 # Projet Messagerie
 
-by CERIARA Nathan, (FOULON Valentin)? JACQUET Ysée and JAYAT Adrien
+by CERIARA Nathan, JACQUET Ysée and JAYAT Adrien
 
 ## Description Rapide du projet
 
