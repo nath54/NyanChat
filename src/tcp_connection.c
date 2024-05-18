@@ -309,6 +309,11 @@ void tcp_connection_mainloop(TcpConnection* con,
                              fn_on_stdin on_stdin)
 {
 
+    if(on_msg == NULL){
+        fprintf(stderr, "Error, on_msg is NULL!\n");
+        exit(EXIT_FAILURE);
+    }
+
     // Tant que le serveur tourne
     do{
 
@@ -372,7 +377,9 @@ void tcp_connection_mainloop(TcpConnection* con,
                 // Replace the last \n by \0
                 buffer[bytes_read - 1] = '\0';
 
-                on_stdin(con, buffer, bytes_read);
+                if(on_stdin != NULL){
+                    on_stdin(con, buffer, bytes_read);
+                }
 
                 printf("Vous avez écrit: \"%s\"\n", buffer);
 

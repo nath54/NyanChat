@@ -45,7 +45,7 @@ int main(int argc, char* argv[]) {
     // Check arguments
     if (argc != 3) {
         printf("Usage: %s ip_proxy port_proxy\n", argv[0]);
-        exit(-1);
+        exit(EXIT_FAILURE);
     }
 
     char* ip_proxy = argv[1];
