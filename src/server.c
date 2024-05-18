@@ -17,6 +17,7 @@
 #include <unistd.h>
 
 #include "../include/tcp_connection.h"
+#include "../include/server.h"
 
 
 // Fonction qui traite les messages reçus

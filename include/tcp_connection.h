@@ -70,33 +70,6 @@ typedef struct {
 } Message;
 
 
-
-typedef struct {
-    // Nom du salon textuel
-    char name[T_NOM_MAX];
-
-    // Pseudo du créateur du channel
-    char host[T_NOM_MAX];
-
-    // Liste des clients autorisés
-    char clients[T_NOM_MAX][NB_MAX_CLIENTS];
-
-    // Nombre de clients
-    int nb_clients;
-
-    // liste des messages
-    char msgs[T_MAX][NB_MAX_MESSAGES];
-
-    // Nombre de messages dans le salon
-    int nb_msgs;
-
-    // Indique qu’on a dépassé NB_MAX_MESSAGES messages dans le salon,
-    //  donc on active la périodicité du tableau msgs
-	bool msgs_boucle;
-
-} Channel;
-
-
 typedef struct {
     // Base TCP Socket Connection
     SOCKET sockfd;              // Descripteur du fichier du socket
@@ -155,8 +128,11 @@ void tcp_connection_close(TcpConnection* con);
 
 // Envoi d'un message
 void tcp_connection_send_message(TcpConnection* con, SOCKET sock,
-                      char buffer[T_MAX], int message_size, int flags,
-                      uint32 ip_src, uint32 ip_dest);
+                                 char buffer[T_MAX], int message_size,
+                                 int flags,
+                                 char pseudo_src[T_NOM_MAX],
+                                 int type_destination,
+                                 char destination[T_NOM_MAX]);
 
 
 // Transmission d'un struct message

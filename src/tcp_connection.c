@@ -434,18 +434,22 @@ void tcp_connection_close(TcpConnection* con){
 
 
 void tcp_connection_send_message(TcpConnection* con, SOCKET sock,
-                      char buffer[T_MAX], int message_size, int flags,
-                      uint32 ip_src, uint32 ip_dest)
+                                 char buffer[T_MAX], int message_size,
+                                 int flags,
+                                 char pseudo_src[T_NOM_MAX],
+                                 int type_destination,
+                                 char destination[T_NOM_MAX])
 {
 
-    Message msg[1];
-    strcpy(msg[0].msg, buffer);
-    msg[0].taille_msg = message_size;
-    msg[0].type_msg = 1;
-    msg[0].ip_source = ip_src;
-    msg[0].destination = ip_dest;
+    Message msg;
+    strcpy(msg.msg, buffer);
+    msg.taille_msg = message_size;
+    msg.type_msg = 1;
+    msg.flag_destination = type_destination;
+    strcpy(msg.pseudo_source, pseudo_src);
+    strcpy(msg.destination, destination);
 
-    int bytes_sent = send(sock, msg, sizeof(msg), 0);
+    int bytes_sent = send(sock, &msg, sizeof(msg), 0);
 
     printf("%d bytes sent!\n", bytes_sent);
 

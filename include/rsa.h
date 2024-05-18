@@ -1,3 +1,5 @@
+#pragma once
+
 #include <stdio.h>
 #include <openssl/err.h>
 #include <openssl/pem.h>
