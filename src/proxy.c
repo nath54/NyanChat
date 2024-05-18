@@ -14,6 +14,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <stdnoreturn.h>
 
 #include <pthread.h>
 #include <semaphore.h>
@@ -39,6 +40,15 @@
         if ((errno = (op)) > 0)                                               \
             raler(#op);                                                       \
     } while (0)
+
+
+
+noreturn void raler(const char *msg)
+{
+    perror(msg);
+    exit(1);
+}
+
 
 
 
@@ -77,7 +87,7 @@ void on_server_received(TcpConnection* con, SOCKET sock,
 }
 
 
-void gestion_server(){
+void* gestion_server(void* onsenfout){
 
     // Initialisation de la connection qui va écouter le serveur
     tcp_connection_client_init(&con_server, ip_server, port_server, -1);
@@ -87,11 +97,13 @@ void gestion_server(){
 
     // fermeture de la connection qui a écouté le serveur
     tcp_connection_close(&con_server);
+
+    return NULL;
 }
 
 
-void gestion_clients(){
-
+void* gestion_clients(void* onsenfout){
+    
     // Initialisation de la connection qui va écouter les clients
     tcp_connection_server_init(&con_clients, "127.0.0.1", port_clients, 20, -1);
 
@@ -100,6 +112,8 @@ void gestion_clients(){
 
     // fermeture de la connection qui a écouté les clients
     tcp_connection_close(&con_clients);
+
+    return NULL;
 }
 
 

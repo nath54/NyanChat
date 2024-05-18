@@ -23,7 +23,7 @@
 void on_msg_received(TcpConnection* con, SOCKET sock,
                      Message msg, size_t msg_length)
 {
-    printf("Message reçu : \"%s\"\n", msg);
+    printf("Message reçu : \"%s\"\n", msg.msg);
 }
 
 

@@ -97,7 +97,7 @@ typedef void(fn_on_stdin)(TcpConnection* con,
                           char msg[T_MAX], size_t msg_len);
 
 
-static socklen_t sockaddr_size = sizeof(SOCKADDR_IN);
+// static socklen_t sockaddr_size = sizeof(SOCKADDR_IN);
 
 // static int stdin_fd = fileno(stdin);
 #define stdin_fd fileno(stdin)

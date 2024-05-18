@@ -51,7 +51,7 @@ void tcp_connection_server_init(TcpConnection* con,
     inet_aton(address_receptor, &(con->addr.sin_addr));
 
     // association de la socket et des param reseaux du recepteur
-    if(bind(con->sockfd, (SOCKADDR *)&con->addr, sockaddr_size) != 0){
+    if(bind(con->sockfd, (SOCKADDR *)&con->addr, sizeof(con->addr)) != 0){
         perror("erreur lors de l'appel a bind -> ");
         exit(errno);
     }
