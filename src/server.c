@@ -23,7 +23,10 @@
 // Fonction qui traite les messages reçus
 void on_msg_received(TcpConnection* con, SOCKET sock,
                      Message msg, size_t msg_length)
-{
+{   
+    (void)con;
+    (void)sock;
+    (void)msg_length;
     printf("Message reçu : \"%s\"\n", msg.msg);
 }
 
@@ -31,6 +34,8 @@ void on_msg_received(TcpConnection* con, SOCKET sock,
 void on_stdin_server(TcpConnection* con,
                      char msg[T_MSG_MAX], size_t msg_len)
 {
+    (void)con;
+    (void)msg_len;
     // On affiche juste l'entrée reçue
     printf("Message écrit : \"%s\"\n", msg);
 }

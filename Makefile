@@ -1,31 +1,32 @@
-IDIR = ./include/
-CC=gcc
-CFLAGS=-I$(IDIR) -Werror -Wall -lcrypto -lssl -lm
+ODIR = build/obj/
+SDIR = src/
+BDIR = bin/
+IDIR = include/
 
-ODIR=obj/
-SDIR=src/
-BDIR=bin/
+CC = gcc
+CFLAGS = -I$(IDIR) -Werror -Wall -Wextra -g
+LDFLAGS = -lcrypto -lssl -lm
 
-_OBJ = bits.o tcp_connection.o rsa.o hashmap.o lib_ansi.o
-OBJ = $(patsubst %,$(ODIR)%,$(_OBJ))
+SSHARED = bits.c tcp_connection.c rsa.c hashmap.c lib_ansi.c
+OBJ := $(SSHARED:%.c=$(ODIR)%.o)
 
+all: client server proxy
 
-build:
-	mkdir -p $(ODIR)
-	$(CC) -c -o $(ODIR)bits.o $(SDIR)bits.c $(CFLAGS)
-	$(CC) -c -o $(ODIR)tcp_connection.o $(SDIR)tcp_connection.c $(CFLAGS)
-	$(CC) -c -o $(ODIR)rsa.o $(SDIR)rsa.c $(CFLAGS)
-	$(CC) -c -o $(ODIR)hashmap.o $(SDIR)hashmap.c $(CFLAGS)
-	$(CC) -c -o $(ODIR)lib_ansi.o $(SDIR)lib_ansi.c $(CFLAGS)
+client: $(OBJ) $(ODIR)client.o
+	$(CC) $^ -o $(BDIR)$@ $(LDFLAGS)
 
-	mkdir -p $(BDIR)
-	$(CC) -o $(BDIR)client $(SDIR)client.c $(OBJ) $(CFLAGS)
-	$(CC) -o $(BDIR)proxy $(SDIR)proxy.c $(OBJ) $(CFLAGS)
-	$(CC) -o $(BDIR)server $(SDIR)server.c $(OBJ) $(CFLAGS)
+server: $(OBJ) $(ODIR)server.o
+	$(CC) $^ -o $(BDIR)$@ $(LDFLAGS)
 
-	# $(CC) -o $(BDIR)test_ansi $(SDIR)test_ansi.c $(OBJ) $(CFLAGS)
-
-.PHONY: clean
+proxy: $(OBJ) $(ODIR)proxy.o
+	$(CC) $^ -o $(BDIR)$@ $(LDFLAGS)
 
 clean:
-	rm -f $(ODIR)/*.o bin/*
+	$(RM) -r $(ODIR) $(BDIR)
+
+# Rule for compiling a C source file
+$(ODIR)%.o: $(SDIR)%.c
+	@mkdir -p $(BDIR) $(ODIR)
+	$(CC) $(CFLAGS) -c $< -o $@
+
+.PHONY: clean

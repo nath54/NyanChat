@@ -422,7 +422,7 @@ void tcp_connection_close(TcpConnection* con){
     close(con->sockfd);
 
     // Fermeture de tous les autres sockets ouverts
-    for(int i=0; i<con->nb_poll_fds; i++){
+    for(unsigned long i=0; i<con->nb_poll_fds; i++){
         if(con->poll_fds[i].fd >= 0
             && con->poll_fds[i].fd != con->sockfd
             && con->poll_fds[i].fd != stdin_fd
@@ -440,7 +440,7 @@ void tcp_connection_send_message(TcpConnection* con, SOCKET sock,
                                  int type_destination,
                                  char destination[T_NOM_MAX])
 {
-
+    (void)flags;
     Message msg;
     strcpy(msg.msg, buffer);
     msg.taille_msg = message_size;

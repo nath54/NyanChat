@@ -75,6 +75,9 @@ TcpConnection con_clients;
 void on_client_received(TcpConnection* con, SOCKET sock,
                         Message msg, size_t msg_length)
 {
+    (void)con;
+    (void)sock;
+    (void)msg_length;
     tcp_connection_send_struct_message(&con_server, con_server.poll_fds[0].fd,
                                        msg);
 }
@@ -83,12 +86,17 @@ void on_client_received(TcpConnection* con, SOCKET sock,
 void on_server_received(TcpConnection* con, SOCKET sock,
                         Message msg, size_t msg_length)
 {
+    (void)con;
+    (void)sock;
+    (void)msg;
+    (void)msg_length;
     // TODO : récupérer le SOCKET DU CLIENT
 }
 
 
-void* gestion_server(void* _){
-
+void* gestion_server(void* arg)
+{
+    (void)arg;
     // Initialisation de la connection qui va écouter le serveur
     tcp_connection_client_init(&con_server, ip_server, port_server, -1);
 
@@ -102,8 +110,9 @@ void* gestion_server(void* _){
 }
 
 
-void* gestion_clients(void* _){
-
+void* gestion_clients(void* arg)
+{
+    (void)arg;
     // Initialisation de la connection qui va écouter les clients
     tcp_connection_server_init(&con_clients, "127.0.0.1", port_clients, 20, -1);
 
@@ -117,8 +126,8 @@ void* gestion_clients(void* _){
 }
 
 
-int main(int argc, char* argv[]){
-
+int main(int argc, char* argv[])
+{
     if (argc != 4) {
         printf("Usage: %s ip_server port_server port_clients\n", argv[0]);
         exit(EXIT_FAILURE);
