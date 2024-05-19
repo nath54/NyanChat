@@ -33,13 +33,11 @@ void set_screen_border(int width, int height){
     printf("#");
 }
 
-void set_logo(int width, int height){
-
-}
-
 
 int main() {
     int width, height;
+
+    AsciiArt* logo = load_ascii_art("res/test2.txt");
 
     get_terminal_size(&width, &height);
 
@@ -53,7 +51,12 @@ int main() {
         get_terminal_size(&width, &height);
         set_screen_border(width, height);
         
-        set_logo(width, height);
+        print_ascii_art_with_gradients(width/3, height/3, logo,
+                                       FUCHSIA, CYAN, GREEN);
+        
+        sleep(1);
     }
+
+    free_ascii_art(logo);
     return 0;
 }

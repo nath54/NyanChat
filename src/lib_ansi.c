@@ -91,6 +91,13 @@ void set_cursor_position(int col, int row) {
 }
 
 
+// Rainbow colors
+#define NB_RAINBOW_COLORS 7
+static Color rainbow_colors[NB_RAINBOW_COLORS] = {
+    RED, ORANGE, YELLOW, GREEN, BLUE, INDIGO, VIOLET
+};
+
+
 // Print a text with a rainbow effect
 void print_rainbow(char* txt){
     size_t len = strlen(txt);
@@ -272,7 +279,7 @@ void print_ascii_art_with_gradients(int x, int y,
     Color cl_delta_y = cl_divide(cl_sub(cl_bottom_left, cl_top_left), art->ty);
     
     for(int l=0; l<art->ty; l++){
-        Color cl = cl_add(cl_bottom_left, cl_mult(cl_delta_y, l));
+        Color cl = cl_add(cl_top_left, cl_mult(cl_delta_y, l));
         set_cursor_position(x, y+l);
         for(int c=0; c<art->tx; c++){
             //

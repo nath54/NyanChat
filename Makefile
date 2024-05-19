@@ -10,7 +10,10 @@ LDFLAGS = -lcrypto -lssl -lm
 SSHARED = bits.c tcp_connection.c rsa.c hashmap.c lib_ansi.c
 OBJ := $(SSHARED:%.c=$(ODIR)%.o)
 
-all: client server proxy
+all: client server proxy test_ansi
+
+test_ansi: $(OBJ) $(ODIR)test_ansi.o
+	$(CC) $^ -o $(BDIR)$@ $(LDFLAGS)
 
 client: $(OBJ) $(ODIR)client.o
 	$(CC) $^ -o $(BDIR)$@ $(LDFLAGS)

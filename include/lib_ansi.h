@@ -50,13 +50,6 @@ void get_cursor_position(int *row, int *col);
 // Function to set the cursor position
 void set_cursor_position(int row, int col);
 
-
-// Rainbow colors
-#define NB_RAINBOW_COLORS 7
-Color rainbow_colors[NB_RAINBOW_COLORS] = {
-    RED, ORANGE, YELLOW, GREEN, BLUE, INDIGO, VIOLET
-};
-
 // Print a text with a rainbow effect
 void print_rainbow(char* txt);
 
