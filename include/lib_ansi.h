@@ -78,4 +78,23 @@ typedef struct{
     int ty;
 } ColoredAsciiArt;
 
+//
+AsciiArt* load_ascii_art(char* file_path);
+
+//
+void free_ascii_art(AsciiArt* art);
+
+// 
+void print_ascii_art(int x, int y, AsciiArt* art);
+
+//
+void print_ascii_art_with_colors(int x, int y, ColoredAsciiArt* art,
+                                               ColorPalette palette);
+
+// 
+void print_ascii_art_with_gradients(int x, int y,
+                                    AsciiArt* art,
+                                    Color cl_top_left,
+                                    Color cl_bottom_left,
+                                    Color cl_top_right);
 
