@@ -23,7 +23,7 @@ build:
 	$(CC) -o $(BDIR)proxy $(SDIR)proxy.c $(OBJ) $(CFLAGS)
 	$(CC) -o $(BDIR)server $(SDIR)server.c $(OBJ) $(CFLAGS)
 
-	$(CC) -o $(BDIR)test_ansi $(SDIR)test_ansi.c $(CFLAGS)
+	# $(CC) -o $(BDIR)test_ansi $(SDIR)test_ansi.c $(OBJ) $(CFLAGS)
 
 .PHONY: clean
 

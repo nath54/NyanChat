@@ -37,12 +37,6 @@ void set_logo(int width, int height){
 
 }
 
-void set_menu(int width, int height,
-              char** menus, int nb_menus, int menu_selected)
-{
-
-}
-
 
 int main() {
     int width, height;
@@ -53,14 +47,6 @@ int main() {
 
     set_screen_border(width, height);
 
-    char menus[3][10] = {
-        "Menu 1",
-        "Menu 2",
-        "Menu 3"
-    };
-
-    int selected_menu = 0;
-
 
     //
     while(1){
@@ -68,8 +54,6 @@ int main() {
         set_screen_border(width, height);
         
         set_logo(width, height);
-        
-        set_menu(width, height, menus, 3, selected_menu);
     }
     return 0;
 }

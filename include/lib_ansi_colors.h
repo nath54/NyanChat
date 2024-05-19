@@ -1,7 +1,11 @@
 #pragma once
 
-// Forward declaration
-typedef Color Color;
+// Color Structure
+typedef struct{
+    int r;
+    int g;
+    int b;
+} Color;
 
 // Sample colors
 #define MAROON                    (Color){128,0,0}

@@ -8,13 +8,6 @@
 
 #include "../include/lib_ansi_colors.h"
 
-// Color Structure
-typedef struct{
-    int r;
-    int g;
-    int b;
-} Color;
-
 // Create a Color struct from r, g, b
 Color cl(int r, int g, int b);
 
