@@ -9,7 +9,22 @@
 #include "../include/lib_ansi_colors.h"
 
 // Create a Color struct from r, g, b
-Color cl(int r, int g, int b);
+Color cl(double r, double g, double b);
+
+// Clamp a color values between 0 and 255
+Color cl_clamp(Color c);
+
+// Add two colors together
+Color cl_add(Color c1, Color c2);
+
+// Substract two colors
+Color cl_sub(Color c1, Color c2);
+
+// Divide a color by a value
+Color cl_divide(Color c1, double d);
+
+// Multiply a color by a value
+Color cl_mult(Color c1, double v);
 
 // Set the terminal font color to the color c
 void set_cl_fg(Color c);
@@ -44,3 +59,23 @@ Color rainbow_colors[NB_RAINBOW_COLORS] = {
 
 // Print a text with a rainbow effect
 void print_rainbow(char* txt);
+
+typedef struct{
+    char** art;
+    int tx;
+    int ty;
+} AsciiArt;
+
+typedef struct{
+    Color* colors;
+    int nb_colors;
+} ColorPalette;
+
+typedef struct{
+    char** art;
+    int** colors;
+    int tx;
+    int ty;
+} ColoredAsciiArt;
+
+

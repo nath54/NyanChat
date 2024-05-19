@@ -2,9 +2,9 @@
 
 // Color Structure
 typedef struct{
-    int r;
-    int g;
-    int b;
+    double r;
+    double g;
+    double b;
 } Color;
 
 // Sample colors
