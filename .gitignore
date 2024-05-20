@@ -6,6 +6,9 @@
 build/
 bin/
 
+# Documentation files
+doc/*/
+
 # Prerequisites and object files
 *.d
 *.o
