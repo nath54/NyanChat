@@ -5,6 +5,10 @@
 #include "../include/tcp_connection.h"
 
 
+#define PROXY_ERROR_RATE 10   // En pourcentage, la chance de créer une erreur
+#define PROXY_MAX_ERROR_CREATED 4  // Le nombre max d'erreurs créées
+
+
 // Fonction pour détecter une erreur dans le message
 //  Renvoie 0 si pas d'erreurs détectées,
 //  sinon une valeur positive qui peut par exemple indiquer si possibilité de

@@ -4,6 +4,8 @@
 #include <sys/errno.h>
 #include <sys/ioctl.h>
 #include <sys/time.h>
+#include <math.h>
+#include <sys/random.h>
 
 #include <netinet/in.h>
 
@@ -19,6 +21,8 @@
 #include <semaphore.h>
 
 #include "../include/tcp_connection.h"
+
+#include "../include/codes_detection_correction.h"
 
 #include "../include/lib_chks.h"
 
@@ -41,6 +45,10 @@ TcpConnection con_clients;
 /* ------------------ FIN VARIABLES GLOBALES ------------------*/
 
 
+int randint(int maxi_val){
+    return rand() % maxi_val;
+}
+
 
 void on_client_received(TcpConnection* con, SOCKET sock,
                         Message msg, size_t msg_length,
@@ -58,6 +66,17 @@ void on_client_received(TcpConnection* con, SOCKET sock,
 
     // Normalement, la fonction qui a appelé cette fonction 
     //  a mis l'id du poll socket du client dans msg.proxy_client_socket
+
+    if(msg.type_msg == MSG_NORMAL_CLIENT_SERVER && msg.taille_msg >= 10){
+        // Ajouts potentiel d'erreurs
+
+        if(randint(100) <= PROXY_ERROR_RATE){
+            
+            // Ajout d'erreurs au message
+            code_add_noise_to_msg(&msg, randint(PROXY_MAX_ERROR_CREATED));
+        }
+
+    }
 
     tcp_connection_send_struct_message(&con_server, con_server.poll_fds[0].fd,
                                        msg);
@@ -159,6 +178,9 @@ int main(int argc, char* argv[])
     ip_server = argv[1];
     port_server = atoi(argv[2]);
     port_clients = atoi(argv[3]);
+
+    // init random
+    srand(time(NULL));
 
     TCHK( sem_init(&semaphore, 0, 0) );
     etat_server = SERVER_WAIT_CONNECTION;
