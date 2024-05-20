@@ -387,9 +387,9 @@ void tcp_connection_mainloop(TcpConnection* con,
                 // Evenement stdin
 
                 // Read message from standard input
-                char buffer[T_MSG_MAX];
+                char buffer[MAX_MSG_LENGTH];
 
-                int bytes_read = read(stdin_fd, buffer, T_MSG_MAX);
+                int bytes_read = read(stdin_fd, buffer, MAX_MSG_LENGTH);
                 if (bytes_read == 0) {
                     printf("User closed input\n");
                     break;
@@ -457,15 +457,15 @@ void tcp_connection_close(TcpConnection* con){
 }
 
 
-void tcp_connection_message_update(Message *msg, char buffer[T_MSG_MAX],
+void tcp_connection_message_update(Message *msg, char buffer[MAX_MSG_LENGTH],
                                    uint32_t size, int type, int flag,
-                                   char pseudo_source[T_NOM_MAX],
-                                   char destination[T_NOM_MAX])
+                                   char pseudo_source[MAX_NAME_LENGTH],
+                                   char destination[MAX_NAME_LENGTH])
 {
     if (buffer != NULL)
         strcpy(msg->msg, buffer);
-    if (size > T_MSG_MAX)
-        size = T_MSG_MAX;
+    if (size > MAX_MSG_LENGTH)
+        size = MAX_MSG_LENGTH;
     if (size != 0)
         msg->msg_length = size;
     msg->msg_type = type;

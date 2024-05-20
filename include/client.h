@@ -6,13 +6,13 @@
 
 typedef struct {
     bool connected;
-    char pseudo[T_NOM_MAX];
+    char pseudo[MAX_NAME_LENGTH];
     bool waiting_pseudo_confirmation;
 
     // Salon actuel
     int type_current_dest; // 0=salon par défaut, 1=salon privé, 2=msg_privé
     // Nom du salon où il est, ou pseudo du client de msg privé
-    char destination[T_NOM_MAX];
+    char destination[MAX_NAME_LENGTH];
 
     // Liste de messages envoyés qui attendent un ackuittement
     //  à initialiser au début du client, et à libérer à la fin

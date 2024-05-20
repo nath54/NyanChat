@@ -34,9 +34,9 @@ typedef u_int32_t uint32;
 
 
 // Taille max d'un pseudo de clients ou d'un nom de salon
-#define T_NOM_MAX 256
+#define MAX_NAME_LENGTH 256
 
-#define T_MSG_MAX 256
+#define MAX_MSG_LENGTH 256
 
 #define MAX_POLL_SOCKETS 200
 
@@ -78,7 +78,7 @@ typedef struct __attribute__((packed, aligned(4))) Message {
     int msg_id;
     
     // Pseudo of the client
-	char src_pseudo[T_NOM_MAX];
+	char src_pseudo[MAX_NAME_LENGTH];
 
     // Client socket of the proxy (filled by the proxy)
     int proxy_client_socket;
@@ -92,13 +92,13 @@ typedef struct __attribute__((packed, aligned(4))) Message {
 	int dst_flag;
     
     // Pseudo of the client destination, or name of the channel
-	char dst[T_NOM_MAX];
+	char dst[MAX_NAME_LENGTH];
     
     // Length of the message
 	uint32 msg_length;
     
     // Message from the user
-	char msg[T_MSG_MAX];
+	char msg[MAX_MSG_LENGTH];
     
     // (for detection & correction)
     // TODO: ajouter ici les ressources nécessaires pour les codes polynomiaux
@@ -136,7 +136,7 @@ typedef void(fn_on_msg)(TcpConnection* con, SOCKET sock,
                         void* custom_args);
 
 typedef void(fn_on_stdin)(TcpConnection* con,
-                          char msg[T_MSG_MAX], size_t msg_len,
+                          char msg[MAX_MSG_LENGTH], size_t msg_len,
                           void* custom_args);
 
 
@@ -173,10 +173,10 @@ void tcp_connection_close(TcpConnection* con);
 
 
 // Mise à jour d'un message
-void tcp_connection_message_update(Message *msg, char buffer[T_MSG_MAX],
+void tcp_connection_message_update(Message *msg, char buffer[MAX_MSG_LENGTH],
                                    uint32_t size, int type, int flag,
-                                   char pseudo_source[T_NOM_MAX],
-                                   char destination[T_NOM_MAX]);
+                                   char pseudo_source[MAX_NAME_LENGTH],
+                                   char destination[MAX_NAME_LENGTH]);
 
 
 // Transmission d'un struct message

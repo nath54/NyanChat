@@ -89,7 +89,6 @@ void on_msg_received(TcpConnection* con, SOCKET sock,
             );
         }
 
-
     }
 
     printf("Message reçu : \"%s\"\n", msg->msg);
@@ -97,7 +96,7 @@ void on_msg_received(TcpConnection* con, SOCKET sock,
 
 
 void on_stdin_server(TcpConnection* con,
-                     char msg[T_MSG_MAX], size_t msg_len,
+                     char msg[MAX_MSG_LENGTH], size_t msg_len,
                      void* custom_args)
 {
     (void)con;
@@ -107,17 +106,39 @@ void on_stdin_server(TcpConnection* con,
 
     // On affiche juste l'entrée reçue
     printf("Message écrit : \"%s\"\n", msg);
+
+    // Test de commandes
+    //   - Commande pour quitter le serveur
+    if(strcmp(msg, "/quit") == 0){
+        con->end_connection = true;
+    }
 }
 
 
 void init_server_state(ServerState* sstate){
     (void)sstate;
     
+    sstate->nb_clients = 0;
+    for(int i=0; i<NB_MAX_CONNECTED_CLIENTS; i++){
+        sstate->clients[i] = NULL;
+    }
+
+    hashmap_create(NB_MAX_CONNECTED_CLIENTS * 2);
+
     // TODO: compléter cette fonction
 }
 
 void free_server_state(ServerState* sstate){
     (void)sstate;
+    
+    for(int i=0; i<NB_MAX_CONNECTED_CLIENTS; i++){
+        if(sstate->clients[i] != NULL){
+            free(sstate->clients[i]);
+            sstate->clients[i] = NULL;
+        }
+    }
+
+    hashmap_free(sstate->hm_pseudo_to_id);
 
     // TODO: compléter cette fonction
 }

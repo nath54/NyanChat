@@ -54,7 +54,7 @@ int find_next_msg_id(ClientState* cstate){
 
 void client_send_message(TcpConnection* con,
                          ClientState* cstate,
-                         char msg[T_MSG_MAX],
+                         char msg[MAX_MSG_LENGTH],
                          size_t msg_len)
 {
     int id_new_msg = find_next_msg_id(cstate);
@@ -79,7 +79,7 @@ void client_send_message(TcpConnection* con,
 
 
 void on_stdin_client(TcpConnection* con,
-                    char msg[T_MSG_MAX],
+                    char msg[MAX_MSG_LENGTH],
                     size_t msg_len,
                     void* custom_args)
 {
@@ -114,15 +114,15 @@ void on_stdin_client(TcpConnection* con,
                 }
 
                 // Répertoire des clés pour le pseudo demandé
-                char path_dir[T_NOM_MAX + 100] = PATH_RSA_KEYS;
+                char path_dir[MAX_NAME_LENGTH + 100] = PATH_RSA_KEYS;
                 CHKN( strcat(path_dir, msg) );
                 CHKN( strcat(path_dir, "/") );
 
                 // Chemins des clés
-                char path_pub[T_NOM_MAX + 100];
+                char path_pub[MAX_NAME_LENGTH + 100];
                 CHKN( strcpy(path_pub, path_dir) );
                 CHKN( strcat(path_pub, "rsa_pub") );
-                char path_priv[T_NOM_MAX + 100];
+                char path_priv[MAX_NAME_LENGTH + 100];
                 CHKN( strcpy(path_priv, path_dir) );
                 CHKN( strcat(path_priv, "rsa_pub") );
 
@@ -135,7 +135,7 @@ void on_stdin_client(TcpConnection* con,
 
                     // Création des clés
                     if( generate_keypair(path_priv, path_pub,
-                                         T_MSG_MAX/2) != 1)
+                                         MAX_MSG_LENGTH/2) != 1)
                     {
                         fprintf(stderr, "Erreur génération des clés rsa!\n");
                         exit(EXIT_FAILURE);
@@ -149,7 +149,7 @@ void on_stdin_client(TcpConnection* con,
                 strcpy(cstate->msg_waiting_ack[0].src_pseudo, msg);
                 load_rsa_key(path_pub,
                              cstate->msg_waiting_ack[0].msg,
-                             T_MSG_MAX,
+                             MAX_MSG_LENGTH,
                              &(cstate->msg_waiting_ack[0].msg_length));
 
                 cstate->nb_msg_waiting_ack += 1;
@@ -189,14 +189,14 @@ void on_msg_client(TcpConnection* con, SOCKET sock,
         // Sinon, on ignore, on est pas censé recevoir autre chose
 
         // Répertoire des clés pour le pseudo
-        char path_dir[T_NOM_MAX + 100] = PATH_RSA_KEYS;
+        char path_dir[MAX_NAME_LENGTH + 100] = PATH_RSA_KEYS;
         CHKN( strcat(path_dir, cstate->pseudo) );
         CHKN( strcat(path_dir, "/") );
         // Chemins des clés
-        char path_pub[T_NOM_MAX + 100];
+        char path_pub[MAX_NAME_LENGTH + 100];
         CHKN( strcpy(path_pub, path_dir) );
         CHKN( strcat(path_pub, "rsa_pub") );
-        char path_priv[T_NOM_MAX + 100];
+        char path_priv[MAX_NAME_LENGTH + 100];
         CHKN( strcpy(path_priv, path_dir) );
         CHKN( strcat(path_priv, "rsa_pub") );
 
@@ -322,7 +322,7 @@ void on_msg_client(TcpConnection* con, SOCKET sock,
 // Initialise le client_state
 void init_client_state(ClientState* client_state){
     // Init pseudo
-    memset(client_state->pseudo, 0, T_NOM_MAX);
+    memset(client_state->pseudo, 0, MAX_NAME_LENGTH);
     strcpy(client_state->pseudo, "");
 
     // Init bools
@@ -331,7 +331,7 @@ void init_client_state(ClientState* client_state){
 
     // Init salon
     client_state->type_current_dest = 0;
-    memset(client_state->destination, 0, T_NOM_MAX);
+    memset(client_state->destination, 0, MAX_NAME_LENGTH);
     strcpy(client_state->destination, "");
 
     // Init msg_waiting_ack
