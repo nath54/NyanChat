@@ -21,17 +21,17 @@
 #include "server.h"
 
 
-void gen_positive_acq_from_msg(Message* msg, Message* acq){
-    init_empty_message(acq);
-    acq->type_msg = MSG_ACQ_POS;
-    acq->id_msg = msg->id_msg;
+void gen_positive_ack_from_msg(Message* msg, Message* ack){
+    init_empty_message(ack);
+    ack->msg_type = MSG_ACK_POS;
+    ack->msg_id = msg->msg_id;
 }
 
 
-void gen_negative_acq_from_msg(Message* msg, Message* acq){
-    init_empty_message(acq);
-    acq->type_msg = MSG_ACQ_NEG;
-    acq->id_msg = msg->id_msg;
+void gen_negative_ack_from_msg(Message* msg, Message* ack){
+    init_empty_message(ack);
+    ack->msg_type = MSG_ACK_NEG;
+    ack->msg_id = msg->msg_id;
 }
 
 
@@ -46,7 +46,7 @@ void on_msg_received(TcpConnection* con, SOCKET sock,
     ServerState* sstate = custom_args;
     (void)sstate;
 
-    if(msg->type_msg == MSG_NORMAL_CLIENT_SERVER && msg->taille_msg >= 10){
+    if(msg->msg_type == MSG_NORMAL_CLIENT_SERVER && msg->taille_msg >= 10){
         
         // test detection d'erreurs
         int res = code_detect_error(msg);
@@ -66,26 +66,26 @@ void on_msg_received(TcpConnection* con, SOCKET sock,
 
         }
 
-        // Envoi des acquittements
-        Message acq;
+        // Envoi des ackuittements
+        Message ack;
         if(msg_bon){
             // Acquittement positif: on a bien reçu le message
-            gen_negative_acq_from_msg(msg, &acq);
+            gen_negative_ack_from_msg(msg, &ack);
 
-            tcp_connection_send_struct_message(
+            tcp_connection_message_send(
                 con,
                 sock,
-                &acq
+                &ack
             );
         }
         else{
             // Acquittement négatif: on n'a pas bien reçu le message
-            gen_negative_acq_from_msg(msg, &acq);
+            gen_negative_ack_from_msg(msg, &ack);
 
-            tcp_connection_send_struct_message(
+            tcp_connection_message_send(
                 con,
                 sock,
-                &acq
+                &ack
             );
         }
 

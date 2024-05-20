@@ -51,13 +51,13 @@ typedef u_int32_t uint32;
 #define MSG_SERVER_CLIENT 1
 #define MSG_CONNECTION_CLIENT 2
 #define MSG_ERREUR 4
-#define MSG_ACQ_POS 5
-#define MSG_ACQ_NEG 6
+#define MSG_ACK_POS 5
+#define MSG_ACK_NEG 6
 
 /* Structure used for messages and acknowledgments
     transmitted by the connection
 */
-typedef struct Message {	
+typedef struct __attribute__((packed, aligned(4))) Message {	
     /*
     Type of message:
         -1 = msg NULL,
@@ -104,7 +104,7 @@ typedef struct Message {
     // TODO: ajouter ici les ressources nécessaires pour les codes polynomiaux
 	// ???	code;
 
-} Message __attribute__((packed));
+} Message;
 
 
 typedef struct {

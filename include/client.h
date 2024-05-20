@@ -14,7 +14,7 @@ typedef struct {
     // Nom du salon où il est, ou pseudo du client de msg privé
     char destination[T_NOM_MAX];
 
-    // Liste de messages envoyés qui attendent un acquittement
+    // Liste de messages envoyés qui attendent un ackuittement
     //  à initialiser au début du client, et à libérer à la fin
     Message* msg_waiting_ack;
     size_t tot_msg_waiting_ack;

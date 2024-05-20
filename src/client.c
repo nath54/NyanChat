@@ -124,8 +124,8 @@ void on_stdin_client(TcpConnection* con,
                              &(cstate->msg_waiting_ack[0].msg_length));
 
                 cstate->nb_msg_waiting_ack += 1;
-                tcp_connection_send_struct_message(con, con->sockfd,
-                                                &(cstate->msg_waiting_ack[0]));
+                tcp_connection_message_send(con, con->sockfd,
+                                            &(cstate->msg_waiting_ack[0]));
 
                 cstate->waiting_pseudo_confirmation = true;
             }
@@ -150,7 +150,7 @@ void on_stdin_client(TcpConnection* con,
 
         cstate->nb_msg_waiting_ack += 1;
 
-        tcp_connection_send_struct_message(con, con->sockfd,
+        tcp_connection_message_send(con, con->sockfd,
                                     &(cstate->msg_waiting_ack[id_new_msg]));
     }
 
@@ -181,14 +181,14 @@ void on_msg_client(TcpConnection* con, SOCKET sock,
             // Sinon, on ignore, on est pas censé recevoir autre chose
 
             // Gestion erreur
-            if(msg->type_msg == MSG_ERREUR){
+            if(msg->msg_type == MSG_ERREUR){
                 // Pseudo non utilisable, il faut donc le dire à l'utilisateur
                 //  et lui demander d'en rentrer un autre
                 //  il faudra donc aussi supprimer les fichiers de clés rsa
 
                 // TODO
             }
-            else if(msg->type_msg == MSG_SERVER_CLIENT){
+            else if(msg->msg_type == MSG_SERVER_CLIENT){
                 // TODO
             }
             else{
