@@ -27,7 +27,7 @@
 
 
 
-noreturn void raler(const char *msg)
+static noreturn void raler(const char *msg)
 {
     perror(msg);
     exit(1);

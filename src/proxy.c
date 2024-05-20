@@ -166,18 +166,18 @@ int main(int argc, char* argv[])
         exit(EXIT_FAILURE);
     }
 
-    if (port_server < 5000 || port_server > 65000){
-        fprintf(stderr, "Bad value of port_server !\n");
-        exit(EXIT_FAILURE);
-    }
-    if (port_clients < 5000 || port_clients > 65000){
-        fprintf(stderr, "Bad value of port_clients !\n");
-        exit(EXIT_FAILURE);
-    }
-
     ip_server = argv[1];
     port_server = atoi(argv[2]);
     port_clients = atoi(argv[3]);
+
+    if (port_server < 5000 || port_server > 65000){
+        fprintf(stderr, "Bad value of port_server : %d !\n", port_server);
+        exit(EXIT_FAILURE);
+    }
+    if (port_clients < 5000 || port_clients > 65000){
+        fprintf(stderr, "Bad value of port_clients : %d !\n", port_clients);
+        exit(EXIT_FAILURE);
+    }
 
     // init random
     srand(time(NULL));

@@ -134,12 +134,15 @@ void on_stdin_client(TcpConnection* con,
                     CHK( mkdir(path_dir, 0700) );
 
                     // Création des clés
+                    printf("Taille clé générée : %d\n", MAX_MSG_LENGTH/2);
                     if( generate_keypair(path_priv, path_pub,
-                                         MAX_MSG_LENGTH/2) != 1)
+                                         MAX_MSG_LENGTH/2) != RSA_OP_FAILURE)
                     {
                         fprintf(stderr, "Erreur génération des clés rsa!\n");
                         exit(EXIT_FAILURE);
                     }
+
+                    printf("rsa keypair generated\n");
                 }
 
                 // Envoi de la demande de connection au serveur
@@ -236,22 +239,14 @@ void on_msg_client(TcpConnection* con, SOCKET sock,
             char* decrypted_message;
             size_t decrypted_length;
 
-            FILE* fpriv = fopen(path_priv, "r");
-            if(fpriv == NULL){
-                fprintf(stderr, "\033[31mError while open priv key!\033[m\n");
-                exit(EXIT_FAILURE);
-            }
-
             if( decrypt_message((unsigned char*)msg->msg, msg->msg_length,
-                                fpriv,
+                                path_priv,
                                 (unsigned char** )(&decrypted_message),
                                 &decrypted_length) == -1)
             {
-                fclose(fpriv);
                 fprintf(stderr, "\033[31mError from decrypt message!\033[m\n");
                 exit(EXIT_FAILURE);
             }
-            fclose(fpriv);
             
             client_send_message(con, cstate,
                                 decrypted_message, decrypted_length);
@@ -373,6 +368,11 @@ int main(int argc, char* argv[]) {
 
     char* ip_proxy = argv[1];
     int port_proxy = atoi(argv[2]);
+
+    if (port_proxy < 5000 || port_proxy > 65000){
+        fprintf(stderr, "Bad value of port_proxy : %d !\n", port_proxy);
+        exit(EXIT_FAILURE);
+    }
 
     init_client_state(&client_state);
     tcp_connection_client_init(&con, ip_proxy, port_proxy, -1);
