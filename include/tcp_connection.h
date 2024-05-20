@@ -54,46 +54,53 @@ typedef u_int32_t uint32;
 #define MSG_ACQ_POS 5
 #define MSG_ACQ_NEG 6
 
-// Structure utilisée pour les messages et
-//  les acquittements transmis par la connection
-typedef struct {	
+/* Structure used for messages and acknowledgments
+    transmitted by the connection
+*/
+typedef struct Message {	
     /*
-    Modifier les defines juste au dessus si changements de valeurs
-        (
-            -1=msg NULL,
-            0=msg normal client->serveur,
-            1=msg serveur->client,
-            2=connection client
-            3=fin de connection,
-            4=erreur,
-            5=acquittement positif,
-            6=acquittement négatif
-        ) */
-	int type_msg;
+    Type of message:
+        -1 = msg NULL,
+        0 = normal msg client->server,
+        1 = msg server->client,
+        2 = client connection
+        3 = end of connection,
+        4 = error,
+        5 = positive acknowledgment
+        6 = negative acknowledgment
+    */
+	int msg_type;
 
-    // Identifiant qui permet au client de savoir de quel message
-    //  le serveur parle lorsqu'un acquittement est renvoyé
-    int id_msg;
+    /*
+    Identifier which allows the client to know which message
+     the server is talking about when an acknowledgment is sent
+    */
+    int msg_id;
     
-    // pseudo du client
-	char pseudo_source[T_NOM_MAX];
+    // Pseudo of the client
+	char src_pseudo[T_NOM_MAX];
 
-    // Socket client du proxy (rempli par le proxy)
+    // Client socket of the proxy (filled by the proxy)
     int proxy_client_socket;
     
-    // 0 = msg privé, 1 = salon privé, 2 = salon par défaut
-	int flag_destination;
+    /*
+    Flag for destination type:
+    0 = private message
+    1 = private channel
+    2 = default channel
+    */
+	int dst_flag;
     
-    // pseudo du client destinataire, ou alors nom du salon
-	char destination[T_NOM_MAX];
+    // Pseudo of the client destination, or name of the channel
+	char dst[T_NOM_MAX];
     
-    // Taille du message
-	uint32 taille_msg;
+    // Length of the message
+	uint32 msg_length;
     
-    // Message de l’utilisateur
+    // Message from the user
 	char msg[T_MSG_MAX];
     
-    // (pour détection & correction)
+    // (for detection & correction)
     // TODO: ajouter ici les ressources nécessaires pour les codes polynomiaux
 	// ???	code;
 
@@ -112,7 +119,7 @@ typedef struct {
     nfds_t nb_poll_fds;    // Nombre actuel de sockets de polling
 
     // Variables pour le serveur
-    Message msg;    // Recevra les messages depuis recv
+    struct Message msg;    // Recevra les messages depuis recv
 
     // Paramètres de la connexion
     int type_connection;    // 0 = server, 1 = client,
@@ -165,18 +172,16 @@ void tcp_connection_mainloop(TcpConnection* con,
 void tcp_connection_close(TcpConnection* con);
 
 
-// Envoi d'un message
-void tcp_connection_send_message(TcpConnection* con, SOCKET sock,
-                                 char buffer[T_MSG_MAX], int message_size,
-                                 int flags,
-                                 char pseudo_src[T_NOM_MAX],
-                                 int type_destination,
-                                 char destination[T_NOM_MAX]);
+// Mise à jour d'un message
+void tcp_connection_message_update(Message *msg, char buffer[T_MSG_MAX],
+                                   uint32_t size, int type, int flag,
+                                   char pseudo_source[T_NOM_MAX],
+                                   char destination[T_NOM_MAX]);
 
 
 // Transmission d'un struct message
-void tcp_connection_send_struct_message(TcpConnection* con, SOCKET sock,
-                                        Message* msg);
+void tcp_connection_message_send(TcpConnection* con, SOCKET sock,
+                                 Message* msg);
 
 
 // Fonction qui copie le contenu d'un message depuis src vers dest

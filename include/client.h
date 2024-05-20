@@ -16,8 +16,8 @@ typedef struct {
 
     // Liste de messages envoyés qui attendent un acquittement
     //  à initialiser au début du client, et à libérer à la fin
-    Message* msg_waiting_acq;
-    size_t tot_msg_waiting_acq;
-    size_t nb_msg_waiting_acq;
+    Message* msg_waiting_ack;
+    size_t tot_msg_waiting_ack;
+    size_t nb_msg_waiting_ack;
 
 } ClientState;

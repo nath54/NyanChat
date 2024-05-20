@@ -21,28 +21,28 @@
 #define PATH_RSA_KEYS "client_rsa_keys/"
 
 
-// Find the next free slot of the msg_waiting_acq
+// Find the next free slot of the msg_waiting_ack
 int find_next_msg_id(ClientState* cstate){
     size_t first_free = 0;
-    if(cstate->nb_msg_waiting_acq == cstate->tot_msg_waiting_acq){
-        first_free = cstate->tot_msg_waiting_acq;
-        cstate->tot_msg_waiting_acq *= 2;
-        cstate->msg_waiting_acq = realloc(
-                cstate->msg_waiting_acq,
-                sizeof(Message)*cstate->tot_msg_waiting_acq
+    if (cstate->nb_msg_waiting_ack == cstate->tot_msg_waiting_ack){
+        first_free = cstate->tot_msg_waiting_ack;
+        cstate->tot_msg_waiting_ack *= 2;
+        cstate->msg_waiting_ack = realloc(
+                cstate->msg_waiting_ack,
+                sizeof(Message)*cstate->tot_msg_waiting_ack
         );
-        if(cstate->msg_waiting_acq == NULL){
+        if (cstate->msg_waiting_ack == NULL){
             fprintf(stderr, "Erreur Realloc!\n");
             exit(EXIT_FAILURE);
         }
         //
-        for(size_t i = first_free; i<cstate->tot_msg_waiting_acq; i++){
-            cstate->msg_waiting_acq[i].type_msg = MSG_NULL;
+        for (size_t i = first_free; i<cstate->tot_msg_waiting_ack; i++){
+            cstate->msg_waiting_ack[i].msg_type = MSG_NULL;
         }
     }
     //
-    for(size_t i=first_free; i<cstate->tot_msg_waiting_acq; i++){
-        if(cstate->msg_waiting_acq[i].type_msg == MSG_NULL){
+    for (size_t i=first_free; i<cstate->tot_msg_waiting_ack; i++){
+        if(cstate->msg_waiting_ack[i].msg_type == MSG_NULL){
             return i;
         }
     }
@@ -59,31 +59,28 @@ void on_stdin_client(TcpConnection* con,
 {
     ClientState* cstate = custom_args;
 
-    if( strlen(cstate->pseudo) == 0 ){
+    if (strlen(cstate->pseudo) == 0){
         // Pas de pseudo, pas connecté, donc soit:
         //  - attente de l'entrée utilisateur pour le pseudo
-        //  - attente du serveur pour confirmation du pseudo
+        //  - attente du serveur pour confirmation du pseudo (rien à faire)
 
-        if(cstate->waiting_pseudo_confirmation){
-            // On ne fait rien, on attend le serveur
-
-        }
-        else{
+        if (!cstate->waiting_pseudo_confirmation){
+            // On n'attend pas le serveur, on attend l'entrée utilisateur
             // msg est censé contenir le pseudo demandé par le client
 
             // On crée clée RSA puis
             //  on envoie une demande de pseudo au serveur
 
-            if(msg_len < 4){
+            if (msg_len < 4){
                 printf("Pseudo trop court, "
                        "doit avoir une taille entre 4 et 64 !\n"
                        "\nEntrez votre pseudo > ");
             }
-            else{
+            else {
                 // Création du répertoire pour fichiers clés si non existant
                 struct stat st = {0};
 
-                if (stat(PATH_RSA_KEYS, &st) == -1) {
+                if (stat(PATH_RSA_KEYS, &st) == -1){
                     CHK( mkdir(PATH_RSA_KEYS, 0700) );
                 }
 
@@ -117,44 +114,44 @@ void on_stdin_client(TcpConnection* con,
                 }
 
                 // Envoi de la demande de connection au serveur
-                init_empty_message(&(cstate->msg_waiting_acq[0]));
-                cstate->msg_waiting_acq[0].type_msg = MSG_CONNECTION_CLIENT;
-                cstate->msg_waiting_acq[0].id_msg = 0;
-                strcpy(cstate->msg_waiting_acq[0].pseudo_source, msg);
+                init_empty_message(&(cstate->msg_waiting_ack[0]));
+                cstate->msg_waiting_ack[0].msg_type = MSG_CONNECTION_CLIENT;
+                cstate->msg_waiting_ack[0].msg_id = 0;
+                strcpy(cstate->msg_waiting_ack[0].src_pseudo, msg);
                 load_rsa_key(path_pub,
-                             cstate->msg_waiting_acq[0].msg,
+                             cstate->msg_waiting_ack[0].msg,
                              T_MSG_MAX,
-                             &(cstate->msg_waiting_acq[0].taille_msg));
+                             &(cstate->msg_waiting_ack[0].msg_length));
 
-                cstate->nb_msg_waiting_acq += 1;
+                cstate->nb_msg_waiting_ack += 1;
                 tcp_connection_send_struct_message(con, con->sockfd,
-                                                &(cstate->msg_waiting_acq[0]));
+                                                &(cstate->msg_waiting_ack[0]));
 
                 cstate->waiting_pseudo_confirmation = true;
             }
         }
     }
-    else if( cstate->connected ){
+    else if (cstate->connected){
         // Bien connecté, on envoie des messages normalement
 
         int id_new_msg = find_next_msg_id(cstate);
 
-        cstate->msg_waiting_acq[id_new_msg].type_msg = 1;
-        cstate->msg_waiting_acq[id_new_msg].id_msg = id_new_msg;
-        strcpy(cstate->msg_waiting_acq[id_new_msg].pseudo_source,
+        cstate->msg_waiting_ack[id_new_msg].msg_type = 1;
+        cstate->msg_waiting_ack[id_new_msg].msg_id = id_new_msg;
+        strcpy(cstate->msg_waiting_ack[id_new_msg].src_pseudo,
                                                     cstate->pseudo);
-        cstate->msg_waiting_acq[id_new_msg].flag_destination = 
+        cstate->msg_waiting_ack[id_new_msg].dst_flag = 
                                                     cstate->type_current_dest;
-        strcpy(cstate->msg_waiting_acq[id_new_msg].destination,
+        strcpy(cstate->msg_waiting_ack[id_new_msg].dst,
                                                     cstate->destination);
-        cstate->msg_waiting_acq[id_new_msg].proxy_client_socket = MSG_NULL;
-        strcpy(cstate->msg_waiting_acq[id_new_msg].msg, msg);
-        cstate->msg_waiting_acq[id_new_msg].taille_msg = msg_len;
+        cstate->msg_waiting_ack[id_new_msg].proxy_client_socket = MSG_NULL;
+        strcpy(cstate->msg_waiting_ack[id_new_msg].msg, msg);
+        cstate->msg_waiting_ack[id_new_msg].msg_length = msg_len;
 
-        cstate->nb_msg_waiting_acq += 1;
+        cstate->nb_msg_waiting_ack += 1;
 
         tcp_connection_send_struct_message(con, con->sockfd,
-                                    &(cstate->msg_waiting_acq[id_new_msg]));
+                                    &(cstate->msg_waiting_ack[id_new_msg]));
     }
 
 }
@@ -222,17 +219,17 @@ void init_client_state(ClientState* client_state){
     memset(client_state->destination, 0, T_NOM_MAX);
     strcpy(client_state->destination, "");
 
-    // Init msg_waiting_acq
-    client_state->tot_msg_waiting_acq = 10;
-    client_state->nb_msg_waiting_acq = 0;
-    client_state->msg_waiting_acq = calloc(client_state->tot_msg_waiting_acq,
+    // Init msg_waiting_ack
+    client_state->tot_msg_waiting_ack = 10;
+    client_state->nb_msg_waiting_ack = 0;
+    client_state->msg_waiting_ack = calloc(client_state->tot_msg_waiting_ack,
                                            sizeof(Message));
     //
-    for(size_t i=0; i<client_state->tot_msg_waiting_acq; i++){
-        client_state->msg_waiting_acq[i].type_msg = -1;
+    for (size_t i=0; i<client_state->tot_msg_waiting_ack; i++){
+        client_state->msg_waiting_ack[i].msg_type = -1;
     }
     //
-    if(client_state->msg_waiting_acq == NULL){
+    if (client_state->msg_waiting_ack == NULL){
         fprintf(stderr, "Error malloc! \n");
         exit(EXIT_FAILURE);
     }
@@ -244,7 +241,7 @@ void init_client_state(ClientState* client_state){
 
 
 void free_client_state(ClientState* client_state){
-    free(client_state->msg_waiting_acq);
+    free(client_state->msg_waiting_ack);
 }
 
 
@@ -254,7 +251,7 @@ int main(int argc, char* argv[]) {
     TcpConnection con;
 
     // Check arguments
-    if (argc != 3) {
+    if (argc != 3){
         printf("Usage: %s ip_proxy port_proxy\n", argv[0]);
         exit(EXIT_FAILURE);
     }

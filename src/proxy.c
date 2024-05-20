@@ -59,7 +59,7 @@ void on_client_received(TcpConnection* con, SOCKET sock,
     (void)msg_length;
     (void)custom_args;
 
-    if(msg->type_msg == MSG_NULL)
+    if (msg->msg_type == MSG_NULL)
         return;
 
     //
@@ -67,7 +67,7 @@ void on_client_received(TcpConnection* con, SOCKET sock,
     // Normalement, la fonction qui a appelé cette fonction 
     //  a mis l'id du poll socket du client dans msg.proxy_client_socket
 
-    if(msg->type_msg == MSG_NORMAL_CLIENT_SERVER && msg->taille_msg >= 10){
+    if (msg->msg_type == MSG_NORMAL_CLIENT_SERVER && msg->msg_length >= 10){
         // Ajouts potentiel d'erreurs
 
         if(randint(100) <= PROXY_ERROR_RATE){
@@ -78,7 +78,7 @@ void on_client_received(TcpConnection* con, SOCKET sock,
 
     }
 
-    tcp_connection_send_struct_message(&con_server, con_server.poll_fds[0].fd,
+    tcp_connection_message_send(&con_server, con_server.poll_fds[0].fd,
                                        msg);
 
 }
@@ -93,15 +93,15 @@ void on_server_received(TcpConnection* con, SOCKET sock,
     (void)msg_length;
     (void)custom_args;
 
-    if(msg->type_msg == MSG_NULL)
+    if (msg->msg_type == MSG_NULL)
         return;
 
     // Test du socket client à qui retransmettre le message
-    if(msg->proxy_client_socket == -1){
+    if (msg->proxy_client_socket == -1){
         fprintf(stderr, "Error: Unknown client socket on msg from serv!\n");
         return;
     }
-    else if(msg->proxy_client_socket < 0||
+    else if (msg->proxy_client_socket < 0||
             (size_t)msg->proxy_client_socket >= con->nb_poll_fds)
     {
         fprintf(stderr,
@@ -110,7 +110,7 @@ void on_server_received(TcpConnection* con, SOCKET sock,
     }
 
     // Le socket est à priori bon, on transmet le message
-    tcp_connection_send_struct_message(
+    tcp_connection_send_message(
         &con_clients,
         con_clients.poll_fds[msg->proxy_client_socket].fd,
         msg
@@ -166,11 +166,11 @@ int main(int argc, char* argv[])
         exit(EXIT_FAILURE);
     }
 
-    if(port_server < 5000 || port_server > 65000){
+    if (port_server < 5000 || port_server > 65000){
         fprintf(stderr, "Bad value of port_server !\n");
         exit(EXIT_FAILURE);
     }
-    if(port_clients < 5000 || port_clients > 65000){
+    if (port_clients < 5000 || port_clients > 65000){
         fprintf(stderr, "Bad value of port_clients !\n");
         exit(EXIT_FAILURE);
     }
@@ -193,7 +193,7 @@ int main(int argc, char* argv[])
     TCHK( sem_wait(&semaphore) );
     TCHK( sem_destroy(&semaphore) );
 
-    if(etat_server != SERVER_OK){
+    if (etat_server != SERVER_OK){
 
         TCHK( pthread_join(thread_server, NULL) );
 

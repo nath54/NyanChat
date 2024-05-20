@@ -21,13 +21,13 @@
 // Initialisation d'un message vide
 //  pour éviter de manipuler des données non initialisées
 void init_empty_message(Message* msg){
-    msg->type_msg = MSG_NULL;
-    msg->id_msg = -1;
+    msg->msg_type = MSG_NULL;
+    msg->msg_id = -1;
     msg->proxy_client_socket = -1;
-    msg->taille_msg = 0;
-    msg->flag_destination = 0;
-    strcpy(msg->destination, "");
-    strcpy(msg->pseudo_source, "");
+    msg->msg_length = 0;
+    msg->dst_flag = 0;
+    strcpy(msg->dst, "");
+    strcpy(msg->src_pseudo, "");
 }
 
 
@@ -44,7 +44,7 @@ void tcp_connection_server_init(TcpConnection* con,
     con->sockfd = socket(AF_INET, SOCK_STREAM | SOCK_NONBLOCK, 0);
 
     // Test de bonne création
-    if(con->sockfd == INVALID_SOCKET){
+    if (con->sockfd == INVALID_SOCKET){
         fprintf(stderr, "Erreur lors de la création du socket!\n");
         exit(errno);
     }
@@ -62,13 +62,13 @@ void tcp_connection_server_init(TcpConnection* con,
     inet_aton(address_receptor, &(con->addr.sin_addr));
 
     // association de la socket et des param reseaux du recepteur
-    if(bind(con->sockfd, (SOCKADDR *)&con->addr, sizeof(con->addr)) != 0){
+    if (bind(con->sockfd, (SOCKADDR *)&con->addr, sizeof(con->addr)) != 0){
         perror("erreur lors de l'appel a bind -> ");
         exit(errno);
     }
 
     // Préparation à l'écoute des nouvelles connections
-    if(listen(con->sockfd, nb_max_connections_server) == SOCKET_ERROR) {
+    if (listen(con->sockfd, nb_max_connections_server) == SOCKET_ERROR) {
         perror("listen()");
         exit(errno);
     }
@@ -91,7 +91,7 @@ void tcp_connection_server_init(TcpConnection* con,
     con->nb_poll_fds = 2;
 
     // Valeur du timeout en milisecondes
-    if(timeout_server > 0){
+    if (timeout_server > 0){
         con->timeout = timeout_server * 60 * 1000;
     }
     else {
@@ -150,7 +150,7 @@ void tcp_connection_client_init(TcpConnection* con,
     con->nb_poll_fds = 2;
 
     // Valeur du timeout en milisecondes
-    if(timeout_client > 0){
+    if (timeout_client > 0){
         con->timeout = timeout_client * 60 * 1000;
     }
     else {
@@ -187,9 +187,9 @@ void new_clients_acceptation(TcpConnection* con) {
     // Variable pour stoquer des sockets
     SOCKET new_sock;
 
-    do{
+    do {
 
-        if(con->nb_poll_fds < MAX_POLL_SOCKETS){
+        if (con->nb_poll_fds < MAX_POLL_SOCKETS){
 
             SOCKADDR_IN connected_addr;
             socklen_t con_addr_len;
@@ -237,12 +237,12 @@ void compress_poll_socket_array(TcpConnection* con, int current_nb_poll_socks){
 
     // last_ok_sock contient l'index du dernier socket non fermé
     int last_ok_sock = current_nb_poll_socks;            
-    while(last_ok_sock > 0 && con->poll_fds[last_ok_sock].fd == -1){
+    while (last_ok_sock > 0 && con->poll_fds[last_ok_sock].fd == -1){
         last_ok_sock--;
     }
 
     // On teste chaque descripteur de socket
-    for(int i=0; i < last_ok_sock; i++){
+    for (int i=0; i < last_ok_sock; i++){
         
         // Si socket fermé
         //   -> on met à la place le dernier socket non fermé trouvé
@@ -279,14 +279,14 @@ void read_poll_socket(TcpConnection* con, int id_poll,
     // Variable pour savoir si un socket du poll se coupe ou pas
     bool close_conn = false;
 
-    do{
+    do {
         // On lit sur le socket
         // rc pour Return Code
         int rc = recv(con->poll_fds[id_poll].fd,
                       &(con->msg), sizeof(con->msg), MSG_DONTWAIT);
 
         // Plus rien à lire
-        if(rc < 0){
+        if (rc < 0){
             // Erreur lors de la lecture
             if (errno != EWOULDBLOCK) {
                 perror("  recv() failed");
@@ -296,7 +296,7 @@ void read_poll_socket(TcpConnection* con, int id_poll,
         }
 
         // Connection fermée par le client
-        if(rc == 0){
+        if (rc == 0){
             printf("  Connection closed\n");
             close_conn = true;
             break;
@@ -307,16 +307,16 @@ void read_poll_socket(TcpConnection* con, int id_poll,
 
         printf("Msg reçu : %s\n", con->msg.msg);
 
-        if(con->type_connection == TCP_CON_PROXY_CLIENTS_SIDE){
+        if (con->type_connection == TCP_CON_PROXY_CLIENTS_SIDE){
             con->msg.proxy_client_socket = id_poll;
         }
 
         on_msg(con, con->poll_fds[id_poll].fd, &(con->msg), msg_len,
                on_msg_custom_args);
 
-    } while(true);
+    } while (true);
 
-    if(close_conn){
+    if (close_conn){
         close(con->poll_fds[id_poll].fd);
         con->poll_fds[id_poll].fd = -1;
         con->need_compress_poll_arr = true;
@@ -330,7 +330,7 @@ void tcp_connection_mainloop(TcpConnection* con,
                              fn_on_stdin on_stdin, void* on_stdin_custom_args)
 {
 
-    if(on_msg == NULL){
+    if (on_msg == NULL){
         fprintf(stderr, "Error, on_msg is NULL!\n");
         exit(EXIT_FAILURE);
     }
@@ -345,29 +345,29 @@ void tcp_connection_mainloop(TcpConnection* con,
         int rc = poll(con->poll_fds, con->nb_poll_fds, con->timeout);
 
         printf("test, rc=%d\n", rc);
-        if(test_poll_errors(rc))
+        if (test_poll_errors(rc))
             break;
 
         // Pour l'instant, on a tant de poll sockets
         int current_nb_poll_socks = con->nb_poll_fds;
 
         // On parcours tous nos sockets, 
-        for(int i = 0; i < current_nb_poll_socks; i++){
+        for (int i = 0; i < current_nb_poll_socks; i++){
 
             // Socket inactif
-            if(con->poll_fds[i].revents == 0){
+            if (con->poll_fds[i].revents == 0){
                 continue;
             }
 
             // Erreur 
-            if(con->poll_fds[i].revents != POLLIN){
+            if (con->poll_fds[i].revents != POLLIN){
                 fprintf(stderr, "  Error! revents = %d\n",
                                     con->poll_fds[i].revents);
                 con->end_connection = true;
                 break;
             }
  
-            if((con->type_connection == TCP_CON_SERVER ||
+            if ((con->type_connection == TCP_CON_SERVER ||
                 con->type_connection == TCP_CON_PROXY_CLIENTS_SIDE) &&
                 con->poll_fds[i].fd == con->sockfd)
             {
@@ -375,14 +375,14 @@ void tcp_connection_mainloop(TcpConnection* con,
                 // Socket qui écoute les connections entrantes 
                 new_clients_acceptation(con);
 
-            } else if((con->type_connection == TCP_CON_CLIENT ||
-                       con->type_connection == TCP_CON_PROXY_SERVER_SIDE) &&
-                       con->poll_fds[i].fd == con->sockfd){
+            } else if ((con->type_connection == TCP_CON_CLIENT ||
+                        con->type_connection == TCP_CON_PROXY_SERVER_SIDE) &&
+                        con->poll_fds[i].fd == con->sockfd){
 
                 // Socket qui écoute les connections entrantes 
                 read_poll_socket(con, i, on_msg, on_msg_custom_args);
 
-            } else if(con->poll_fds[i].fd == stdin_fd) {
+            } else if (con->poll_fds[i].fd == stdin_fd) {
 
                 // Evenement stdin
 
@@ -401,7 +401,7 @@ void tcp_connection_mainloop(TcpConnection* con,
                 // Replace the last \n by \0
                 buffer[bytes_read - 1] = '\0';
 
-                if(on_stdin != NULL){
+                if (on_stdin != NULL){
                     on_stdin(con, buffer, bytes_read, on_stdin_custom_args);
                 }
 
@@ -424,7 +424,7 @@ void tcp_connection_mainloop(TcpConnection* con,
         //  on remet ensemble côtes à côtes tous les sockets 
         //  on n'a pas besoin de toucher aux attributs revent,
         //  ils sont normalement tous à la valeur POLLIN
-        if(con->need_compress_poll_arr){
+        if (con->need_compress_poll_arr){
 
             printf("Compress polls sockets array.\n");
             con->need_compress_poll_arr = false;
@@ -433,7 +433,7 @@ void tcp_connection_mainloop(TcpConnection* con,
 
         }
 
-    } while(con->end_connection == false);
+    } while (con->end_connection == false);
 
 }
 
@@ -446,8 +446,8 @@ void tcp_connection_close(TcpConnection* con){
     close(con->sockfd);
 
     // Fermeture de tous les autres sockets ouverts
-    for(unsigned long i=0; i<con->nb_poll_fds; i++){
-        if(con->poll_fds[i].fd >= 0
+    for (unsigned long i=0; i<con->nb_poll_fds; i++){
+        if (con->poll_fds[i].fd >= 0
             && con->poll_fds[i].fd != con->sockfd
             && con->poll_fds[i].fd != stdin_fd
         ){
@@ -457,28 +457,27 @@ void tcp_connection_close(TcpConnection* con){
 }
 
 
-void tcp_connection_send_message(TcpConnection* con, SOCKET sock,
-                                 char buffer[T_MSG_MAX], int message_size,
-                                 int flags,
-                                 char pseudo_src[T_NOM_MAX],
-                                 int type_destination,
-                                 char destination[T_NOM_MAX])
+void tcp_connection_message_update(Message *msg, char buffer[T_MSG_MAX],
+                                   uint32_t size, int type, int flag,
+                                   char pseudo_source[T_NOM_MAX],
+                                   char destination[T_NOM_MAX])
 {
-    (void)flags;
-    Message msg;
-    init_empty_message(&msg);
-    strcpy(msg.msg, buffer);
-    msg.taille_msg = message_size;
-    msg.type_msg = 1;
-    msg.flag_destination = type_destination;
-    strcpy(msg.pseudo_source, pseudo_src);
-    strcpy(msg.destination, destination);
-
-    tcp_connection_send_struct_message(con, sock, &msg);
+    if (buffer != NULL)
+        strcpy(msg->msg, buffer);
+    if (size > T_MSG_MAX)
+        size = T_MSG_MAX;
+    if (size != 0)
+        msg->msg_length = size;
+    msg->msg_type = type;
+    msg->dst_flag = flag;
+    if (pseudo_source != NULL)
+        strcpy(msg->src_pseudo, pseudo_source);
+    if (destination != NULL)
+        strcpy(msg->dst, destination);
 }
 
 
-void tcp_connection_send_struct_message(TcpConnection* con, SOCKET sock,
+void tcp_connection_message_send(TcpConnection* con, SOCKET sock,
                                         Message* msg)
 {
 
@@ -495,13 +494,13 @@ void tcp_connection_send_struct_message(TcpConnection* con, SOCKET sock,
 
 // Fonction qui copie le contenu d'un message depuis src vers dest
 void copy_message(Message* dest, Message* src){
-    dest->type_msg = src->type_msg;
-    dest->id_msg = src->id_msg;
-    strcpy(dest->pseudo_source, src->pseudo_source);
+    dest->msg_type = src->msg_type;
+    dest->msg_id = src->msg_id;
+    strcpy(dest->src_pseudo, src->src_pseudo);
     dest->proxy_client_socket = src->proxy_client_socket;
-    dest->flag_destination = src->flag_destination;
-    strcpy(dest->destination, src->destination);
-    dest->taille_msg = src->taille_msg;
+    dest->dst_flag = src->dst_flag;
+    strcpy(dest->dst, src->dst);
+    dest->msg_length = src->msg_length;
     strcpy(dest->msg, src->msg);
     //
     // TODO: copier les variables qui gèrent les codes correcteurs
