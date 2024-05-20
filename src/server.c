@@ -160,9 +160,10 @@ void on_msg_received(TcpConnection* con, SOCKET sock,
         
 
     }
-
-    if(msg->msg_type == MSG_NORMAL_CLIENT_SERVER && msg->msg_length >= 10){
+    else if(msg->msg_type == MSG_NORMAL_CLIENT_SERVER && msg->msg_length >= 10){
         
+        printf("Message reçu : \"%s\"\n", msg->msg);
+
         // test detection d'erreurs
         int res = code_detect_error(msg);
         bool msg_bon = true;
@@ -205,8 +206,15 @@ void on_msg_received(TcpConnection* con, SOCKET sock,
         }
 
     }
+    else if(msg->msg_type == MSG_NORMAL_CLIENT_SERVER){  // Tout petit msg
+        
+        printf("Message reçu : \"%s\"\n", msg->msg);
 
-    printf("Message reçu : \"%s\"\n", msg->msg);
+        
+    }
+    else{
+
+    }
 }
 
 
