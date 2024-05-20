@@ -4,6 +4,7 @@
 
 # Build folder
 build/
+bin/
 
 # Prerequisites and object files
 *.d
