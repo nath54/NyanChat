@@ -1,5 +1,7 @@
 # NyanChat
 
+![](res/NyanChat_bg_black.png)
+
 NyanChat is a multi-user chat with error detection and correction realized by CERISARA Nathan, JACQUET Ysée and JAYAT Adrien.
 
 ## Get Started

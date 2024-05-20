@@ -200,7 +200,9 @@ void on_msg_client(TcpConnection* con, SOCKET sock,
             // Donc on ne fait rien, on n'est pas censé recevoir de messages
         }
     }
-
+    else if(cstate->connected){
+        // On est bien connecté
+    }
 }
 
 
