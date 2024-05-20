@@ -52,6 +52,32 @@ int find_next_msg_id(ClientState* cstate){
 }
 
 
+void client_send_message(TcpConnection* con,
+                         ClientState* cstate,
+                         char msg[T_MSG_MAX],
+                         size_t msg_len)
+{
+    int id_new_msg = find_next_msg_id(cstate);
+
+    cstate->msg_waiting_ack[id_new_msg].msg_type = 1;
+    cstate->msg_waiting_ack[id_new_msg].msg_id = id_new_msg;
+    strcpy(cstate->msg_waiting_ack[id_new_msg].src_pseudo,
+                                                cstate->pseudo);
+    cstate->msg_waiting_ack[id_new_msg].dst_flag = 
+                                                cstate->type_current_dest;
+    strcpy(cstate->msg_waiting_ack[id_new_msg].dst,
+                                                cstate->destination);
+    cstate->msg_waiting_ack[id_new_msg].proxy_client_socket = MSG_NULL;
+    strcpy(cstate->msg_waiting_ack[id_new_msg].msg, msg);
+    cstate->msg_waiting_ack[id_new_msg].msg_length = msg_len;
+
+    cstate->nb_msg_waiting_ack += 1;
+
+    tcp_connection_message_send(con, con->sockfd,
+                                &(cstate->msg_waiting_ack[id_new_msg]));
+}
+
+
 void on_stdin_client(TcpConnection* con,
                     char msg[T_MSG_MAX],
                     size_t msg_len,
@@ -77,6 +103,9 @@ void on_stdin_client(TcpConnection* con,
                        "\nEntrez votre pseudo > ");
             }
             else {
+                // Enregistrement (temporaire ou pas) du pseudo
+                strcpy(cstate->pseudo, msg);
+
                 // Création du répertoire pour fichiers clés si non existant
                 struct stat st = {0};
 
@@ -133,25 +162,7 @@ void on_stdin_client(TcpConnection* con,
     }
     else if (cstate->connected){
         // Bien connecté, on envoie des messages normalement
-
-        int id_new_msg = find_next_msg_id(cstate);
-
-        cstate->msg_waiting_ack[id_new_msg].msg_type = 1;
-        cstate->msg_waiting_ack[id_new_msg].msg_id = id_new_msg;
-        strcpy(cstate->msg_waiting_ack[id_new_msg].src_pseudo,
-                                                    cstate->pseudo);
-        cstate->msg_waiting_ack[id_new_msg].dst_flag = 
-                                                    cstate->type_current_dest;
-        strcpy(cstate->msg_waiting_ack[id_new_msg].dst,
-                                                    cstate->destination);
-        cstate->msg_waiting_ack[id_new_msg].proxy_client_socket = MSG_NULL;
-        strcpy(cstate->msg_waiting_ack[id_new_msg].msg, msg);
-        cstate->msg_waiting_ack[id_new_msg].msg_length = msg_len;
-
-        cstate->nb_msg_waiting_ack += 1;
-
-        tcp_connection_message_send(con, con->sockfd,
-                                    &(cstate->msg_waiting_ack[id_new_msg]));
+        client_send_message(con, cstate, msg, msg_len);
     }
 
 }
@@ -168,40 +179,142 @@ void on_msg_client(TcpConnection* con, SOCKET sock,
     
     printf("Message received: %s\n", msg->msg);
 
-    if( strlen(cstate->pseudo) == 0 ){
-        // Pas de pseudo, pas connecté, donc soit:
-        //  - attente de l'entrée utilisateur pour le pseudo
-        //  - attente du serveur pour confirmation du pseudo
+    if(cstate->waiting_pseudo_confirmation){
+        // On vérifie que l'on a bien soit:
+        //   - une erreur -> pseudo non utilisable
+        //   - un message encodé du serveur
+        //       qu'il faudra décoder avec notre clé privée et lui renvoyer
+        //   - un acquittement positif qui indique que le message a bien été
+        //       décodé, et donc qu'on est bien connecté
+        // Sinon, on ignore, on est pas censé recevoir autre chose
 
-        if(cstate->waiting_pseudo_confirmation){
-            // On vérifie que l'on a bien soit:
-            //   - une erreur -> pseudo non utilisable
-            //   - un message encodé du serveur
-            //       qu'il faudra décoder avec notre clé privée et lui renvoyer
-            // Sinon, on ignore, on est pas censé recevoir autre chose
+        // Répertoire des clés pour le pseudo
+        char path_dir[T_NOM_MAX + 100] = PATH_RSA_KEYS;
+        CHKN( strcat(path_dir, cstate->pseudo) );
+        CHKN( strcat(path_dir, "/") );
+        // Chemins des clés
+        char path_pub[T_NOM_MAX + 100];
+        CHKN( strcpy(path_pub, path_dir) );
+        CHKN( strcat(path_pub, "rsa_pub") );
+        char path_priv[T_NOM_MAX + 100];
+        CHKN( strcpy(path_priv, path_dir) );
+        CHKN( strcat(path_priv, "rsa_pub") );
 
-            // Gestion erreur
-            if(msg->msg_type == MSG_ERREUR){
-                // Pseudo non utilisable, il faut donc le dire à l'utilisateur
-                //  et lui demander d'en rentrer un autre
-                //  il faudra donc aussi supprimer les fichiers de clés rsa
+        // Gestion erreur
+        if(msg->msg_type == MSG_ERREUR){
+            // Pseudo non utilisable, il faut donc le dire à l'utilisateur
+            //  et lui demander d'en rentrer un autre
+            //  il faudra donc aussi supprimer les fichiers de clés rsa
 
-                // TODO
-            }
-            else if(msg->msg_type == MSG_SERVER_CLIENT){
-                // TODO
-            }
-            else{
-                // On ne fait rien, on n'est pas censé arriver ici
+            printf("\033[31mError, this pseudo is already taken, "
+                    "please choose another pseudo!\033[m\nPseudo : ");
+
+            // SUPPRESSION DES FICHIERS DE CLE RSA:
+            remove(path_pub);
+            remove(path_priv);
+            rmdir(path_pub);
+
+            // Réinitialisation du pseudo
+            strcpy(cstate->pseudo, "");
+            cstate->waiting_pseudo_confirmation = false;
+
+            // Si erreur envoyée sur retour du message décodé,
+            //   il faut aussi nettoyer ce message
+            // Test bad ACK
+            if(msg->msg_id >= 0 &&
+               (size_t)msg->msg_id < cstate->nb_msg_waiting_ack &&
+               cstate->msg_waiting_ack[msg->msg_id].msg_type != MSG_NULL
+            ){
+                // On nettoie le message qui attend
+                init_empty_message(&(cstate->msg_waiting_ack[msg->msg_id]));
             }
         }
+        else if(msg->msg_type == MSG_SERVER_CLIENT){
+            // On décode le message avec notre clé privée,
+            //   et ensuite on le renvoie
+
+            char* decrypted_message;
+            size_t decrypted_length;
+
+            FILE* fpriv = fopen(path_priv, "r");
+            if(fpriv == NULL){
+                fprintf(stderr, "\033[31mError while open priv key!\033[m\n");
+                exit(EXIT_FAILURE);
+            }
+
+            if( decrypt_message((unsigned char*)msg->msg, msg->msg_length,
+                                fpriv,
+                                (unsigned char** )(&decrypted_message),
+                                &decrypted_length) == -1)
+            {
+                fclose(fpriv);
+                fprintf(stderr, "\033[31mError from decrypt message!\033[m\n");
+                exit(EXIT_FAILURE);
+            }
+            fclose(fpriv);
+            
+            client_send_message(con, cstate,
+                                decrypted_message, decrypted_length);
+            
+        }
+        else if(msg->msg_type == MSG_ACK_POS){
+            cstate->connected = true;
+            cstate->waiting_pseudo_confirmation = false;
+            printf("Bien connecté au serveur!\n");
+
+            // TODO: récupérer les messages des salons, etc...
+        }
         else{
-            // On est censé attendre que le client nous donne son pseudo
-            // Donc on ne fait rien, on n'est pas censé recevoir de messages
+            // On ne fait rien, on n'est pas censé arriver ici
         }
     }
     else if(cstate->connected){
-        // On est bien connecté
+        // On est bien connecté, donc on reçoit les messages normalement
+
+        switch (msg->msg_type)
+        {
+            case MSG_SERVER_CLIENT:
+                printf("Received message from %s : \"%s\"\n",
+                                        msg->src_pseudo, msg->msg);
+                break;
+
+            case MSG_ERREUR:
+                printf("\033[31mError from server: %s\033[m\n", msg->msg);
+                break;
+
+            case MSG_ACK_NEG:
+                // Test bad ACK
+                if(msg->msg_id < 0 ||
+                   (size_t)msg->msg_id > cstate->nb_msg_waiting_ack ||
+                   cstate->msg_waiting_ack[msg->msg_id].msg_type == MSG_NULL
+                ){
+                    fprintf(stderr, "\033[31mError, "
+                            "bad negative ack from server\033[m\n");
+                    return;
+                }
+                // Il faut renvoyer le message
+                tcp_connection_message_send(con, con->sockfd,
+                                    &(cstate->msg_waiting_ack[msg->msg_id]));
+                break;
+            
+            case MSG_ACK_POS:
+                // Test bad ACK
+                if(msg->msg_id < 0 ||
+                   (size_t)msg->msg_id > cstate->nb_msg_waiting_ack ||
+                   cstate->msg_waiting_ack[msg->msg_id].msg_type == MSG_NULL
+                ){
+                    fprintf(stderr, "\033[31mError, "
+                            "bad negative ack from server\033[m\n");
+                    return;
+                }
+                // On nettoie le message qui attend
+                init_empty_message(&(cstate->msg_waiting_ack[msg->msg_id]));
+                break;
+
+            default:
+                break;
+        }
+
     }
 }
 
