@@ -36,3 +36,4 @@ doc/*/
 
 client_rsa_keys/
 server_rsa_keys/
+tmp_key

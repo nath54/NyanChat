@@ -269,7 +269,7 @@ void on_msg_received(TcpConnection* con, SOCKET sock,
         fwrite(cli->public_key, sizeof(char), strlen(cli->public_key), ftmp);
         fclose(ftmp);
         CHK( encrypt_message(cli->code_to_verify, strlen(cli->code_to_verify),
-                             "tmp.key",
+                             "tmp_key",
                              (unsigned char** )&encrypted_msg, &t_encrypted) );
         remove("tmp_key");
 

@@ -124,7 +124,7 @@ void on_stdin_client(TcpConnection* con,
                 CHKN( strcat(path_pub, "rsa_pub") );
                 char path_priv[MAX_NAME_LENGTH + 100];
                 CHKN( strcpy(path_priv, path_dir) );
-                CHKN( strcat(path_priv, "rsa_pub") );
+                CHKN( strcat(path_priv, "rsa_priv") );
 
                 // Test inscription (première connexion avec ce pseudo)
                 if (stat(path_dir, &st) == -1) {
@@ -134,9 +134,12 @@ void on_stdin_client(TcpConnection* con,
                     CHK( mkdir(path_dir, 0700) );
 
                     // Création des clés
-                    printf("Taille clé générée : %d\n", MAX_MSG_LENGTH/2);
+                    printf("Génération d'une paire de clé RSA : \n");
+                    printf("  - chemin privée : %s\n", path_priv);
+                    printf("  - chemin publique : %s\n", path_pub);
+                    printf("  - longueur : %d\n", MAX_MSG_LENGTH/2);
                     if( generate_keypair(path_priv, path_pub,
-                                         MAX_MSG_LENGTH/2) != RSA_OP_FAILURE)
+                                         MAX_MSG_LENGTH/2) == RSA_OP_FAILURE)
                     {
                         fprintf(stderr, "Erreur génération des clés rsa!\n");
                         exit(EXIT_FAILURE);
