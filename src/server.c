@@ -22,20 +22,24 @@
 
 // Fonction qui traite les messages reçus
 void on_msg_received(TcpConnection* con, SOCKET sock,
-                     Message msg, size_t msg_length)
-{   
+                     Message msg, size_t msg_length,
+                     void* custom_args)
+{
     (void)con;
     (void)sock;
     (void)msg_length;
+    (void)custom_args;
     printf("Message reçu : \"%s\"\n", msg.msg);
 }
 
 
 void on_stdin_server(TcpConnection* con,
-                     char msg[T_MSG_MAX], size_t msg_len)
+                     char msg[T_MSG_MAX], size_t msg_len,
+                     void* custom_args)
 {
     (void)con;
     (void)msg_len;
+    (void)custom_args;
     // On affiche juste l'entrée reçue
     printf("Message écrit : \"%s\"\n", msg);
 }
@@ -60,7 +64,9 @@ int main(int argc, char **argv)
     tcp_connection_server_init(&con, "127.0.0.1", port, 20, -1);
 
     // Boucle principale de la connection tcp
-    tcp_connection_mainloop(&con, on_msg_received, on_stdin_server);
+    tcp_connection_mainloop(&con,
+                            on_msg_received, NULL,
+                            on_stdin_server, NULL);
 
     // fermeture de la connection
     tcp_connection_close(&con);

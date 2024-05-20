@@ -10,14 +10,17 @@
 #include <stdlib.h>
 #include <unistd.h>
 
-
-#include "../include/tcp_connection.h"
+// #include "../include/tcp_connection.h"
+#include "../include/client.h"
 
 
 void on_stdin_client(TcpConnection* con,
                     char msg[T_MSG_MAX],
-                    size_t msg_len)
+                    size_t msg_len,
+                    void* custom_args)
 {
+    (void)custom_args;
+
     int bytes_sent = send(con->sockfd, msg, msg_len, 0);
 
     printf("%d bytes sent!\n", bytes_sent);
@@ -30,10 +33,12 @@ void on_stdin_client(TcpConnection* con,
 
 
 void on_msg_client(TcpConnection* con, SOCKET sock, 
-                   Message msg, size_t msg_len){
+                   Message msg, size_t msg_len,
+                   void* custom_args){
     (void)con;
     (void)sock;
     (void)msg_len;
+    (void)custom_args;
     printf("Message received: %s\n", msg.msg);
 
 }
@@ -55,7 +60,9 @@ int main(int argc, char* argv[]) {
 
     tcp_connection_client_init(&con, ip_proxy, port_proxy, -1);
 
-    tcp_connection_mainloop(&con, on_msg_client, on_stdin_client);
+    tcp_connection_mainloop(&con,
+                            on_msg_client, NULL,
+                            on_stdin_client, NULL);
 
     tcp_connection_close(&con);
 

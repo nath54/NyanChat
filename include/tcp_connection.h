@@ -36,7 +36,7 @@ typedef u_int32_t uint32;
 // Taille max d'un pseudo de clients ou d'un nom de salon
 #define T_NOM_MAX 256
 
-#define T_MSG_MAX 1024
+#define T_MSG_MAX 256
 
 #define MAX_POLL_SOCKETS 200
 
@@ -44,13 +44,23 @@ typedef u_int32_t uint32;
 #define TCP_CONNECTION_CLIENT 1
 
 
+// Structure utilisée pour les messages et
+//  les acquittements transmis par la connection
 typedef struct {	
-    // (0=je suis là, 1=msg normal,
-    //  2=demande qui est là, 3=au revoir, 4=erreur)
+    // (0=ping, 1=msg normal client->serveur,
+    //  2=msg serveur->client, 3=fin de connection, 4=erreur,
+    //  5=acquittement positif, 6=acquittement négatif)
 	int type_msg;
+
+    // Identifiant qui permet au client de savoir de quel message
+    //  le serveur parle lorsqu'un acquittement est renvoyé
+    int id_msg;
     
     // pseudo du client
 	char pseudo_source[T_NOM_MAX];
+
+    // Socket client du proxy (rempli par le proxy)
+    int proxy_client_socket;
     
     // 0 = msg privé, 1 = salon privé, 2 = salon par défaut
 	int flag_destination;
@@ -94,10 +104,12 @@ typedef struct {
 
 
 typedef void(fn_on_msg)(TcpConnection* con, SOCKET sock,
-                        Message msg, size_t msg_len);
+                        Message msg, size_t msg_len,
+                        void* custom_args);
 
 typedef void(fn_on_stdin)(TcpConnection* con,
-                          char msg[T_MSG_MAX], size_t msg_len);
+                          char msg[T_MSG_MAX], size_t msg_len,
+                          void* custom_args);
 
 
 // static socklen_t sockaddr_size = sizeof(SOCKADDR_IN);
@@ -117,8 +129,8 @@ void tcp_connection_client_init(TcpConnection* con,
 
 // Boucle principale d'une connection tcp
 void tcp_connection_mainloop(TcpConnection* con,
-                             fn_on_msg on_msg,
-                             fn_on_stdin on_stdin);
+                             fn_on_msg on_msg, void* on_msg_custom_args,
+                             fn_on_stdin on_stdin, void* on_stdin_custom_args);
 
 
 

@@ -258,7 +258,9 @@ void compress_poll_socket_array(TcpConnection* con, int current_nb_poll_socks){
 }
 
 
-void read_poll_socket(TcpConnection* con, int id_poll, fn_on_msg on_msg){
+void read_poll_socket(TcpConnection* con, int id_poll,
+                      fn_on_msg on_msg, void* on_msg_custom_args)
+{
 
     // Variable pour savoir si un socket du poll se coupe ou pas
     bool close_conn = false;
@@ -291,7 +293,8 @@ void read_poll_socket(TcpConnection* con, int id_poll, fn_on_msg on_msg){
 
         printf("Msg reçu : %s\n", con->msg[0].msg);
 
-        on_msg(con, con->poll_fds[id_poll].fd, con->msg[0], msg_len);
+        on_msg(con, con->poll_fds[id_poll].fd, con->msg[0], msg_len,
+               on_msg_custom_args);
 
     } while(true);
 
@@ -305,8 +308,8 @@ void read_poll_socket(TcpConnection* con, int id_poll, fn_on_msg on_msg){
 
 // Boucle principale d'une connection tcp
 void tcp_connection_mainloop(TcpConnection* con,
-                             fn_on_msg on_msg,
-                             fn_on_stdin on_stdin)
+                             fn_on_msg on_msg, void* on_msg_custom_args,
+                             fn_on_stdin on_stdin, void* on_stdin_custom_args)
 {
 
     if(on_msg == NULL){
@@ -356,7 +359,7 @@ void tcp_connection_mainloop(TcpConnection* con,
                     con->poll_fds[i].fd == con->sockfd){
 
                 // Socket qui écoute les connections entrantes 
-                read_poll_socket(con, i, on_msg);
+                read_poll_socket(con, i, on_msg, on_msg_custom_args);
 
             } else if(con->poll_fds[i].fd == stdin_fd) {
 
@@ -378,7 +381,7 @@ void tcp_connection_mainloop(TcpConnection* con,
                 buffer[bytes_read - 1] = '\0';
 
                 if(on_stdin != NULL){
-                    on_stdin(con, buffer, bytes_read);
+                    on_stdin(con, buffer, bytes_read, on_stdin_custom_args);
                 }
 
                 printf("Vous avez écrit: \"%s\"\n", buffer);
@@ -390,7 +393,7 @@ void tcp_connection_mainloop(TcpConnection* con,
                 // SOCKET lisible
                 // On reçoit des données tant que possible
 
-                read_poll_socket(con, i, on_msg);
+                read_poll_socket(con, i, on_msg, on_msg_custom_args);
 
             }
 
