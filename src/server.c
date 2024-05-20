@@ -28,7 +28,9 @@ void on_msg_received(TcpConnection* con, SOCKET sock,
     (void)con;
     (void)sock;
     (void)msg_length;
-    (void)custom_args;
+    ServerState* sstate = custom_args;
+    (void)sstate;
+
     printf("Message reçu : \"%s\"\n", msg.msg);
 }
 
@@ -39,16 +41,31 @@ void on_stdin_server(TcpConnection* con,
 {
     (void)con;
     (void)msg_len;
-    (void)custom_args;
+    ServerState* sstate = custom_args;
+    (void)sstate;
+
     // On affiche juste l'entrée reçue
     printf("Message écrit : \"%s\"\n", msg);
+}
+
+
+void init_server_state(ServerState* sstate){
+    (void)sstate;
+    
+    // TODO: compléter cette fonction
+}
+
+void free_server_state(ServerState* sstate){
+    (void)sstate;
+
+    // TODO: compléter cette fonction
 }
 
 
 // Main
 int main(int argc, char **argv)
 {
-    
+    ServerState server_state;
     TcpConnection con;
 
     // verification du nombre d'arguments sur la ligne de commande
@@ -61,15 +78,17 @@ int main(int argc, char **argv)
     int port = atoi(argv[1]);
 
     // Initialisation de la connection tcp du côté serveur
+    init_server_state(&server_state);
     tcp_connection_server_init(&con, "127.0.0.1", port, 20, -1);
 
     // Boucle principale de la connection tcp
     tcp_connection_mainloop(&con,
-                            on_msg_received, NULL,
-                            on_stdin_server, NULL);
+                            on_msg_received, &server_state,
+                            on_stdin_server, &server_state);
 
     // fermeture de la connection
     tcp_connection_close(&con);
+    free_server_state(&server_state);
 
     return 0;
 }

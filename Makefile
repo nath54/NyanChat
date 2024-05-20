@@ -4,7 +4,7 @@ BDIR = bin/
 IDIR = include/
 
 CC = gcc
-CFLAGS = -I$(IDIR) -Werror -Wall -Wextra -g
+CFLAGS = -I $(IDIR) -Werror -Wall -Wextra -g
 LDFLAGS = -lcrypto -lssl -lm
 
 SSHARED = bits.c tcp_connection.c rsa.c hashmap.c lib_ansi.c

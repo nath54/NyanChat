@@ -38,6 +38,8 @@ typedef struct {
 typedef struct{
 
     
+    
+    // TODO : compléter cette structure
 
-} MessagesServer;
+} ServerState;
 
