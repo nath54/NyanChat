@@ -40,8 +40,10 @@ typedef u_int32_t uint32;
 
 #define MAX_POLL_SOCKETS 200
 
-#define TCP_CONNECTION_SERVER 0
-#define TCP_CONNECTION_CLIENT 1
+#define TCP_CON_SERVER 0
+#define TCP_CON_CLIENT 1
+#define TCP_CON_PROXY_SERVER_SIDE 2
+#define TCP_CON_PROXY_CLIENTS_SIDE 3
 
 
 #define MSG_NULL -1
@@ -112,7 +114,8 @@ typedef struct {
     Message msg[1];
 
     // Paramètres de la connexion
-    int type_connection;    // 0 = server, 1 = client
+    int type_connection;    // 0 = server, 1 = client,
+                            // 2 = proxy côté server, 3 = proxy côté clients
     int timeout;    // Temps max d'inactivité avant fermeture de la connexion
     bool end_connection; // S'il faut éteindre la connexion
     bool need_compress_poll_arr; // S'il faut compresser this->poll_fds

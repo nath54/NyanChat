@@ -36,8 +36,6 @@ typedef struct {
 
 
 typedef struct{
-
-    
     
     // TODO : compléter cette structure
 

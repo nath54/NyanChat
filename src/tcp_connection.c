@@ -38,7 +38,7 @@ void tcp_connection_server_init(TcpConnection* con,
                  int timeout_server)
 {
 
-    con->type_connection = TCP_CONNECTION_SERVER;
+    con->type_connection = TCP_CON_SERVER;
 
     // Création du socket
     con->sockfd = socket(AF_INET, SOCK_STREAM | SOCK_NONBLOCK, 0);
@@ -106,7 +106,7 @@ void tcp_connection_client_init(TcpConnection* con,
                                 char* ip_to_connect, int port_to_connect,
                                 int timeout_client){
 
-    con->type_connection = TCP_CONNECTION_CLIENT;
+    con->type_connection = TCP_CON_CLIENT;
 
     // Create socket
     con->sockfd = socket(AF_INET, SOCK_STREAM, 0);
@@ -304,6 +304,10 @@ void read_poll_socket(TcpConnection* con, int id_poll,
 
         printf("Msg reçu : %s\n", con->msg[0].msg);
 
+        if(con->type_connection == TCP_CON_PROXY_CLIENTS_SIDE){
+            con->msg[0].proxy_client_socket = id_poll;
+        }
+
         on_msg(con, con->poll_fds[id_poll].fd, con->msg[0], msg_len,
                on_msg_custom_args);
 
@@ -359,15 +363,18 @@ void tcp_connection_mainloop(TcpConnection* con,
                 con->end_connection = true;
                 break;
             }
-
-            if(con->type_connection == TCP_CONNECTION_SERVER &&
-                    con->poll_fds[i].fd == con->sockfd){
+ 
+            if((con->type_connection == TCP_CON_SERVER ||
+                con->type_connection == TCP_CON_PROXY_CLIENTS_SIDE) &&
+                con->poll_fds[i].fd == con->sockfd)
+            {
 
                 // Socket qui écoute les connections entrantes 
                 new_clients_acceptation(con);
 
-            } else if(con->type_connection == TCP_CONNECTION_CLIENT &&
-                    con->poll_fds[i].fd == con->sockfd){
+            } else if((con->type_connection == TCP_CON_CLIENT ||
+                       con->type_connection == TCP_CON_PROXY_SERVER_SIDE) &&
+                       con->poll_fds[i].fd == con->sockfd){
 
                 // Socket qui écoute les connections entrantes 
                 read_poll_socket(con, i, on_msg, on_msg_custom_args);

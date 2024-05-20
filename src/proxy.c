@@ -54,8 +54,14 @@ void on_client_received(TcpConnection* con, SOCKET sock,
     if(msg.type_msg == MSG_NULL)
         return;
 
+    //
+
+    // Normalement, la fonction qui a appelé cette fonction 
+    //  a mis l'id du poll socket du client dans msg.proxy_client_socket
+
     tcp_connection_send_struct_message(&con_server, con_server.poll_fds[0].fd,
                                        msg);
+
 }
 
 
@@ -71,7 +77,26 @@ void on_server_received(TcpConnection* con, SOCKET sock,
     if(msg.type_msg == MSG_NULL)
         return;
 
-    // TODO : récupérer le SOCKET DU CLIENT
+    // Test du socket client à qui retransmettre le message
+    if(msg.proxy_client_socket == -1){
+        fprintf(stderr, "Error: Unknown client socket on msg from serv!\n");
+        return;
+    }
+    else if(msg.proxy_client_socket < 0||
+            (size_t)msg.proxy_client_socket >= con->nb_poll_fds)
+    {
+        fprintf(stderr,
+                "Error: Bad value of client socket on msg  from serv!\n");
+        return;
+    }
+
+    // Le socket est à priori bon, on transmet le message
+    tcp_connection_send_struct_message(
+        &con_clients,
+        con_clients.poll_fds[msg.proxy_client_socket].fd,
+        msg
+    );
+
 }
 
 
@@ -80,6 +105,7 @@ void* gestion_server(void* arg)
     (void)arg;
     // Initialisation de la connection qui va écouter le serveur
     tcp_connection_client_init(&con_server, ip_server, port_server, -1);
+    con_server.type_connection = TCP_CON_PROXY_SERVER_SIDE;
 
     // Boucle principale de la connection tcp qui écoute le serveur
     tcp_connection_mainloop(&con_server,
@@ -97,7 +123,10 @@ void* gestion_clients(void* arg)
 {
     (void)arg;
     // Initialisation de la connection qui va écouter les clients
-    tcp_connection_server_init(&con_clients, "127.0.0.1", port_clients, 20, -1);
+    tcp_connection_server_init(&con_clients,
+                               "127.0.0.1", port_clients, 20, -1);
+    con_clients.type_connection = TCP_CON_PROXY_CLIENTS_SIDE;
+
 
     // Boucle principale de la connection tcp qui écoute les clients
     tcp_connection_mainloop(&con_clients,
@@ -127,7 +156,6 @@ int main(int argc, char* argv[])
         exit(EXIT_FAILURE);
     }
 
-    
     ip_server = argv[1];
     port_server = atoi(argv[2]);
     port_clients = atoi(argv[3]);
