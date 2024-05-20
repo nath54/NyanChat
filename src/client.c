@@ -97,7 +97,7 @@ void on_stdin_client(TcpConnection* con,
             // On crée clée RSA puis
             //  on envoie une demande de pseudo au serveur
 
-            if (msg_len < 4){
+            if (msg_len < MIN_NAME_LENGTH){
                 printf("Pseudo trop court, "
                        "doit avoir une taille entre 4 et 64 !\n"
                        "\nEntrez votre pseudo > ");
