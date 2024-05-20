@@ -1,6 +1,6 @@
 ODIR = build/obj/
 SDIR = src/
-BDIR = bin/
+BDIR = build/bin/
 IDIR = include/
 TDIR = test/
 UDIR = unity/src/
@@ -39,7 +39,8 @@ test: test_hashmap
 	done
 
 clean:
-	$(RM) -r $(ODIR) $(BDIR)
+	@printf "$(GREEN)Cleaning... $(DEFAULT)\n"
+	$(RM) -r $(ODIR) $(BDIR) build/
 
 # Rule for compiling a C source file
 $(ODIR)%.o: $(SDIR)%.c
@@ -54,7 +55,7 @@ $(ODIR)unity.o: $(UDIR)unity.c $(UDIR)unity.h
 
 # Rule for compiling a C test file
 $(ODIR)%.o: $(TDIR)%.c
-	@mkdir -p $(BDIR) $(ODIR)
+	@mkdir -p $(BDIR) $(ODIR) build/
 	@$(CC) $(CFLAGS) -I $(UDIR) -c $< -o $@
 
 .PHONY: clean
