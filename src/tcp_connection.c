@@ -470,14 +470,7 @@ void tcp_connection_send_message(TcpConnection* con, SOCKET sock,
     strcpy(msg.pseudo_source, pseudo_src);
     strcpy(msg.destination, destination);
 
-    int bytes_sent = send(sock, &msg, sizeof(msg), 0);
-
-    printf("%d bytes sent!\n", bytes_sent);
-
-    if (bytes_sent == -1) {
-        perror("send");
-        con->end_connection = true;
-    }
+    tcp_connection_send_struct_message(con, sock, msg);
 }
 
 
