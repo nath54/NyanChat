@@ -110,7 +110,7 @@ void on_server_received(TcpConnection* con, SOCKET sock,
     }
 
     // Le socket est à priori bon, on transmet le message
-    tcp_connection_send_message(
+    tcp_connection_message_send(
         &con_clients,
         con_clients.poll_fds[msg->proxy_client_socket].fd,
         msg

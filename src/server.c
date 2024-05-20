@@ -46,7 +46,7 @@ void on_msg_received(TcpConnection* con, SOCKET sock,
     ServerState* sstate = custom_args;
     (void)sstate;
 
-    if(msg->msg_type == MSG_NORMAL_CLIENT_SERVER && msg->taille_msg >= 10){
+    if(msg->msg_type == MSG_NORMAL_CLIENT_SERVER && msg->msg_length >= 10){
         
         // test detection d'erreurs
         int res = code_detect_error(msg);
