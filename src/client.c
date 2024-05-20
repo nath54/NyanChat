@@ -1,4 +1,6 @@
 #include <sys/types.h>
+#include <sys/stat.h>
+#include <unistd.h>
 #include <sys/socket.h>
 #include <sys/poll.h>
 #include <sys/errno.h>
@@ -11,7 +13,12 @@
 #include <unistd.h>
 
 // #include "../include/tcp_connection.h"
+#include "../include/lib_ansi.h"
+#include "../include/rsa.h"
+#include "../include/lib_chks.h"
 #include "../include/client.h"
+
+#define PATH_RSA_KEYS "client_rsa_keys/"
 
 
 // Find the next free slot of the msg_waiting_acq
@@ -30,12 +37,12 @@ int find_next_msg_id(ClientState* cstate){
         }
         //
         for(size_t i = first_free; i<cstate->tot_msg_waiting_acq; i++){
-            cstate->msg_waiting_acq[i].type_msg = -1;
+            cstate->msg_waiting_acq[i].type_msg = MSG_NULL;
         }
     }
     //
     for(size_t i=first_free; i<cstate->tot_msg_waiting_acq; i++){
-        if(cstate->msg_waiting_acq[i].type_msg == -1){
+        if(cstate->msg_waiting_acq[i].type_msg == MSG_NULL){
             return i;
         }
     }
@@ -57,15 +64,74 @@ void on_stdin_client(TcpConnection* con,
         //  - attente de l'entrée utilisateur pour le pseudo
         //  - attente du serveur pour confirmation du pseudo
 
-        if(cstate->attente_confirmation_pseudo){
+        if(cstate->waiting_pseudo_confirmation){
             // On ne fait rien, on attend le serveur
 
         }
         else{
+            // msg est censé contenir le pseudo demandé par le client
+
             // On crée clée RSA puis
             //  on envoie une demande de pseudo au serveur
 
-            // TODO
+            if(msg_len < 4){
+                printf("Pseudo trop court, "
+                       "doit avoir une taille entre 4 et 64 !\n"
+                       "\nEntrez votre pseudo > ");
+            }
+            else{
+                // Création du répertoire pour fichiers clés si non existant
+                struct stat st = {0};
+
+                if (stat(PATH_RSA_KEYS, &st) == -1) {
+                    CHK( mkdir(PATH_RSA_KEYS, 0700) );
+                }
+
+                // Répertoire des clés pour le pseudo demandé
+                char path_dir[T_NOM_MAX + 100] = PATH_RSA_KEYS;
+                CHKN( strcat(path_dir, msg) );
+                CHKN( strcat(path_dir, "/") );
+
+                // Chemins des clés
+                char path_pub[T_NOM_MAX + 100];
+                CHKN( strcpy(path_pub, path_dir) );
+                CHKN( strcat(path_pub, "rsa_pub") );
+                char path_priv[T_NOM_MAX + 100];
+                CHKN( strcpy(path_priv, path_dir) );
+                CHKN( strcat(path_priv, "rsa_pub") );
+
+                // Test inscription (première connexion avec ce pseudo)
+                if (stat(path_dir, &st) == -1) {
+                    // Il faut créer les fichiers clés RSA
+
+                    // Création du répertoire pour le pseudo
+                    CHK( mkdir(path_dir, 0700) );
+
+                    // Création des clés
+                    if( generate_keypair(path_priv, path_pub,
+                                         T_MSG_MAX/2) != 1)
+                    {
+                        fprintf(stderr, "Erreur génération des clés rsa!\n");
+                        exit(EXIT_FAILURE);
+                    }
+                }
+
+                // Envoi de la demande de connection au serveur
+                init_empty_message(&(cstate->msg_waiting_acq[0]));
+                cstate->msg_waiting_acq[0].type_msg = MSG_CONNECTION_CLIENT;
+                cstate->msg_waiting_acq[0].id_msg = 0;
+                strcpy(cstate->msg_waiting_acq[0].pseudo_source, msg);
+                load_rsa_key(path_pub,
+                             cstate->msg_waiting_acq[0].msg,
+                             T_MSG_MAX,
+                             &(cstate->msg_waiting_acq[0].taille_msg));
+
+                cstate->nb_msg_waiting_acq += 1;
+                tcp_connection_send_struct_message(con, con->sockfd,
+                                                   cstate->msg_waiting_acq[0]);
+
+                cstate->waiting_pseudo_confirmation = true;
+            }
         }
     }
     else if( cstate->connected ){
@@ -78,12 +144,14 @@ void on_stdin_client(TcpConnection* con,
         strcpy(cstate->msg_waiting_acq[id_new_msg].pseudo_source,
                                                     cstate->pseudo);
         cstate->msg_waiting_acq[id_new_msg].flag_destination = 
-                                                    cstate->type_salon_actuel;
+                                                    cstate->type_current_dest;
         strcpy(cstate->msg_waiting_acq[id_new_msg].destination,
                                                     cstate->destination);
-        cstate->msg_waiting_acq[id_new_msg].proxy_client_socket = -1;
+        cstate->msg_waiting_acq[id_new_msg].proxy_client_socket = MSG_NULL;
         strcpy(cstate->msg_waiting_acq[id_new_msg].msg, msg);
         cstate->msg_waiting_acq[id_new_msg].taille_msg = msg_len;
+
+        cstate->nb_msg_waiting_acq += 1;
 
         tcp_connection_send_struct_message(con, con->sockfd,
                                         cstate->msg_waiting_acq[id_new_msg]);
@@ -114,10 +182,10 @@ void init_client_state(ClientState* client_state){
 
     // Init bools
     client_state->connected = false;
-    client_state->attente_confirmation_pseudo = false;
+    client_state->waiting_pseudo_confirmation = false;
 
     // Init salon
-    client_state->type_salon_actuel = 0;
+    client_state->type_current_dest = 0;
     memset(client_state->destination, 0, T_NOM_MAX);
     strcpy(client_state->destination, "");
 
@@ -135,6 +203,10 @@ void init_client_state(ClientState* client_state){
         fprintf(stderr, "Error malloc! \n");
         exit(EXIT_FAILURE);
     }
+
+    // Demande du pseudo client, première chose à faire
+    print_rainbow("Bienvenue sur NyanChat!\n");
+    printf("\nEntrez votre pseudo > ");
 }
 
 

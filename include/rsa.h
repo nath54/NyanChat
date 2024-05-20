@@ -27,3 +27,8 @@ int decrypt_message(unsigned char* encrypted_message, size_t encrypted_len,
                      FILE* private_key_file, unsigned char** decrypted_message,
                      size_t* decrypted_len);
 
+
+
+
+// Charge un fichier de clé rsa vers la chaine dest
+void load_rsa_key(char* rsa_key, char* dest, size_t t_max, uint32_t* t_read);

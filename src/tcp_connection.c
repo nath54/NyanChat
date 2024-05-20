@@ -19,6 +19,17 @@
 #include "../include/tcp_connection.h"
 
 
+// Initialisation d'un message vide
+void init_empty_message(Message* msg){
+    msg->type_msg = MSG_NULL;
+    msg->id_msg = -1;
+    msg->proxy_client_socket = -1;
+    msg->taille_msg = 0;
+    msg->flag_destination = 0;
+    strcpy(msg->destination, "");
+    strcpy(msg->pseudo_source, "");
+}
+
 
 // Initialisation d'un socket pour un serveur tcp
 void tcp_connection_server_init(TcpConnection* con,

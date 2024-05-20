@@ -44,12 +44,29 @@ typedef u_int32_t uint32;
 #define TCP_CONNECTION_CLIENT 1
 
 
+#define MSG_NULL -1
+#define MSG_NORMAL_CLIENT_SERVER 0
+#define MSG_SERVER_CLIENT 1
+#define MSG_CONNECTION_CLIENT 2
+#define MSG_ERREUR 4
+#define MSG_ACQ_POS 5
+#define MSG_ACQ_NEG 6
+
 // Structure utilisée pour les messages et
 //  les acquittements transmis par la connection
 typedef struct {	
-    // (-1=msg NULL, 0=ping, 1=msg normal client->serveur,
-    //  2=msg serveur->client, 3=fin de connection, 4=erreur,
-    //  5=acquittement positif, 6=acquittement négatif)
+    /*
+    Modifier les defines juste au dessus si changements de valeurs
+        (
+            -1=msg NULL,
+            0=msg normal client->serveur,
+            1=msg serveur->client,
+            2=connection client
+            3=fin de connection,
+            4=erreur,
+            5=acquittement positif,
+            6=acquittement négatif
+        ) */
 	int type_msg;
 
     // Identifiant qui permet au client de savoir de quel message
@@ -116,6 +133,11 @@ typedef void(fn_on_stdin)(TcpConnection* con,
 
 // static int stdin_fd = fileno(stdin);
 #define stdin_fd fileno(stdin)
+
+
+// Initialisation d'un message vide
+void init_empty_message(Message* msg);
+
 
 // Initialisation d'un socket pour un serveur tcp
 void tcp_connection_server_init(TcpConnection* con,

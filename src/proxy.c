@@ -14,43 +14,13 @@
 #include <string.h>
 #include <stdlib.h>
 #include <unistd.h>
-#include <stdnoreturn.h>
 
 #include <pthread.h>
 #include <semaphore.h>
 
 #include "../include/tcp_connection.h"
 
-
-#define CHK(op)                                                               \
-    do                                                                        \
-    {                                                                         \
-        if ((op) == -1)                                                       \
-            raler(#op);                                                       \
-    } while (0)
-#define CHKN(op)                                                              \
-    do                                                                        \
-    {                                                                         \
-        if ((op) == NULL)                                                     \
-            raler(#op);                                                       \
-    } while (0)
-#define TCHK(op)                                                              \
-    do                                                                        \
-    {                                                                         \
-        if ((errno = (op)) > 0)                                               \
-            raler(#op);                                                       \
-    } while (0)
-
-
-
-noreturn void raler(const char *msg)
-{
-    perror(msg);
-    exit(1);
-}
-
-
-
+#include "../include/lib_chks.h"
 
 /* ------------------ VARIABLES GLOBALES ------------------ */
 
@@ -80,6 +50,10 @@ void on_client_received(TcpConnection* con, SOCKET sock,
     (void)sock;
     (void)msg_length;
     (void)custom_args;
+
+    if(msg.type_msg == MSG_NULL)
+        return;
+
     tcp_connection_send_struct_message(&con_server, con_server.poll_fds[0].fd,
                                        msg);
 }
@@ -91,9 +65,12 @@ void on_server_received(TcpConnection* con, SOCKET sock,
 {
     (void)con;
     (void)sock;
-    (void)msg;
     (void)msg_length;
     (void)custom_args;
+
+    if(msg.type_msg == MSG_NULL)
+        return;
+
     // TODO : récupérer le SOCKET DU CLIENT
 }
 

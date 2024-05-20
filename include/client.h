@@ -7,10 +7,10 @@
 typedef struct {
     bool connected;
     char pseudo[T_NOM_MAX];
-    bool attente_confirmation_pseudo;
+    bool waiting_pseudo_confirmation;
 
     // Salon actuel
-    int type_salon_actuel; // 0=salon par défaut, 1=salon privé, 2=msg_privé
+    int type_current_dest; // 0=salon par défaut, 1=salon privé, 2=msg_privé
     // Nom du salon où il est, ou pseudo du client de msg privé
     char destination[T_NOM_MAX];
 
