@@ -47,7 +47,7 @@ typedef u_int32_t uint32;
 // Structure utilisée pour les messages et
 //  les acquittements transmis par la connection
 typedef struct {	
-    // (0=ping, 1=msg normal client->serveur,
+    // (-1=msg NULL, 0=ping, 1=msg normal client->serveur,
     //  2=msg serveur->client, 3=fin de connection, 4=erreur,
     //  5=acquittement positif, 6=acquittement négatif)
 	int type_msg;
