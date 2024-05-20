@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../include/tcp_connection.h"
+#include "tcp_connection.h"
 
 #define NB_MAX_CLIENTS 200
 #define NB_MAX_MESSAGES 2000

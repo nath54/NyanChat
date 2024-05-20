@@ -2,7 +2,7 @@
 
 
 // Pour le struct Message
-#include "../include/tcp_connection.h"
+#include "tcp_connection.h"
 
 
 #define PROXY_ERROR_RATE 10   // En pourcentage, la chance de créer une erreur

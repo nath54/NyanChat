@@ -6,7 +6,7 @@
 #include <sys/ioctl.h>
 #include <string.h>
 
-#include "../include/lib_ansi_colors.h"
+#include "lib_ansi_colors.h"
 
 // Create a Color struct from r, g, b
 Color cl(double r, double g, double b);

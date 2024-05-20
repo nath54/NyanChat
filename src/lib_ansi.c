@@ -1,4 +1,4 @@
-#include "../include/lib_ansi.h"
+#include "lib_ansi.h"
 
 double my_clamp(double val, double vmin, double vmax){
     if(val < vmin){

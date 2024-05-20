@@ -16,7 +16,7 @@
 #include <stdbool.h>
 #include <unistd.h>
 
-#include "../include/tcp_connection.h"
+#include "tcp_connection.h"
 
 
 // Initialisation d'un message vide

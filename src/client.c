@@ -12,11 +12,11 @@
 #include <stdlib.h>
 #include <unistd.h>
 
-// #include "../include/tcp_connection.h"
-#include "../include/lib_ansi.h"
-#include "../include/rsa.h"
-#include "../include/lib_chks.h"
-#include "../include/client.h"
+// #include "tcp_connection.h"
+#include "lib_ansi.h"
+#include "rsa.h"
+#include "lib_chks.h"
+#include "client.h"
 
 #define PATH_RSA_KEYS "client_rsa_keys/"
 

@@ -20,11 +20,11 @@
 #include <pthread.h>
 #include <semaphore.h>
 
-#include "../include/tcp_connection.h"
+#include "tcp_connection.h"
 
-#include "../include/codes_detection_correction.h"
+#include "codes_detection_correction.h"
 
-#include "../include/lib_chks.h"
+#include "lib_chks.h"
 
 /* ------------------ VARIABLES GLOBALES ------------------ */
 

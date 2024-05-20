@@ -16,9 +16,9 @@
 #include <stdbool.h>
 #include <unistd.h>
 
-#include "../include/tcp_connection.h"
-#include "../include/codes_detection_correction.h"
-#include "../include/server.h"
+#include "tcp_connection.h"
+#include "codes_detection_correction.h"
+#include "server.h"
 
 
 void gen_positive_acq_from_msg(Message* msg, Message* acq){

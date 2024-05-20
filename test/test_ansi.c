@@ -6,7 +6,10 @@
 #include <math.h>
 #include <time.h>
 
-#include "../include/lib_ansi.h"
+#include "lib_ansi.h"
+
+void setUp(void) {}
+void tearDown(void) {}
 
 void set_screen_border(int width, int height){
     // Cleaning screen
