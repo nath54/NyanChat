@@ -7,7 +7,7 @@ CC = gcc
 CFLAGS = -I $(IDIR) -Werror -Wall -Wextra -g
 LDFLAGS = -lcrypto -lssl -lm
 
-SSHARED = bits.c tcp_connection.c rsa.c hashmap.c lib_ansi.c
+SSHARED = bits.c tcp_connection.c rsa.c hashmap.c lib_ansi.c codes_detection_correction.c
 OBJ := $(SSHARED:%.c=$(ODIR)%.o)
 
 all: client server proxy test_ansi

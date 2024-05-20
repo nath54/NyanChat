@@ -94,6 +94,7 @@ typedef struct {
 	char msg[T_MSG_MAX];
     
     // (pour détection & correction)
+    // TODO: ajouter ici les ressources nécessaires pour les codes polynomiaux
 	// ???	code;
 
 } Message;
