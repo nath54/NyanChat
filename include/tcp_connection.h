@@ -97,7 +97,7 @@ typedef struct {
     // TODO: ajouter ici les ressources nécessaires pour les codes polynomiaux
 	// ???	code;
 
-} Message;
+} Message __attribute__((packed));
 
 
 typedef struct {

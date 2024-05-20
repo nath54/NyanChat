@@ -171,6 +171,39 @@ void on_msg_client(TcpConnection* con, SOCKET sock,
     
     printf("Message received: %s\n", msg->msg);
 
+    if( strlen(cstate->pseudo) == 0 ){
+        // Pas de pseudo, pas connecté, donc soit:
+        //  - attente de l'entrée utilisateur pour le pseudo
+        //  - attente du serveur pour confirmation du pseudo
+
+        if(cstate->waiting_pseudo_confirmation){
+            // On vérifie que l'on a bien soit:
+            //   - une erreur -> pseudo non utilisable
+            //   - un message encodé du serveur
+            //       qu'il faudra décoder avec notre clé privée et lui renvoyer
+            // Sinon, on ignore, on est pas censé recevoir autre chose
+
+            // Gestion erreur
+            if(msg->type_msg == MSG_ERREUR){
+                // Pseudo non utilisable, il faut donc le dire à l'utilisateur
+                //  et lui demander d'en rentrer un autre
+                //  il faudra donc aussi supprimer les fichiers de clés rsa
+
+                // TODO
+            }
+            else if(msg->type_msg == MSG_SERVER_CLIENT){
+                // TODO
+            }
+            else{
+                // On ne fait rien, on n'est pas censé arriver ici
+            }
+        }
+        else{
+            // On est censé attendre que le client nous donne son pseudo
+            // Donc on ne fait rien, on n'est pas censé recevoir de messages
+        }
+    }
+
 }
 
 
