@@ -1,0 +1,73 @@
+\doxysection{Channel Struct Reference}
+\hypertarget{structChannel}{}\label{structChannel}\index{Channel@{Channel}}
+
+
+{\ttfamily \#include $<$server.\+h$>$}
+
+\doxysubsubsection*{Data Fields}
+\begin{DoxyCompactItemize}
+\item 
+char \mbox{\hyperlink{structChannel_a44d41ad048fecab154f14894582a74ce}{name}} \mbox{[}\mbox{\hyperlink{tcp__connection_8h_aeb818ba2320ac54338775af361c645b9}{T\+\_\+\+NOM\+\_\+\+MAX}}\mbox{]}
+\item 
+char \mbox{\hyperlink{structChannel_a69b35f1ab6c31dbc87269857494797f0}{host}} \mbox{[}\mbox{\hyperlink{tcp__connection_8h_aeb818ba2320ac54338775af361c645b9}{T\+\_\+\+NOM\+\_\+\+MAX}}\mbox{]}
+\item 
+char \mbox{\hyperlink{structChannel_a507c0a0cb141037293ad2173abb88902}{clients}} \mbox{[}\mbox{\hyperlink{tcp__connection_8h_aeb818ba2320ac54338775af361c645b9}{T\+\_\+\+NOM\+\_\+\+MAX}}\mbox{]}\mbox{[}\mbox{\hyperlink{server_8h_ab8fdad3db19e3d15c1f5e965a00a2bc9}{NB\+\_\+\+MAX\+\_\+\+CLIENTS}}\mbox{]}
+\item 
+int \mbox{\hyperlink{structChannel_aceb4db4cf97948be62ba86bd0ffe6fe8}{nb\+\_\+clients}}
+\item 
+\mbox{\hyperlink{structMessage}{Message}} \mbox{\hyperlink{structChannel_ae8489f7003b76a02383c8afedb10725d}{msgs}} \mbox{[}\mbox{\hyperlink{server_8h_afb945283a3a4f0930ac3a79fe319155a}{NB\+\_\+\+MAX\+\_\+\+MESSAGES}}\mbox{]}
+\item 
+int \mbox{\hyperlink{structChannel_a809bf3d69aa7469b348616ece43c0039}{nb\+\_\+msgs}}
+\item 
+bool \mbox{\hyperlink{structChannel_aa5f18a5b8039a00aeb6ea0eff69cf719}{msgs\+\_\+boucle}}
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Field Documentation}
+\Hypertarget{structChannel_a44d41ad048fecab154f14894582a74ce}\label{structChannel_a44d41ad048fecab154f14894582a74ce} 
+\index{Channel@{Channel}!name@{name}}
+\index{name@{name}!Channel@{Channel}}
+\doxysubsubsection{\texorpdfstring{name}{name}}
+{\footnotesize\ttfamily char Channel\+::name\mbox{[}\mbox{\hyperlink{tcp__connection_8h_aeb818ba2320ac54338775af361c645b9}{T\+\_\+\+NOM\+\_\+\+MAX}}\mbox{]}}
+
+\Hypertarget{structChannel_a69b35f1ab6c31dbc87269857494797f0}\label{structChannel_a69b35f1ab6c31dbc87269857494797f0} 
+\index{Channel@{Channel}!host@{host}}
+\index{host@{host}!Channel@{Channel}}
+\doxysubsubsection{\texorpdfstring{host}{host}}
+{\footnotesize\ttfamily char Channel\+::host\mbox{[}\mbox{\hyperlink{tcp__connection_8h_aeb818ba2320ac54338775af361c645b9}{T\+\_\+\+NOM\+\_\+\+MAX}}\mbox{]}}
+
+\Hypertarget{structChannel_a507c0a0cb141037293ad2173abb88902}\label{structChannel_a507c0a0cb141037293ad2173abb88902} 
+\index{Channel@{Channel}!clients@{clients}}
+\index{clients@{clients}!Channel@{Channel}}
+\doxysubsubsection{\texorpdfstring{clients}{clients}}
+{\footnotesize\ttfamily char Channel\+::clients\mbox{[}\mbox{\hyperlink{tcp__connection_8h_aeb818ba2320ac54338775af361c645b9}{T\+\_\+\+NOM\+\_\+\+MAX}}\mbox{]}\mbox{[}\mbox{\hyperlink{server_8h_ab8fdad3db19e3d15c1f5e965a00a2bc9}{NB\+\_\+\+MAX\+\_\+\+CLIENTS}}\mbox{]}}
+
+\Hypertarget{structChannel_aceb4db4cf97948be62ba86bd0ffe6fe8}\label{structChannel_aceb4db4cf97948be62ba86bd0ffe6fe8} 
+\index{Channel@{Channel}!nb\_clients@{nb\_clients}}
+\index{nb\_clients@{nb\_clients}!Channel@{Channel}}
+\doxysubsubsection{\texorpdfstring{nb\_clients}{nb\_clients}}
+{\footnotesize\ttfamily int Channel\+::nb\+\_\+clients}
+
+\Hypertarget{structChannel_ae8489f7003b76a02383c8afedb10725d}\label{structChannel_ae8489f7003b76a02383c8afedb10725d} 
+\index{Channel@{Channel}!msgs@{msgs}}
+\index{msgs@{msgs}!Channel@{Channel}}
+\doxysubsubsection{\texorpdfstring{msgs}{msgs}}
+{\footnotesize\ttfamily \mbox{\hyperlink{structMessage}{Message}} Channel\+::msgs\mbox{[}\mbox{\hyperlink{server_8h_afb945283a3a4f0930ac3a79fe319155a}{NB\+\_\+\+MAX\+\_\+\+MESSAGES}}\mbox{]}}
+
+\Hypertarget{structChannel_a809bf3d69aa7469b348616ece43c0039}\label{structChannel_a809bf3d69aa7469b348616ece43c0039} 
+\index{Channel@{Channel}!nb\_msgs@{nb\_msgs}}
+\index{nb\_msgs@{nb\_msgs}!Channel@{Channel}}
+\doxysubsubsection{\texorpdfstring{nb\_msgs}{nb\_msgs}}
+{\footnotesize\ttfamily int Channel\+::nb\+\_\+msgs}
+
+\Hypertarget{structChannel_aa5f18a5b8039a00aeb6ea0eff69cf719}\label{structChannel_aa5f18a5b8039a00aeb6ea0eff69cf719} 
+\index{Channel@{Channel}!msgs\_boucle@{msgs\_boucle}}
+\index{msgs\_boucle@{msgs\_boucle}!Channel@{Channel}}
+\doxysubsubsection{\texorpdfstring{msgs\_boucle}{msgs\_boucle}}
+{\footnotesize\ttfamily bool Channel\+::msgs\+\_\+boucle}
+
+
+
+The documentation for this struct was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+include/\mbox{\hyperlink{server_8h}{server.\+h}}\end{DoxyCompactItemize}

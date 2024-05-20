@@ -1,0 +1,81 @@
+\doxysection{src/server.c File Reference}
+\hypertarget{server_8c}{}\label{server_8c}\index{src/server.c@{src/server.c}}
+{\ttfamily \#include $<$sys/types.\+h$>$}\newline
+{\ttfamily \#include $<$sys/socket.\+h$>$}\newline
+{\ttfamily \#include $<$sys/poll.\+h$>$}\newline
+{\ttfamily \#include $<$sys/errno.\+h$>$}\newline
+{\ttfamily \#include $<$sys/ioctl.\+h$>$}\newline
+{\ttfamily \#include $<$sys/time.\+h$>$}\newline
+{\ttfamily \#include $<$netinet/in.\+h$>$}\newline
+{\ttfamily \#include $<$arpa/inet.\+h$>$}\newline
+{\ttfamily \#include $<$netdb.\+h$>$}\newline
+{\ttfamily \#include $<$stdio.\+h$>$}\newline
+{\ttfamily \#include $<$string.\+h$>$}\newline
+{\ttfamily \#include $<$stdlib.\+h$>$}\newline
+{\ttfamily \#include $<$stdbool.\+h$>$}\newline
+{\ttfamily \#include $<$unistd.\+h$>$}\newline
+{\ttfamily \#include "{}tcp\+\_\+connection.\+h"{}}\newline
+{\ttfamily \#include "{}codes\+\_\+detection\+\_\+correction.\+h"{}}\newline
+{\ttfamily \#include "{}server.\+h"{}}\newline
+\doxysubsubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+void \mbox{\hyperlink{server_8c_aeef4043c29a0dd95afa22106e4ea39f7}{gen\+\_\+positive\+\_\+acq\+\_\+from\+\_\+msg}} (\mbox{\hyperlink{structMessage}{Message}} \texorpdfstring{$\ast$}{*}msg, \mbox{\hyperlink{structMessage}{Message}} \texorpdfstring{$\ast$}{*}acq)
+\item 
+void \mbox{\hyperlink{server_8c_a40998acbd6f16331937a352713d9a8b6}{gen\+\_\+negative\+\_\+acq\+\_\+from\+\_\+msg}} (\mbox{\hyperlink{structMessage}{Message}} \texorpdfstring{$\ast$}{*}msg, \mbox{\hyperlink{structMessage}{Message}} \texorpdfstring{$\ast$}{*}acq)
+\item 
+void \mbox{\hyperlink{server_8c_a28fccaeccd125072443135f40a2debcd}{on\+\_\+msg\+\_\+received}} (\mbox{\hyperlink{structTcpConnection}{Tcp\+Connection}} \texorpdfstring{$\ast$}{*}con, \mbox{\hyperlink{tcp__connection_8h_a8dc8083897335125630f1af5dafd5831}{SOCKET}} sock, \mbox{\hyperlink{structMessage}{Message}} \texorpdfstring{$\ast$}{*}msg, size\+\_\+t msg\+\_\+length, void \texorpdfstring{$\ast$}{*}custom\+\_\+args)
+\item 
+void \mbox{\hyperlink{server_8c_aefac48b3cdf2ef3b3dd39fd182ba8b60}{on\+\_\+stdin\+\_\+server}} (\mbox{\hyperlink{structTcpConnection}{Tcp\+Connection}} \texorpdfstring{$\ast$}{*}con, char msg\mbox{[}\mbox{\hyperlink{tcp__connection_8h_ac256122478c560cbacbd2cfac158579e}{T\+\_\+\+MSG\+\_\+\+MAX}}\mbox{]}, size\+\_\+t msg\+\_\+len, void \texorpdfstring{$\ast$}{*}custom\+\_\+args)
+\item 
+void \mbox{\hyperlink{server_8c_aed8fa1cc7c0043af62d666b5bc5fc15b}{init\+\_\+server\+\_\+state}} (\mbox{\hyperlink{structServerState}{Server\+State}} \texorpdfstring{$\ast$}{*}sstate)
+\item 
+void \mbox{\hyperlink{server_8c_a1431ddc6ec12d0ec9fbbb92d4d2f63de}{free\+\_\+server\+\_\+state}} (\mbox{\hyperlink{structServerState}{Server\+State}} \texorpdfstring{$\ast$}{*}sstate)
+\item 
+int \mbox{\hyperlink{server_8c_a3c04138a5bfe5d72780bb7e82a18e627}{main}} (int argc, char \texorpdfstring{$\ast$}{*}\texorpdfstring{$\ast$}{*}argv)
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Function Documentation}
+\Hypertarget{server_8c_aeef4043c29a0dd95afa22106e4ea39f7}\label{server_8c_aeef4043c29a0dd95afa22106e4ea39f7} 
+\index{server.c@{server.c}!gen\_positive\_acq\_from\_msg@{gen\_positive\_acq\_from\_msg}}
+\index{gen\_positive\_acq\_from\_msg@{gen\_positive\_acq\_from\_msg}!server.c@{server.c}}
+\doxysubsubsection{\texorpdfstring{gen\_positive\_acq\_from\_msg()}{gen\_positive\_acq\_from\_msg()}}
+{\footnotesize\ttfamily void gen\+\_\+positive\+\_\+acq\+\_\+from\+\_\+msg (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{structMessage}{Message}} \texorpdfstring{$\ast$}{*}}]{msg,  }\item[{\mbox{\hyperlink{structMessage}{Message}} \texorpdfstring{$\ast$}{*}}]{acq }\end{DoxyParamCaption})}
+
+\Hypertarget{server_8c_a40998acbd6f16331937a352713d9a8b6}\label{server_8c_a40998acbd6f16331937a352713d9a8b6} 
+\index{server.c@{server.c}!gen\_negative\_acq\_from\_msg@{gen\_negative\_acq\_from\_msg}}
+\index{gen\_negative\_acq\_from\_msg@{gen\_negative\_acq\_from\_msg}!server.c@{server.c}}
+\doxysubsubsection{\texorpdfstring{gen\_negative\_acq\_from\_msg()}{gen\_negative\_acq\_from\_msg()}}
+{\footnotesize\ttfamily void gen\+\_\+negative\+\_\+acq\+\_\+from\+\_\+msg (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{structMessage}{Message}} \texorpdfstring{$\ast$}{*}}]{msg,  }\item[{\mbox{\hyperlink{structMessage}{Message}} \texorpdfstring{$\ast$}{*}}]{acq }\end{DoxyParamCaption})}
+
+\Hypertarget{server_8c_a28fccaeccd125072443135f40a2debcd}\label{server_8c_a28fccaeccd125072443135f40a2debcd} 
+\index{server.c@{server.c}!on\_msg\_received@{on\_msg\_received}}
+\index{on\_msg\_received@{on\_msg\_received}!server.c@{server.c}}
+\doxysubsubsection{\texorpdfstring{on\_msg\_received()}{on\_msg\_received()}}
+{\footnotesize\ttfamily void on\+\_\+msg\+\_\+received (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{structTcpConnection}{Tcp\+Connection}} \texorpdfstring{$\ast$}{*}}]{con,  }\item[{\mbox{\hyperlink{tcp__connection_8h_a8dc8083897335125630f1af5dafd5831}{SOCKET}}}]{sock,  }\item[{\mbox{\hyperlink{structMessage}{Message}} \texorpdfstring{$\ast$}{*}}]{msg,  }\item[{size\+\_\+t}]{msg\+\_\+length,  }\item[{void \texorpdfstring{$\ast$}{*}}]{custom\+\_\+args }\end{DoxyParamCaption})}
+
+\Hypertarget{server_8c_aefac48b3cdf2ef3b3dd39fd182ba8b60}\label{server_8c_aefac48b3cdf2ef3b3dd39fd182ba8b60} 
+\index{server.c@{server.c}!on\_stdin\_server@{on\_stdin\_server}}
+\index{on\_stdin\_server@{on\_stdin\_server}!server.c@{server.c}}
+\doxysubsubsection{\texorpdfstring{on\_stdin\_server()}{on\_stdin\_server()}}
+{\footnotesize\ttfamily void on\+\_\+stdin\+\_\+server (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{structTcpConnection}{Tcp\+Connection}} \texorpdfstring{$\ast$}{*}}]{con,  }\item[{char}]{msg\mbox{[}\+T\+\_\+\+MSG\+\_\+\+MAX\mbox{]},  }\item[{size\+\_\+t}]{msg\+\_\+len,  }\item[{void \texorpdfstring{$\ast$}{*}}]{custom\+\_\+args }\end{DoxyParamCaption})}
+
+\Hypertarget{server_8c_aed8fa1cc7c0043af62d666b5bc5fc15b}\label{server_8c_aed8fa1cc7c0043af62d666b5bc5fc15b} 
+\index{server.c@{server.c}!init\_server\_state@{init\_server\_state}}
+\index{init\_server\_state@{init\_server\_state}!server.c@{server.c}}
+\doxysubsubsection{\texorpdfstring{init\_server\_state()}{init\_server\_state()}}
+{\footnotesize\ttfamily void init\+\_\+server\+\_\+state (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{structServerState}{Server\+State}} \texorpdfstring{$\ast$}{*}}]{sstate }\end{DoxyParamCaption})}
+
+\Hypertarget{server_8c_a1431ddc6ec12d0ec9fbbb92d4d2f63de}\label{server_8c_a1431ddc6ec12d0ec9fbbb92d4d2f63de} 
+\index{server.c@{server.c}!free\_server\_state@{free\_server\_state}}
+\index{free\_server\_state@{free\_server\_state}!server.c@{server.c}}
+\doxysubsubsection{\texorpdfstring{free\_server\_state()}{free\_server\_state()}}
+{\footnotesize\ttfamily void free\+\_\+server\+\_\+state (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{structServerState}{Server\+State}} \texorpdfstring{$\ast$}{*}}]{sstate }\end{DoxyParamCaption})}
+
+\Hypertarget{server_8c_a3c04138a5bfe5d72780bb7e82a18e627}\label{server_8c_a3c04138a5bfe5d72780bb7e82a18e627} 
+\index{server.c@{server.c}!main@{main}}
+\index{main@{main}!server.c@{server.c}}
+\doxysubsubsection{\texorpdfstring{main()}{main()}}
+{\footnotesize\ttfamily int main (\begin{DoxyParamCaption}\item[{int}]{argc,  }\item[{char \texorpdfstring{$\ast$}{*}\texorpdfstring{$\ast$}{*}}]{argv }\end{DoxyParamCaption})}
+

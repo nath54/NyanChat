@@ -1,0 +1,119 @@
+\doxysection{src/tcp\+\_\+connection.c File Reference}
+\hypertarget{tcp__connection_8c}{}\label{tcp__connection_8c}\index{src/tcp\_connection.c@{src/tcp\_connection.c}}
+{\ttfamily \#include $<$sys/types.\+h$>$}\newline
+{\ttfamily \#include $<$sys/socket.\+h$>$}\newline
+{\ttfamily \#include $<$sys/poll.\+h$>$}\newline
+{\ttfamily \#include $<$sys/errno.\+h$>$}\newline
+{\ttfamily \#include $<$sys/ioctl.\+h$>$}\newline
+{\ttfamily \#include $<$sys/time.\+h$>$}\newline
+{\ttfamily \#include $<$netinet/in.\+h$>$}\newline
+{\ttfamily \#include $<$arpa/inet.\+h$>$}\newline
+{\ttfamily \#include $<$netdb.\+h$>$}\newline
+{\ttfamily \#include $<$stdio.\+h$>$}\newline
+{\ttfamily \#include $<$string.\+h$>$}\newline
+{\ttfamily \#include $<$stdlib.\+h$>$}\newline
+{\ttfamily \#include $<$stdbool.\+h$>$}\newline
+{\ttfamily \#include $<$unistd.\+h$>$}\newline
+{\ttfamily \#include "{}tcp\+\_\+connection.\+h"{}}\newline
+\doxysubsubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+void \mbox{\hyperlink{tcp__connection_8c_a0ffd9c4334ae52c203e8bbc9cc433a2d}{init\+\_\+empty\+\_\+message}} (\mbox{\hyperlink{structMessage}{Message}} \texorpdfstring{$\ast$}{*}msg)
+\item 
+void \mbox{\hyperlink{tcp__connection_8c_aeb50092e9f24b5b60c75eb591bc2ef29}{tcp\+\_\+connection\+\_\+server\+\_\+init}} (\mbox{\hyperlink{structTcpConnection}{Tcp\+Connection}} \texorpdfstring{$\ast$}{*}con, char address\+\_\+receptor\mbox{[}$\,$\mbox{]}, int port\+\_\+receptor, int nb\+\_\+max\+\_\+connections\+\_\+server, int timeout\+\_\+server)
+\item 
+void \mbox{\hyperlink{tcp__connection_8c_aec14d667e4408ada6785d6e04141d0ce}{tcp\+\_\+connection\+\_\+client\+\_\+init}} (\mbox{\hyperlink{structTcpConnection}{Tcp\+Connection}} \texorpdfstring{$\ast$}{*}con, char \texorpdfstring{$\ast$}{*}ip\+\_\+to\+\_\+connect, int port\+\_\+to\+\_\+connect, int timeout\+\_\+client)
+\item 
+bool \mbox{\hyperlink{tcp__connection_8c_ab701c74eaa7f6268643ed669580f3c3c}{test\+\_\+poll\+\_\+errors}} (int rc)
+\item 
+void \mbox{\hyperlink{tcp__connection_8c_aaeb556d977d890a52a2bc40d54adb255}{new\+\_\+clients\+\_\+acceptation}} (\mbox{\hyperlink{structTcpConnection}{Tcp\+Connection}} \texorpdfstring{$\ast$}{*}con)
+\item 
+void \mbox{\hyperlink{tcp__connection_8c_a06b9cbb25bc9299d646518f0ba293a82}{compress\+\_\+poll\+\_\+socket\+\_\+array}} (\mbox{\hyperlink{structTcpConnection}{Tcp\+Connection}} \texorpdfstring{$\ast$}{*}con, int current\+\_\+nb\+\_\+poll\+\_\+socks)
+\item 
+void \mbox{\hyperlink{tcp__connection_8c_a514e3c275e59618848ad65c493cd9d16}{read\+\_\+poll\+\_\+socket}} (\mbox{\hyperlink{structTcpConnection}{Tcp\+Connection}} \texorpdfstring{$\ast$}{*}con, int id\+\_\+poll, \mbox{\hyperlink{tcp__connection_8h_a7ec2c7dd8d234b2a9fa034a7cb4c3d38}{fn\+\_\+on\+\_\+msg}} on\+\_\+msg, void \texorpdfstring{$\ast$}{*}on\+\_\+msg\+\_\+custom\+\_\+args)
+\item 
+void \mbox{\hyperlink{tcp__connection_8c_a7923f950d4689a93ac87312b37a93634}{tcp\+\_\+connection\+\_\+mainloop}} (\mbox{\hyperlink{structTcpConnection}{Tcp\+Connection}} \texorpdfstring{$\ast$}{*}con, \mbox{\hyperlink{tcp__connection_8h_a7ec2c7dd8d234b2a9fa034a7cb4c3d38}{fn\+\_\+on\+\_\+msg}} on\+\_\+msg, void \texorpdfstring{$\ast$}{*}on\+\_\+msg\+\_\+custom\+\_\+args, \mbox{\hyperlink{tcp__connection_8h_a6b90802b684f4c6e4a6460305dea9246}{fn\+\_\+on\+\_\+stdin}} on\+\_\+stdin, void \texorpdfstring{$\ast$}{*}on\+\_\+stdin\+\_\+custom\+\_\+args)
+\item 
+void \mbox{\hyperlink{tcp__connection_8c_afb24e5b689cf814a58b31d3d939cff7f}{tcp\+\_\+connection\+\_\+close}} (\mbox{\hyperlink{structTcpConnection}{Tcp\+Connection}} \texorpdfstring{$\ast$}{*}con)
+\item 
+void \mbox{\hyperlink{tcp__connection_8c_a66b797e788eb983313a7cfd420de7bca}{tcp\+\_\+connection\+\_\+send\+\_\+message}} (\mbox{\hyperlink{structTcpConnection}{Tcp\+Connection}} \texorpdfstring{$\ast$}{*}con, \mbox{\hyperlink{tcp__connection_8h_a8dc8083897335125630f1af5dafd5831}{SOCKET}} sock, char buffer\mbox{[}\mbox{\hyperlink{tcp__connection_8h_ac256122478c560cbacbd2cfac158579e}{T\+\_\+\+MSG\+\_\+\+MAX}}\mbox{]}, int message\+\_\+size, int flags, char pseudo\+\_\+src\mbox{[}\mbox{\hyperlink{tcp__connection_8h_aeb818ba2320ac54338775af361c645b9}{T\+\_\+\+NOM\+\_\+\+MAX}}\mbox{]}, int type\+\_\+destination, char destination\mbox{[}\mbox{\hyperlink{tcp__connection_8h_aeb818ba2320ac54338775af361c645b9}{T\+\_\+\+NOM\+\_\+\+MAX}}\mbox{]})
+\item 
+void \mbox{\hyperlink{tcp__connection_8c_ad6d140f3bb4888feb1ca1473cb82fec8}{tcp\+\_\+connection\+\_\+send\+\_\+struct\+\_\+message}} (\mbox{\hyperlink{structTcpConnection}{Tcp\+Connection}} \texorpdfstring{$\ast$}{*}con, \mbox{\hyperlink{tcp__connection_8h_a8dc8083897335125630f1af5dafd5831}{SOCKET}} sock, \mbox{\hyperlink{structMessage}{Message}} \texorpdfstring{$\ast$}{*}msg)
+\item 
+void \mbox{\hyperlink{tcp__connection_8c_a29cb90b28c76fead4c2e638dd8e67f14}{copy\+\_\+message}} (\mbox{\hyperlink{structMessage}{Message}} \texorpdfstring{$\ast$}{*}dest, \mbox{\hyperlink{structMessage}{Message}} \texorpdfstring{$\ast$}{*}src)
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Function Documentation}
+\Hypertarget{tcp__connection_8c_a0ffd9c4334ae52c203e8bbc9cc433a2d}\label{tcp__connection_8c_a0ffd9c4334ae52c203e8bbc9cc433a2d} 
+\index{tcp\_connection.c@{tcp\_connection.c}!init\_empty\_message@{init\_empty\_message}}
+\index{init\_empty\_message@{init\_empty\_message}!tcp\_connection.c@{tcp\_connection.c}}
+\doxysubsubsection{\texorpdfstring{init\_empty\_message()}{init\_empty\_message()}}
+{\footnotesize\ttfamily void init\+\_\+empty\+\_\+message (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{structMessage}{Message}} \texorpdfstring{$\ast$}{*}}]{msg }\end{DoxyParamCaption})}
+
+\Hypertarget{tcp__connection_8c_aeb50092e9f24b5b60c75eb591bc2ef29}\label{tcp__connection_8c_aeb50092e9f24b5b60c75eb591bc2ef29} 
+\index{tcp\_connection.c@{tcp\_connection.c}!tcp\_connection\_server\_init@{tcp\_connection\_server\_init}}
+\index{tcp\_connection\_server\_init@{tcp\_connection\_server\_init}!tcp\_connection.c@{tcp\_connection.c}}
+\doxysubsubsection{\texorpdfstring{tcp\_connection\_server\_init()}{tcp\_connection\_server\_init()}}
+{\footnotesize\ttfamily void tcp\+\_\+connection\+\_\+server\+\_\+init (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{structTcpConnection}{Tcp\+Connection}} \texorpdfstring{$\ast$}{*}}]{con,  }\item[{char}]{address\+\_\+receptor\mbox{[}$\,$\mbox{]},  }\item[{int}]{port\+\_\+receptor,  }\item[{int}]{nb\+\_\+max\+\_\+connections\+\_\+server,  }\item[{int}]{timeout\+\_\+server }\end{DoxyParamCaption})}
+
+\Hypertarget{tcp__connection_8c_aec14d667e4408ada6785d6e04141d0ce}\label{tcp__connection_8c_aec14d667e4408ada6785d6e04141d0ce} 
+\index{tcp\_connection.c@{tcp\_connection.c}!tcp\_connection\_client\_init@{tcp\_connection\_client\_init}}
+\index{tcp\_connection\_client\_init@{tcp\_connection\_client\_init}!tcp\_connection.c@{tcp\_connection.c}}
+\doxysubsubsection{\texorpdfstring{tcp\_connection\_client\_init()}{tcp\_connection\_client\_init()}}
+{\footnotesize\ttfamily void tcp\+\_\+connection\+\_\+client\+\_\+init (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{structTcpConnection}{Tcp\+Connection}} \texorpdfstring{$\ast$}{*}}]{con,  }\item[{char \texorpdfstring{$\ast$}{*}}]{ip\+\_\+to\+\_\+connect,  }\item[{int}]{port\+\_\+to\+\_\+connect,  }\item[{int}]{timeout\+\_\+client }\end{DoxyParamCaption})}
+
+\Hypertarget{tcp__connection_8c_ab701c74eaa7f6268643ed669580f3c3c}\label{tcp__connection_8c_ab701c74eaa7f6268643ed669580f3c3c} 
+\index{tcp\_connection.c@{tcp\_connection.c}!test\_poll\_errors@{test\_poll\_errors}}
+\index{test\_poll\_errors@{test\_poll\_errors}!tcp\_connection.c@{tcp\_connection.c}}
+\doxysubsubsection{\texorpdfstring{test\_poll\_errors()}{test\_poll\_errors()}}
+{\footnotesize\ttfamily bool test\+\_\+poll\+\_\+errors (\begin{DoxyParamCaption}\item[{int}]{rc }\end{DoxyParamCaption})}
+
+\Hypertarget{tcp__connection_8c_aaeb556d977d890a52a2bc40d54adb255}\label{tcp__connection_8c_aaeb556d977d890a52a2bc40d54adb255} 
+\index{tcp\_connection.c@{tcp\_connection.c}!new\_clients\_acceptation@{new\_clients\_acceptation}}
+\index{new\_clients\_acceptation@{new\_clients\_acceptation}!tcp\_connection.c@{tcp\_connection.c}}
+\doxysubsubsection{\texorpdfstring{new\_clients\_acceptation()}{new\_clients\_acceptation()}}
+{\footnotesize\ttfamily void new\+\_\+clients\+\_\+acceptation (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{structTcpConnection}{Tcp\+Connection}} \texorpdfstring{$\ast$}{*}}]{con }\end{DoxyParamCaption})}
+
+\Hypertarget{tcp__connection_8c_a06b9cbb25bc9299d646518f0ba293a82}\label{tcp__connection_8c_a06b9cbb25bc9299d646518f0ba293a82} 
+\index{tcp\_connection.c@{tcp\_connection.c}!compress\_poll\_socket\_array@{compress\_poll\_socket\_array}}
+\index{compress\_poll\_socket\_array@{compress\_poll\_socket\_array}!tcp\_connection.c@{tcp\_connection.c}}
+\doxysubsubsection{\texorpdfstring{compress\_poll\_socket\_array()}{compress\_poll\_socket\_array()}}
+{\footnotesize\ttfamily void compress\+\_\+poll\+\_\+socket\+\_\+array (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{structTcpConnection}{Tcp\+Connection}} \texorpdfstring{$\ast$}{*}}]{con,  }\item[{int}]{current\+\_\+nb\+\_\+poll\+\_\+socks }\end{DoxyParamCaption})}
+
+\Hypertarget{tcp__connection_8c_a514e3c275e59618848ad65c493cd9d16}\label{tcp__connection_8c_a514e3c275e59618848ad65c493cd9d16} 
+\index{tcp\_connection.c@{tcp\_connection.c}!read\_poll\_socket@{read\_poll\_socket}}
+\index{read\_poll\_socket@{read\_poll\_socket}!tcp\_connection.c@{tcp\_connection.c}}
+\doxysubsubsection{\texorpdfstring{read\_poll\_socket()}{read\_poll\_socket()}}
+{\footnotesize\ttfamily void read\+\_\+poll\+\_\+socket (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{structTcpConnection}{Tcp\+Connection}} \texorpdfstring{$\ast$}{*}}]{con,  }\item[{int}]{id\+\_\+poll,  }\item[{\mbox{\hyperlink{tcp__connection_8h_a7ec2c7dd8d234b2a9fa034a7cb4c3d38}{fn\+\_\+on\+\_\+msg}}}]{on\+\_\+msg,  }\item[{void \texorpdfstring{$\ast$}{*}}]{on\+\_\+msg\+\_\+custom\+\_\+args }\end{DoxyParamCaption})}
+
+\Hypertarget{tcp__connection_8c_a7923f950d4689a93ac87312b37a93634}\label{tcp__connection_8c_a7923f950d4689a93ac87312b37a93634} 
+\index{tcp\_connection.c@{tcp\_connection.c}!tcp\_connection\_mainloop@{tcp\_connection\_mainloop}}
+\index{tcp\_connection\_mainloop@{tcp\_connection\_mainloop}!tcp\_connection.c@{tcp\_connection.c}}
+\doxysubsubsection{\texorpdfstring{tcp\_connection\_mainloop()}{tcp\_connection\_mainloop()}}
+{\footnotesize\ttfamily void tcp\+\_\+connection\+\_\+mainloop (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{structTcpConnection}{Tcp\+Connection}} \texorpdfstring{$\ast$}{*}}]{con,  }\item[{\mbox{\hyperlink{tcp__connection_8h_a7ec2c7dd8d234b2a9fa034a7cb4c3d38}{fn\+\_\+on\+\_\+msg}}}]{on\+\_\+msg,  }\item[{void \texorpdfstring{$\ast$}{*}}]{on\+\_\+msg\+\_\+custom\+\_\+args,  }\item[{\mbox{\hyperlink{tcp__connection_8h_a6b90802b684f4c6e4a6460305dea9246}{fn\+\_\+on\+\_\+stdin}}}]{on\+\_\+stdin,  }\item[{void \texorpdfstring{$\ast$}{*}}]{on\+\_\+stdin\+\_\+custom\+\_\+args }\end{DoxyParamCaption})}
+
+\Hypertarget{tcp__connection_8c_afb24e5b689cf814a58b31d3d939cff7f}\label{tcp__connection_8c_afb24e5b689cf814a58b31d3d939cff7f} 
+\index{tcp\_connection.c@{tcp\_connection.c}!tcp\_connection\_close@{tcp\_connection\_close}}
+\index{tcp\_connection\_close@{tcp\_connection\_close}!tcp\_connection.c@{tcp\_connection.c}}
+\doxysubsubsection{\texorpdfstring{tcp\_connection\_close()}{tcp\_connection\_close()}}
+{\footnotesize\ttfamily void tcp\+\_\+connection\+\_\+close (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{structTcpConnection}{Tcp\+Connection}} \texorpdfstring{$\ast$}{*}}]{con }\end{DoxyParamCaption})}
+
+\Hypertarget{tcp__connection_8c_a66b797e788eb983313a7cfd420de7bca}\label{tcp__connection_8c_a66b797e788eb983313a7cfd420de7bca} 
+\index{tcp\_connection.c@{tcp\_connection.c}!tcp\_connection\_send\_message@{tcp\_connection\_send\_message}}
+\index{tcp\_connection\_send\_message@{tcp\_connection\_send\_message}!tcp\_connection.c@{tcp\_connection.c}}
+\doxysubsubsection{\texorpdfstring{tcp\_connection\_send\_message()}{tcp\_connection\_send\_message()}}
+{\footnotesize\ttfamily void tcp\+\_\+connection\+\_\+send\+\_\+message (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{structTcpConnection}{Tcp\+Connection}} \texorpdfstring{$\ast$}{*}}]{con,  }\item[{\mbox{\hyperlink{tcp__connection_8h_a8dc8083897335125630f1af5dafd5831}{SOCKET}}}]{sock,  }\item[{char}]{buffer\mbox{[}\+T\+\_\+\+MSG\+\_\+\+MAX\mbox{]},  }\item[{int}]{message\+\_\+size,  }\item[{int}]{flags,  }\item[{char}]{pseudo\+\_\+src\mbox{[}\+T\+\_\+\+NOM\+\_\+\+MAX\mbox{]},  }\item[{int}]{type\+\_\+destination,  }\item[{char}]{destination\mbox{[}\+T\+\_\+\+NOM\+\_\+\+MAX\mbox{]} }\end{DoxyParamCaption})}
+
+\Hypertarget{tcp__connection_8c_ad6d140f3bb4888feb1ca1473cb82fec8}\label{tcp__connection_8c_ad6d140f3bb4888feb1ca1473cb82fec8} 
+\index{tcp\_connection.c@{tcp\_connection.c}!tcp\_connection\_send\_struct\_message@{tcp\_connection\_send\_struct\_message}}
+\index{tcp\_connection\_send\_struct\_message@{tcp\_connection\_send\_struct\_message}!tcp\_connection.c@{tcp\_connection.c}}
+\doxysubsubsection{\texorpdfstring{tcp\_connection\_send\_struct\_message()}{tcp\_connection\_send\_struct\_message()}}
+{\footnotesize\ttfamily void tcp\+\_\+connection\+\_\+send\+\_\+struct\+\_\+message (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{structTcpConnection}{Tcp\+Connection}} \texorpdfstring{$\ast$}{*}}]{con,  }\item[{\mbox{\hyperlink{tcp__connection_8h_a8dc8083897335125630f1af5dafd5831}{SOCKET}}}]{sock,  }\item[{\mbox{\hyperlink{structMessage}{Message}} \texorpdfstring{$\ast$}{*}}]{msg }\end{DoxyParamCaption})}
+
+\Hypertarget{tcp__connection_8c_a29cb90b28c76fead4c2e638dd8e67f14}\label{tcp__connection_8c_a29cb90b28c76fead4c2e638dd8e67f14} 
+\index{tcp\_connection.c@{tcp\_connection.c}!copy\_message@{copy\_message}}
+\index{copy\_message@{copy\_message}!tcp\_connection.c@{tcp\_connection.c}}
+\doxysubsubsection{\texorpdfstring{copy\_message()}{copy\_message()}}
+{\footnotesize\ttfamily void copy\+\_\+message (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{structMessage}{Message}} \texorpdfstring{$\ast$}{*}}]{dest,  }\item[{\mbox{\hyperlink{structMessage}{Message}} \texorpdfstring{$\ast$}{*}}]{src }\end{DoxyParamCaption})}
+

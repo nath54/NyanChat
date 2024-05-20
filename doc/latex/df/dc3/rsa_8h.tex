@@ -1,0 +1,65 @@
+\doxysection{include/rsa.h File Reference}
+\hypertarget{rsa_8h}{}\label{rsa_8h}\index{include/rsa.h@{include/rsa.h}}
+{\ttfamily \#include $<$stdio.\+h$>$}\newline
+{\ttfamily \#include $<$openssl/err.\+h$>$}\newline
+{\ttfamily \#include $<$openssl/pem.\+h$>$}\newline
+{\ttfamily \#include $<$openssl/evp.\+h$>$}\newline
+{\ttfamily \#include $<$openssl/rsa.\+h$>$}\newline
+\doxysubsubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+int \mbox{\hyperlink{rsa_8h_adc80aa5d11c6ed8555d76e0a90ef8070}{generate\+\_\+keypair}} (const char \texorpdfstring{$\ast$}{*}private\+\_\+key\+\_\+file, const char \texorpdfstring{$\ast$}{*}public\+\_\+key\+\_\+file, int key\+\_\+size)
+\item 
+int \mbox{\hyperlink{rsa_8h_a025de6e2bbd099a2a75174f2937203ac}{encrypt\+\_\+message}} (const char \texorpdfstring{$\ast$}{*}message, size\+\_\+t message\+\_\+len, FILE \texorpdfstring{$\ast$}{*}public\+\_\+key\+\_\+file, unsigned char \texorpdfstring{$\ast$}{*}\texorpdfstring{$\ast$}{*}encrypted\+\_\+message, size\+\_\+t \texorpdfstring{$\ast$}{*}encrypted\+\_\+len)
+\item 
+int \mbox{\hyperlink{rsa_8h_a15f48bc997e2eedc2fae07805c8620f0}{decrypt\+\_\+message}} (unsigned char \texorpdfstring{$\ast$}{*}encrypted\+\_\+message, size\+\_\+t encrypted\+\_\+len, FILE \texorpdfstring{$\ast$}{*}private\+\_\+key\+\_\+file, unsigned char \texorpdfstring{$\ast$}{*}\texorpdfstring{$\ast$}{*}decrypted\+\_\+message, size\+\_\+t \texorpdfstring{$\ast$}{*}decrypted\+\_\+len)
+\item 
+void \mbox{\hyperlink{rsa_8h_a2098d9ed172acae29ce9c0151eae272f}{load\+\_\+rsa\+\_\+key}} (char \texorpdfstring{$\ast$}{*}rsa\+\_\+key, char \texorpdfstring{$\ast$}{*}dest, size\+\_\+t t\+\_\+max, uint32\+\_\+t \texorpdfstring{$\ast$}{*}t\+\_\+read)
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Function Documentation}
+\Hypertarget{rsa_8h_adc80aa5d11c6ed8555d76e0a90ef8070}\label{rsa_8h_adc80aa5d11c6ed8555d76e0a90ef8070} 
+\index{rsa.h@{rsa.h}!generate\_keypair@{generate\_keypair}}
+\index{generate\_keypair@{generate\_keypair}!rsa.h@{rsa.h}}
+\doxysubsubsection{\texorpdfstring{generate\_keypair()}{generate\_keypair()}}
+{\footnotesize\ttfamily int generate\+\_\+keypair (\begin{DoxyParamCaption}\item[{const char \texorpdfstring{$\ast$}{*}}]{private\+\_\+key\+\_\+file,  }\item[{const char \texorpdfstring{$\ast$}{*}}]{public\+\_\+key\+\_\+file,  }\item[{int}]{key\+\_\+size }\end{DoxyParamCaption})}
+
+Generates an RSA key pair and saves the private and public keys to the specified files.
+
+
+\begin{DoxyParams}{Parameters}
+{\em private\+\_\+key\+\_\+file} & The file to save the private key. \\
+\hline
+{\em public\+\_\+key\+\_\+file} & The file to save the public key. \\
+\hline
+{\em key\+\_\+size} & The size of the RSA key in bits.\\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+1 on success, 0 on failure.
+\end{DoxyReturn}
+This function generates an RSA key pair using the Open\+SSL EVP API. It creates an EVP\+\_\+\+PKEY context, sets the RSA key size, and generates the key pair. The keys are then written to the specified files in PEM format. All resources are cleaned up before returning.
+
+Example use\+:
+
+\begin{quote}
+generate\+\_\+keypair("{}private.\+pem"{}, "{}public.\+pem"{}, 2048); \end{quote}
+\Hypertarget{rsa_8h_a025de6e2bbd099a2a75174f2937203ac}\label{rsa_8h_a025de6e2bbd099a2a75174f2937203ac} 
+\index{rsa.h@{rsa.h}!encrypt\_message@{encrypt\_message}}
+\index{encrypt\_message@{encrypt\_message}!rsa.h@{rsa.h}}
+\doxysubsubsection{\texorpdfstring{encrypt\_message()}{encrypt\_message()}}
+{\footnotesize\ttfamily int encrypt\+\_\+message (\begin{DoxyParamCaption}\item[{const char \texorpdfstring{$\ast$}{*}}]{message,  }\item[{size\+\_\+t}]{message\+\_\+len,  }\item[{FILE \texorpdfstring{$\ast$}{*}}]{public\+\_\+key\+\_\+file,  }\item[{unsigned char \texorpdfstring{$\ast$}{*}\texorpdfstring{$\ast$}{*}}]{encrypted\+\_\+message,  }\item[{size\+\_\+t \texorpdfstring{$\ast$}{*}}]{encrypted\+\_\+len }\end{DoxyParamCaption})}
+
+\Hypertarget{rsa_8h_a15f48bc997e2eedc2fae07805c8620f0}\label{rsa_8h_a15f48bc997e2eedc2fae07805c8620f0} 
+\index{rsa.h@{rsa.h}!decrypt\_message@{decrypt\_message}}
+\index{decrypt\_message@{decrypt\_message}!rsa.h@{rsa.h}}
+\doxysubsubsection{\texorpdfstring{decrypt\_message()}{decrypt\_message()}}
+{\footnotesize\ttfamily int decrypt\+\_\+message (\begin{DoxyParamCaption}\item[{unsigned char \texorpdfstring{$\ast$}{*}}]{encrypted\+\_\+message,  }\item[{size\+\_\+t}]{encrypted\+\_\+len,  }\item[{FILE \texorpdfstring{$\ast$}{*}}]{private\+\_\+key\+\_\+file,  }\item[{unsigned char \texorpdfstring{$\ast$}{*}\texorpdfstring{$\ast$}{*}}]{decrypted\+\_\+message,  }\item[{size\+\_\+t \texorpdfstring{$\ast$}{*}}]{decrypted\+\_\+len }\end{DoxyParamCaption})}
+
+\Hypertarget{rsa_8h_a2098d9ed172acae29ce9c0151eae272f}\label{rsa_8h_a2098d9ed172acae29ce9c0151eae272f} 
+\index{rsa.h@{rsa.h}!load\_rsa\_key@{load\_rsa\_key}}
+\index{load\_rsa\_key@{load\_rsa\_key}!rsa.h@{rsa.h}}
+\doxysubsubsection{\texorpdfstring{load\_rsa\_key()}{load\_rsa\_key()}}
+{\footnotesize\ttfamily void load\+\_\+rsa\+\_\+key (\begin{DoxyParamCaption}\item[{char \texorpdfstring{$\ast$}{*}}]{rsa\+\_\+key,  }\item[{char \texorpdfstring{$\ast$}{*}}]{dest,  }\item[{size\+\_\+t}]{t\+\_\+max,  }\item[{uint32\+\_\+t \texorpdfstring{$\ast$}{*}}]{t\+\_\+read }\end{DoxyParamCaption})}
+

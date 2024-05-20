@@ -1,0 +1,103 @@
+\doxysection{src/rsa.c File Reference}
+\hypertarget{rsa_8c}{}\label{rsa_8c}\index{src/rsa.c@{src/rsa.c}}
+{\ttfamily \#include $<$stdio.\+h$>$}\newline
+{\ttfamily \#include $<$stdlib.\+h$>$}\newline
+{\ttfamily \#include $<$openssl/err.\+h$>$}\newline
+{\ttfamily \#include $<$openssl/pem.\+h$>$}\newline
+{\ttfamily \#include $<$openssl/evp.\+h$>$}\newline
+{\ttfamily \#include $<$openssl/rsa.\+h$>$}\newline
+{\ttfamily \#include $<$openssl/bn.\+h$>$}\newline
+\doxysubsubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+int \mbox{\hyperlink{rsa_8c_adc80aa5d11c6ed8555d76e0a90ef8070}{generate\+\_\+keypair}} (const char \texorpdfstring{$\ast$}{*}private\+\_\+key\+\_\+file, const char \texorpdfstring{$\ast$}{*}public\+\_\+key\+\_\+file, int key\+\_\+size)
+\item 
+int \mbox{\hyperlink{rsa_8c_a5e845b6ac2572906fcb58f344136e30e}{encrypt\+\_\+message}} (const char \texorpdfstring{$\ast$}{*}message, size\+\_\+t message\+\_\+len, const char \texorpdfstring{$\ast$}{*}public\+\_\+key\+\_\+file, unsigned char \texorpdfstring{$\ast$}{*}\texorpdfstring{$\ast$}{*}encrypted\+\_\+message, size\+\_\+t \texorpdfstring{$\ast$}{*}encrypted\+\_\+len)
+\item 
+int \mbox{\hyperlink{rsa_8c_a2f6cd92ae72bd8b71c89354051706f70}{decrypt\+\_\+message}} (const unsigned char \texorpdfstring{$\ast$}{*}encrypted\+\_\+message, size\+\_\+t encrypted\+\_\+len, const char \texorpdfstring{$\ast$}{*}private\+\_\+key\+\_\+file, unsigned char \texorpdfstring{$\ast$}{*}\texorpdfstring{$\ast$}{*}decrypted\+\_\+message, size\+\_\+t \texorpdfstring{$\ast$}{*}decrypted\+\_\+len)
+\item 
+void \mbox{\hyperlink{rsa_8c_a2098d9ed172acae29ce9c0151eae272f}{load\+\_\+rsa\+\_\+key}} (char \texorpdfstring{$\ast$}{*}rsa\+\_\+key, char \texorpdfstring{$\ast$}{*}dest, size\+\_\+t t\+\_\+max, uint32\+\_\+t \texorpdfstring{$\ast$}{*}t\+\_\+read)
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Function Documentation}
+\Hypertarget{rsa_8c_adc80aa5d11c6ed8555d76e0a90ef8070}\label{rsa_8c_adc80aa5d11c6ed8555d76e0a90ef8070} 
+\index{rsa.c@{rsa.c}!generate\_keypair@{generate\_keypair}}
+\index{generate\_keypair@{generate\_keypair}!rsa.c@{rsa.c}}
+\doxysubsubsection{\texorpdfstring{generate\_keypair()}{generate\_keypair()}}
+{\footnotesize\ttfamily int generate\+\_\+keypair (\begin{DoxyParamCaption}\item[{const char \texorpdfstring{$\ast$}{*}}]{private\+\_\+key\+\_\+file,  }\item[{const char \texorpdfstring{$\ast$}{*}}]{public\+\_\+key\+\_\+file,  }\item[{int}]{key\+\_\+size }\end{DoxyParamCaption})}
+
+Generates an RSA key pair and saves the private and public keys to the specified files.
+
+
+\begin{DoxyParams}{Parameters}
+{\em private\+\_\+key\+\_\+file} & The file to save the private key. \\
+\hline
+{\em public\+\_\+key\+\_\+file} & The file to save the public key. \\
+\hline
+{\em key\+\_\+size} & The size of the RSA key in bits.\\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+1 on success, 0 on failure.
+\end{DoxyReturn}
+This function generates an RSA key pair using the Open\+SSL EVP API. It creates an EVP\+\_\+\+PKEY context, sets the RSA key size, and generates the key pair. The keys are then written to the specified files in PEM format. All resources are cleaned up before returning.
+
+Example use\+:
+
+\begin{quote}
+generate\+\_\+keypair("{}private.\+pem"{}, "{}public.\+pem"{}, 2048); \end{quote}
+\Hypertarget{rsa_8c_a5e845b6ac2572906fcb58f344136e30e}\label{rsa_8c_a5e845b6ac2572906fcb58f344136e30e} 
+\index{rsa.c@{rsa.c}!encrypt\_message@{encrypt\_message}}
+\index{encrypt\_message@{encrypt\_message}!rsa.c@{rsa.c}}
+\doxysubsubsection{\texorpdfstring{encrypt\_message()}{encrypt\_message()}}
+{\footnotesize\ttfamily int encrypt\+\_\+message (\begin{DoxyParamCaption}\item[{const char \texorpdfstring{$\ast$}{*}}]{message,  }\item[{size\+\_\+t}]{message\+\_\+len,  }\item[{const char \texorpdfstring{$\ast$}{*}}]{public\+\_\+key\+\_\+file,  }\item[{unsigned char \texorpdfstring{$\ast$}{*}\texorpdfstring{$\ast$}{*}}]{encrypted\+\_\+message,  }\item[{size\+\_\+t \texorpdfstring{$\ast$}{*}}]{encrypted\+\_\+len }\end{DoxyParamCaption})}
+
+Encrypts a message using a public key from the specified file.
+
+
+\begin{DoxyParams}{Parameters}
+{\em message} & The message to encrypt. \\
+\hline
+{\em message\+\_\+len} & The length of the message. \\
+\hline
+{\em public\+\_\+key\+\_\+file} & The file containing the public key in PEM format. \\
+\hline
+{\em encrypted\+\_\+message} & A pointer to hold the encrypted message. The caller must free this buffer. \\
+\hline
+{\em encrypted\+\_\+len} & A pointer to hold the length of the encrypted message.\\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+0 on success, -\/1 on failure.
+\end{DoxyReturn}
+This function reads the public key from a PEM file, initializes an EVP\+\_\+\+PKEY context for encryption, and performs the encryption using RSA with PKCS\#1 v1.\+5 padding. The encrypted message and its length are returned through the output parameters. \Hypertarget{rsa_8c_a2f6cd92ae72bd8b71c89354051706f70}\label{rsa_8c_a2f6cd92ae72bd8b71c89354051706f70} 
+\index{rsa.c@{rsa.c}!decrypt\_message@{decrypt\_message}}
+\index{decrypt\_message@{decrypt\_message}!rsa.c@{rsa.c}}
+\doxysubsubsection{\texorpdfstring{decrypt\_message()}{decrypt\_message()}}
+{\footnotesize\ttfamily int decrypt\+\_\+message (\begin{DoxyParamCaption}\item[{const unsigned char \texorpdfstring{$\ast$}{*}}]{encrypted\+\_\+message,  }\item[{size\+\_\+t}]{encrypted\+\_\+len,  }\item[{const char \texorpdfstring{$\ast$}{*}}]{private\+\_\+key\+\_\+file,  }\item[{unsigned char \texorpdfstring{$\ast$}{*}\texorpdfstring{$\ast$}{*}}]{decrypted\+\_\+message,  }\item[{size\+\_\+t \texorpdfstring{$\ast$}{*}}]{decrypted\+\_\+len }\end{DoxyParamCaption})}
+
+Decrypts a message using a private key from the specified file.
+
+
+\begin{DoxyParams}{Parameters}
+{\em encrypted\+\_\+message} & The encrypted message to decrypt. \\
+\hline
+{\em encrypted\+\_\+len} & The length of the encrypted message. \\
+\hline
+{\em private\+\_\+key\+\_\+file} & The file containing the private key in PEM format. \\
+\hline
+{\em decrypted\+\_\+message} & A pointer to hold the decrypted message. The caller must free this buffer. \\
+\hline
+{\em decrypted\+\_\+len} & A pointer to hold the length of the decrypted message.\\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+0 on success, -\/1 on failure.
+\end{DoxyReturn}
+This function reads the private key from a PEM file, initializes an EVP\+\_\+\+PKEY context for decryption, and performs the decryption using RSA with PKCS\#1 v1.\+5 padding. The decrypted message and its length are returned through the output parameters. \Hypertarget{rsa_8c_a2098d9ed172acae29ce9c0151eae272f}\label{rsa_8c_a2098d9ed172acae29ce9c0151eae272f} 
+\index{rsa.c@{rsa.c}!load\_rsa\_key@{load\_rsa\_key}}
+\index{load\_rsa\_key@{load\_rsa\_key}!rsa.c@{rsa.c}}
+\doxysubsubsection{\texorpdfstring{load\_rsa\_key()}{load\_rsa\_key()}}
+{\footnotesize\ttfamily void load\+\_\+rsa\+\_\+key (\begin{DoxyParamCaption}\item[{char \texorpdfstring{$\ast$}{*}}]{rsa\+\_\+key,  }\item[{char \texorpdfstring{$\ast$}{*}}]{dest,  }\item[{size\+\_\+t}]{t\+\_\+max,  }\item[{uint32\+\_\+t \texorpdfstring{$\ast$}{*}}]{t\+\_\+read }\end{DoxyParamCaption})}
+

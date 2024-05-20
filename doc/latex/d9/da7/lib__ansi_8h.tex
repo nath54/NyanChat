@@ -1,0 +1,183 @@
+\doxysection{include/lib\+\_\+ansi.h File Reference}
+\hypertarget{lib__ansi_8h}{}\label{lib__ansi_8h}\index{include/lib\_ansi.h@{include/lib\_ansi.h}}
+{\ttfamily \#include $<$stdio.\+h$>$}\newline
+{\ttfamily \#include $<$unistd.\+h$>$}\newline
+{\ttfamily \#include $<$stdlib.\+h$>$}\newline
+{\ttfamily \#include $<$sys/ioctl.\+h$>$}\newline
+{\ttfamily \#include $<$string.\+h$>$}\newline
+{\ttfamily \#include "{}lib\+\_\+ansi\+\_\+colors.\+h"{}}\newline
+\doxysubsubsection*{Data Structures}
+\begin{DoxyCompactItemize}
+\item 
+struct \mbox{\hyperlink{structAsciiArt}{Ascii\+Art}}
+\item 
+struct \mbox{\hyperlink{structColorPalette}{Color\+Palette}}
+\item 
+struct \mbox{\hyperlink{structColoredAsciiArt}{Colored\+Ascii\+Art}}
+\end{DoxyCompactItemize}
+\doxysubsubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{structColor}{Color}} \mbox{\hyperlink{lib__ansi_8h_a05d2afeb00339425c95b28586a1c9b24}{cl}} (double r, double g, double b)
+\item 
+\mbox{\hyperlink{structColor}{Color}} \mbox{\hyperlink{lib__ansi_8h_a711c8da31f71afa651800cf310cf56cc}{cl\+\_\+clamp}} (\mbox{\hyperlink{structColor}{Color}} c)
+\item 
+\mbox{\hyperlink{structColor}{Color}} \mbox{\hyperlink{lib__ansi_8h_ab5b19e51458f749447566f492224ef74}{cl\+\_\+add}} (\mbox{\hyperlink{structColor}{Color}} c1, \mbox{\hyperlink{structColor}{Color}} c2)
+\item 
+\mbox{\hyperlink{structColor}{Color}} \mbox{\hyperlink{lib__ansi_8h_a683ea26c5d6a147f36cefc825bac17bf}{cl\+\_\+sub}} (\mbox{\hyperlink{structColor}{Color}} c1, \mbox{\hyperlink{structColor}{Color}} c2)
+\item 
+\mbox{\hyperlink{structColor}{Color}} \mbox{\hyperlink{lib__ansi_8h_a096804f3504b582ef7dad5a8443d3474}{cl\+\_\+divide}} (\mbox{\hyperlink{structColor}{Color}} c1, double d)
+\item 
+\mbox{\hyperlink{structColor}{Color}} \mbox{\hyperlink{lib__ansi_8h_aabd2fec6929a2e7f209dc6c7f6611535}{cl\+\_\+mult}} (\mbox{\hyperlink{structColor}{Color}} c1, double v)
+\item 
+void \mbox{\hyperlink{lib__ansi_8h_a49e0a18659487ca5440e7a25f3f5b914}{set\+\_\+cl\+\_\+fg}} (\mbox{\hyperlink{structColor}{Color}} c)
+\item 
+void \mbox{\hyperlink{lib__ansi_8h_a88ace77ec2007a69f180d88b52d198ab}{set\+\_\+cl\+\_\+bg}} (\mbox{\hyperlink{structColor}{Color}} c)
+\item 
+void \mbox{\hyperlink{lib__ansi_8h_ae85c5a55ff1ef56b59338a90f26ad72b}{set\+\_\+bold}} ()
+\item 
+void \mbox{\hyperlink{lib__ansi_8h_ae87790ab1dd97338b3b303b6029ca2ff}{unset\+\_\+bold}} ()
+\item 
+void \mbox{\hyperlink{lib__ansi_8h_aba363186129d49e097ccce9d07aa49eb}{reset\+\_\+ansi}} ()
+\item 
+void \mbox{\hyperlink{lib__ansi_8h_a55653cb3dd939dfd30cc24e82ea04058}{get\+\_\+terminal\+\_\+size}} (int \texorpdfstring{$\ast$}{*}width, int \texorpdfstring{$\ast$}{*}height)
+\item 
+void \mbox{\hyperlink{lib__ansi_8h_acf86c976a5eda151d928c6c033138265}{get\+\_\+cursor\+\_\+position}} (int \texorpdfstring{$\ast$}{*}row, int \texorpdfstring{$\ast$}{*}col)
+\item 
+void \mbox{\hyperlink{lib__ansi_8h_a059b8336e5683a93582e9509cbc9b108}{set\+\_\+cursor\+\_\+position}} (int row, int col)
+\item 
+void \mbox{\hyperlink{lib__ansi_8h_a3292e8cfe4ba1552ffeb3be87149bb8e}{print\+\_\+rainbow}} (char \texorpdfstring{$\ast$}{*}txt)
+\item 
+\mbox{\hyperlink{structAsciiArt}{Ascii\+Art}} \texorpdfstring{$\ast$}{*} \mbox{\hyperlink{lib__ansi_8h_a91a534226067bf841d7442b47c9dec90}{load\+\_\+ascii\+\_\+art}} (char \texorpdfstring{$\ast$}{*}file\+\_\+path)
+\item 
+void \mbox{\hyperlink{lib__ansi_8h_aede747ffd0163be498a616813c3ebca4}{free\+\_\+ascii\+\_\+art}} (\mbox{\hyperlink{structAsciiArt}{Ascii\+Art}} \texorpdfstring{$\ast$}{*}art)
+\item 
+void \mbox{\hyperlink{lib__ansi_8h_a4ec21d3944592e8e3b2129d65167ebe2}{print\+\_\+ascii\+\_\+art}} (int x, int y, \mbox{\hyperlink{structAsciiArt}{Ascii\+Art}} \texorpdfstring{$\ast$}{*}art)
+\item 
+void \mbox{\hyperlink{lib__ansi_8h_a1418af18eb6a6bc345bb15f4660b7541}{print\+\_\+ascii\+\_\+art\+\_\+with\+\_\+colors}} (int x, int y, \mbox{\hyperlink{structColoredAsciiArt}{Colored\+Ascii\+Art}} \texorpdfstring{$\ast$}{*}art, \mbox{\hyperlink{structColorPalette}{Color\+Palette}} palette)
+\item 
+void \mbox{\hyperlink{lib__ansi_8h_ae9edef6abb4ecb2ede5f63a071c95562}{print\+\_\+ascii\+\_\+art\+\_\+with\+\_\+gradients}} (int x, int y, \mbox{\hyperlink{structAsciiArt}{Ascii\+Art}} \texorpdfstring{$\ast$}{*}art, \mbox{\hyperlink{structColor}{Color}} cl\+\_\+top\+\_\+left, \mbox{\hyperlink{structColor}{Color}} cl\+\_\+bottom\+\_\+left, \mbox{\hyperlink{structColor}{Color}} cl\+\_\+top\+\_\+right)
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Function Documentation}
+\Hypertarget{lib__ansi_8h_a05d2afeb00339425c95b28586a1c9b24}\label{lib__ansi_8h_a05d2afeb00339425c95b28586a1c9b24} 
+\index{lib\_ansi.h@{lib\_ansi.h}!cl@{cl}}
+\index{cl@{cl}!lib\_ansi.h@{lib\_ansi.h}}
+\doxysubsubsection{\texorpdfstring{cl()}{cl()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{structColor}{Color}} cl (\begin{DoxyParamCaption}\item[{double}]{r,  }\item[{double}]{g,  }\item[{double}]{b }\end{DoxyParamCaption})}
+
+\Hypertarget{lib__ansi_8h_a711c8da31f71afa651800cf310cf56cc}\label{lib__ansi_8h_a711c8da31f71afa651800cf310cf56cc} 
+\index{lib\_ansi.h@{lib\_ansi.h}!cl\_clamp@{cl\_clamp}}
+\index{cl\_clamp@{cl\_clamp}!lib\_ansi.h@{lib\_ansi.h}}
+\doxysubsubsection{\texorpdfstring{cl\_clamp()}{cl\_clamp()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{structColor}{Color}} cl\+\_\+clamp (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{structColor}{Color}}}]{c }\end{DoxyParamCaption})}
+
+\Hypertarget{lib__ansi_8h_ab5b19e51458f749447566f492224ef74}\label{lib__ansi_8h_ab5b19e51458f749447566f492224ef74} 
+\index{lib\_ansi.h@{lib\_ansi.h}!cl\_add@{cl\_add}}
+\index{cl\_add@{cl\_add}!lib\_ansi.h@{lib\_ansi.h}}
+\doxysubsubsection{\texorpdfstring{cl\_add()}{cl\_add()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{structColor}{Color}} cl\+\_\+add (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{structColor}{Color}}}]{c1,  }\item[{\mbox{\hyperlink{structColor}{Color}}}]{c2 }\end{DoxyParamCaption})}
+
+\Hypertarget{lib__ansi_8h_a683ea26c5d6a147f36cefc825bac17bf}\label{lib__ansi_8h_a683ea26c5d6a147f36cefc825bac17bf} 
+\index{lib\_ansi.h@{lib\_ansi.h}!cl\_sub@{cl\_sub}}
+\index{cl\_sub@{cl\_sub}!lib\_ansi.h@{lib\_ansi.h}}
+\doxysubsubsection{\texorpdfstring{cl\_sub()}{cl\_sub()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{structColor}{Color}} cl\+\_\+sub (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{structColor}{Color}}}]{c1,  }\item[{\mbox{\hyperlink{structColor}{Color}}}]{c2 }\end{DoxyParamCaption})}
+
+\Hypertarget{lib__ansi_8h_a096804f3504b582ef7dad5a8443d3474}\label{lib__ansi_8h_a096804f3504b582ef7dad5a8443d3474} 
+\index{lib\_ansi.h@{lib\_ansi.h}!cl\_divide@{cl\_divide}}
+\index{cl\_divide@{cl\_divide}!lib\_ansi.h@{lib\_ansi.h}}
+\doxysubsubsection{\texorpdfstring{cl\_divide()}{cl\_divide()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{structColor}{Color}} cl\+\_\+divide (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{structColor}{Color}}}]{c1,  }\item[{double}]{d }\end{DoxyParamCaption})}
+
+\Hypertarget{lib__ansi_8h_aabd2fec6929a2e7f209dc6c7f6611535}\label{lib__ansi_8h_aabd2fec6929a2e7f209dc6c7f6611535} 
+\index{lib\_ansi.h@{lib\_ansi.h}!cl\_mult@{cl\_mult}}
+\index{cl\_mult@{cl\_mult}!lib\_ansi.h@{lib\_ansi.h}}
+\doxysubsubsection{\texorpdfstring{cl\_mult()}{cl\_mult()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{structColor}{Color}} cl\+\_\+mult (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{structColor}{Color}}}]{c1,  }\item[{double}]{v }\end{DoxyParamCaption})}
+
+\Hypertarget{lib__ansi_8h_a49e0a18659487ca5440e7a25f3f5b914}\label{lib__ansi_8h_a49e0a18659487ca5440e7a25f3f5b914} 
+\index{lib\_ansi.h@{lib\_ansi.h}!set\_cl\_fg@{set\_cl\_fg}}
+\index{set\_cl\_fg@{set\_cl\_fg}!lib\_ansi.h@{lib\_ansi.h}}
+\doxysubsubsection{\texorpdfstring{set\_cl\_fg()}{set\_cl\_fg()}}
+{\footnotesize\ttfamily void set\+\_\+cl\+\_\+fg (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{structColor}{Color}}}]{c }\end{DoxyParamCaption})}
+
+\Hypertarget{lib__ansi_8h_a88ace77ec2007a69f180d88b52d198ab}\label{lib__ansi_8h_a88ace77ec2007a69f180d88b52d198ab} 
+\index{lib\_ansi.h@{lib\_ansi.h}!set\_cl\_bg@{set\_cl\_bg}}
+\index{set\_cl\_bg@{set\_cl\_bg}!lib\_ansi.h@{lib\_ansi.h}}
+\doxysubsubsection{\texorpdfstring{set\_cl\_bg()}{set\_cl\_bg()}}
+{\footnotesize\ttfamily void set\+\_\+cl\+\_\+bg (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{structColor}{Color}}}]{c }\end{DoxyParamCaption})}
+
+\Hypertarget{lib__ansi_8h_ae85c5a55ff1ef56b59338a90f26ad72b}\label{lib__ansi_8h_ae85c5a55ff1ef56b59338a90f26ad72b} 
+\index{lib\_ansi.h@{lib\_ansi.h}!set\_bold@{set\_bold}}
+\index{set\_bold@{set\_bold}!lib\_ansi.h@{lib\_ansi.h}}
+\doxysubsubsection{\texorpdfstring{set\_bold()}{set\_bold()}}
+{\footnotesize\ttfamily void set\+\_\+bold (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+\Hypertarget{lib__ansi_8h_ae87790ab1dd97338b3b303b6029ca2ff}\label{lib__ansi_8h_ae87790ab1dd97338b3b303b6029ca2ff} 
+\index{lib\_ansi.h@{lib\_ansi.h}!unset\_bold@{unset\_bold}}
+\index{unset\_bold@{unset\_bold}!lib\_ansi.h@{lib\_ansi.h}}
+\doxysubsubsection{\texorpdfstring{unset\_bold()}{unset\_bold()}}
+{\footnotesize\ttfamily void unset\+\_\+bold (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+\Hypertarget{lib__ansi_8h_aba363186129d49e097ccce9d07aa49eb}\label{lib__ansi_8h_aba363186129d49e097ccce9d07aa49eb} 
+\index{lib\_ansi.h@{lib\_ansi.h}!reset\_ansi@{reset\_ansi}}
+\index{reset\_ansi@{reset\_ansi}!lib\_ansi.h@{lib\_ansi.h}}
+\doxysubsubsection{\texorpdfstring{reset\_ansi()}{reset\_ansi()}}
+{\footnotesize\ttfamily void reset\+\_\+ansi (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+\Hypertarget{lib__ansi_8h_a55653cb3dd939dfd30cc24e82ea04058}\label{lib__ansi_8h_a55653cb3dd939dfd30cc24e82ea04058} 
+\index{lib\_ansi.h@{lib\_ansi.h}!get\_terminal\_size@{get\_terminal\_size}}
+\index{get\_terminal\_size@{get\_terminal\_size}!lib\_ansi.h@{lib\_ansi.h}}
+\doxysubsubsection{\texorpdfstring{get\_terminal\_size()}{get\_terminal\_size()}}
+{\footnotesize\ttfamily void get\+\_\+terminal\+\_\+size (\begin{DoxyParamCaption}\item[{int \texorpdfstring{$\ast$}{*}}]{width,  }\item[{int \texorpdfstring{$\ast$}{*}}]{height }\end{DoxyParamCaption})}
+
+\Hypertarget{lib__ansi_8h_acf86c976a5eda151d928c6c033138265}\label{lib__ansi_8h_acf86c976a5eda151d928c6c033138265} 
+\index{lib\_ansi.h@{lib\_ansi.h}!get\_cursor\_position@{get\_cursor\_position}}
+\index{get\_cursor\_position@{get\_cursor\_position}!lib\_ansi.h@{lib\_ansi.h}}
+\doxysubsubsection{\texorpdfstring{get\_cursor\_position()}{get\_cursor\_position()}}
+{\footnotesize\ttfamily void get\+\_\+cursor\+\_\+position (\begin{DoxyParamCaption}\item[{int \texorpdfstring{$\ast$}{*}}]{row,  }\item[{int \texorpdfstring{$\ast$}{*}}]{col }\end{DoxyParamCaption})}
+
+\Hypertarget{lib__ansi_8h_a059b8336e5683a93582e9509cbc9b108}\label{lib__ansi_8h_a059b8336e5683a93582e9509cbc9b108} 
+\index{lib\_ansi.h@{lib\_ansi.h}!set\_cursor\_position@{set\_cursor\_position}}
+\index{set\_cursor\_position@{set\_cursor\_position}!lib\_ansi.h@{lib\_ansi.h}}
+\doxysubsubsection{\texorpdfstring{set\_cursor\_position()}{set\_cursor\_position()}}
+{\footnotesize\ttfamily void set\+\_\+cursor\+\_\+position (\begin{DoxyParamCaption}\item[{int}]{row,  }\item[{int}]{col }\end{DoxyParamCaption})}
+
+\Hypertarget{lib__ansi_8h_a3292e8cfe4ba1552ffeb3be87149bb8e}\label{lib__ansi_8h_a3292e8cfe4ba1552ffeb3be87149bb8e} 
+\index{lib\_ansi.h@{lib\_ansi.h}!print\_rainbow@{print\_rainbow}}
+\index{print\_rainbow@{print\_rainbow}!lib\_ansi.h@{lib\_ansi.h}}
+\doxysubsubsection{\texorpdfstring{print\_rainbow()}{print\_rainbow()}}
+{\footnotesize\ttfamily void print\+\_\+rainbow (\begin{DoxyParamCaption}\item[{char \texorpdfstring{$\ast$}{*}}]{txt }\end{DoxyParamCaption})}
+
+\Hypertarget{lib__ansi_8h_a91a534226067bf841d7442b47c9dec90}\label{lib__ansi_8h_a91a534226067bf841d7442b47c9dec90} 
+\index{lib\_ansi.h@{lib\_ansi.h}!load\_ascii\_art@{load\_ascii\_art}}
+\index{load\_ascii\_art@{load\_ascii\_art}!lib\_ansi.h@{lib\_ansi.h}}
+\doxysubsubsection{\texorpdfstring{load\_ascii\_art()}{load\_ascii\_art()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{structAsciiArt}{Ascii\+Art}} \texorpdfstring{$\ast$}{*} load\+\_\+ascii\+\_\+art (\begin{DoxyParamCaption}\item[{char \texorpdfstring{$\ast$}{*}}]{file\+\_\+path }\end{DoxyParamCaption})}
+
+\Hypertarget{lib__ansi_8h_aede747ffd0163be498a616813c3ebca4}\label{lib__ansi_8h_aede747ffd0163be498a616813c3ebca4} 
+\index{lib\_ansi.h@{lib\_ansi.h}!free\_ascii\_art@{free\_ascii\_art}}
+\index{free\_ascii\_art@{free\_ascii\_art}!lib\_ansi.h@{lib\_ansi.h}}
+\doxysubsubsection{\texorpdfstring{free\_ascii\_art()}{free\_ascii\_art()}}
+{\footnotesize\ttfamily void free\+\_\+ascii\+\_\+art (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{structAsciiArt}{Ascii\+Art}} \texorpdfstring{$\ast$}{*}}]{art }\end{DoxyParamCaption})}
+
+\Hypertarget{lib__ansi_8h_a4ec21d3944592e8e3b2129d65167ebe2}\label{lib__ansi_8h_a4ec21d3944592e8e3b2129d65167ebe2} 
+\index{lib\_ansi.h@{lib\_ansi.h}!print\_ascii\_art@{print\_ascii\_art}}
+\index{print\_ascii\_art@{print\_ascii\_art}!lib\_ansi.h@{lib\_ansi.h}}
+\doxysubsubsection{\texorpdfstring{print\_ascii\_art()}{print\_ascii\_art()}}
+{\footnotesize\ttfamily void print\+\_\+ascii\+\_\+art (\begin{DoxyParamCaption}\item[{int}]{x,  }\item[{int}]{y,  }\item[{\mbox{\hyperlink{structAsciiArt}{Ascii\+Art}} \texorpdfstring{$\ast$}{*}}]{art }\end{DoxyParamCaption})}
+
+\Hypertarget{lib__ansi_8h_a1418af18eb6a6bc345bb15f4660b7541}\label{lib__ansi_8h_a1418af18eb6a6bc345bb15f4660b7541} 
+\index{lib\_ansi.h@{lib\_ansi.h}!print\_ascii\_art\_with\_colors@{print\_ascii\_art\_with\_colors}}
+\index{print\_ascii\_art\_with\_colors@{print\_ascii\_art\_with\_colors}!lib\_ansi.h@{lib\_ansi.h}}
+\doxysubsubsection{\texorpdfstring{print\_ascii\_art\_with\_colors()}{print\_ascii\_art\_with\_colors()}}
+{\footnotesize\ttfamily void print\+\_\+ascii\+\_\+art\+\_\+with\+\_\+colors (\begin{DoxyParamCaption}\item[{int}]{x,  }\item[{int}]{y,  }\item[{\mbox{\hyperlink{structColoredAsciiArt}{Colored\+Ascii\+Art}} \texorpdfstring{$\ast$}{*}}]{art,  }\item[{\mbox{\hyperlink{structColorPalette}{Color\+Palette}}}]{palette }\end{DoxyParamCaption})}
+
+\Hypertarget{lib__ansi_8h_ae9edef6abb4ecb2ede5f63a071c95562}\label{lib__ansi_8h_ae9edef6abb4ecb2ede5f63a071c95562} 
+\index{lib\_ansi.h@{lib\_ansi.h}!print\_ascii\_art\_with\_gradients@{print\_ascii\_art\_with\_gradients}}
+\index{print\_ascii\_art\_with\_gradients@{print\_ascii\_art\_with\_gradients}!lib\_ansi.h@{lib\_ansi.h}}
+\doxysubsubsection{\texorpdfstring{print\_ascii\_art\_with\_gradients()}{print\_ascii\_art\_with\_gradients()}}
+{\footnotesize\ttfamily void print\+\_\+ascii\+\_\+art\+\_\+with\+\_\+gradients (\begin{DoxyParamCaption}\item[{int}]{x,  }\item[{int}]{y,  }\item[{\mbox{\hyperlink{structAsciiArt}{Ascii\+Art}} \texorpdfstring{$\ast$}{*}}]{art,  }\item[{\mbox{\hyperlink{structColor}{Color}}}]{cl\+\_\+top\+\_\+left,  }\item[{\mbox{\hyperlink{structColor}{Color}}}]{cl\+\_\+bottom\+\_\+left,  }\item[{\mbox{\hyperlink{structColor}{Color}}}]{cl\+\_\+top\+\_\+right }\end{DoxyParamCaption})}
+

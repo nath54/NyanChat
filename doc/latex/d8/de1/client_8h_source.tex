@@ -1,0 +1,29 @@
+\doxysection{client.\+h}
+\hypertarget{client_8h_source}{}\label{client_8h_source}\index{include/client.h@{include/client.h}}
+\mbox{\hyperlink{client_8h}{Go to the documentation of this file.}}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ \textcolor{preprocessor}{\#pragma\ once}}
+\DoxyCodeLine{00002\ }
+\DoxyCodeLine{00003\ \textcolor{preprocessor}{\#include\ <stdbool.h>}}
+\DoxyCodeLine{00004\ \textcolor{preprocessor}{\#include\ "{}\mbox{\hyperlink{tcp__connection_8h}{tcp\_connection.h}}"{}}}
+\DoxyCodeLine{00005\ }
+\DoxyCodeLine{00006\ }
+\DoxyCodeLine{00007\ \textcolor{keyword}{typedef}\ \textcolor{keyword}{struct\ }\{}
+\DoxyCodeLine{00008\ \ \ \ \ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{structClientState_afd3a84c51fd5a9d5fdc5d85c4e4dc4b9}{connected}};}
+\DoxyCodeLine{00009\ \ \ \ \ \textcolor{keywordtype}{char}\ pseudo[\mbox{\hyperlink{tcp__connection_8h_aeb818ba2320ac54338775af361c645b9}{T\_NOM\_MAX}}];}
+\DoxyCodeLine{00010\ \ \ \ \ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{structClientState_a6131380f7662393f8f1d867ed6ccba6f}{waiting\_pseudo\_confirmation}};}
+\DoxyCodeLine{00011\ }
+\DoxyCodeLine{00012\ \ \ \ \ \textcolor{comment}{//\ Salon\ actuel}}
+\DoxyCodeLine{00013\ \ \ \ \ \textcolor{keywordtype}{int}\ \mbox{\hyperlink{structClientState_a832b67d041746c85faf54b91a39ac47a}{type\_current\_dest}};\ \textcolor{comment}{//\ 0=salon\ par\ défaut,\ 1=salon\ privé,\ 2=msg\_privé}}
+\DoxyCodeLine{00014\ \ \ \ \ \textcolor{comment}{//\ Nom\ du\ salon\ où\ il\ est,\ ou\ pseudo\ du\ client\ de\ msg\ privé}}
+\DoxyCodeLine{00015\ \ \ \ \ \textcolor{keywordtype}{char}\ destination[\mbox{\hyperlink{tcp__connection_8h_aeb818ba2320ac54338775af361c645b9}{T\_NOM\_MAX}}];}
+\DoxyCodeLine{00016\ }
+\DoxyCodeLine{00017\ \ \ \ \ \textcolor{comment}{//\ Liste\ de\ messages\ envoyés\ qui\ attendent\ un\ acquittement}}
+\DoxyCodeLine{00018\ \ \ \ \ \textcolor{comment}{//\ \ à\ initialiser\ au\ début\ du\ client,\ et\ à\ libérer\ à\ la\ fin}}
+\DoxyCodeLine{00019\ \ \ \ \ \mbox{\hyperlink{structMessage}{Message}}*\ \mbox{\hyperlink{structClientState_a47928bd21cf7c65337554875beca1899}{msg\_waiting\_acq}};}
+\DoxyCodeLine{00020\ \ \ \ \ \textcolor{keywordtype}{size\_t}\ \mbox{\hyperlink{structClientState_a35deae8d28921a675e9000e4e5d5440f}{tot\_msg\_waiting\_acq}};}
+\DoxyCodeLine{00021\ \ \ \ \ \textcolor{keywordtype}{size\_t}\ \mbox{\hyperlink{structClientState_a6e1c493cc60d3f5d8d873beedb8df08c}{nb\_msg\_waiting\_acq}};}
+\DoxyCodeLine{00022\ }
+\DoxyCodeLine{00023\ \}\ \mbox{\hyperlink{structClientState}{ClientState}};}
+
+\end{DoxyCode}

@@ -1,0 +1,24 @@
+var searchData=
+[
+  ['dark_5fblue_0',['DARK_BLUE',['../d1/deb/lib__ansi__colors_8h.html#ab17de36a1b487f9ad9ef7dabd63531ab',1,'lib_ansi_colors.h']]],
+  ['dark_5fcyan_1',['DARK_CYAN',['../d1/deb/lib__ansi__colors_8h.html#a8e78c0ca33ec357c0332d33da94f01f8',1,'lib_ansi_colors.h']]],
+  ['dark_5fgolden_5frod_2',['DARK_GOLDEN_ROD',['../d1/deb/lib__ansi__colors_8h.html#a575b6613c058c620cac0ccdda94ab435',1,'lib_ansi_colors.h']]],
+  ['dark_5fgreen_3',['DARK_GREEN',['../d1/deb/lib__ansi__colors_8h.html#a2ebb0bf1d379e615bda6e25cccf0f08f',1,'lib_ansi_colors.h']]],
+  ['dark_5fgrey_4',['DARK_GREY',['../d1/deb/lib__ansi__colors_8h.html#a85998c833c5007dc61315ea69919582e',1,'lib_ansi_colors.h']]],
+  ['dark_5fkhaki_5',['DARK_KHAKI',['../d1/deb/lib__ansi__colors_8h.html#a994cc078999778dab151830c343e80e3',1,'lib_ansi_colors.h']]],
+  ['dark_5fmagenta_6',['DARK_MAGENTA',['../d1/deb/lib__ansi__colors_8h.html#a908d63d1e1a62efbe7c61685f9144a7d',1,'lib_ansi_colors.h']]],
+  ['dark_5folive_5fgreen_7',['DARK_OLIVE_GREEN',['../d1/deb/lib__ansi__colors_8h.html#a060da6de9308e772e4bed0b60d460590',1,'lib_ansi_colors.h']]],
+  ['dark_5forange_8',['DARK_ORANGE',['../d1/deb/lib__ansi__colors_8h.html#a3aaa01c080fbef329d92db1fcae3e620',1,'lib_ansi_colors.h']]],
+  ['dark_5forchid_9',['DARK_ORCHID',['../d1/deb/lib__ansi__colors_8h.html#a661c2a831e2c0eb21a92744555639b7f',1,'lib_ansi_colors.h']]],
+  ['dark_5fred_10',['DARK_RED',['../d1/deb/lib__ansi__colors_8h.html#adf1abd1d6844a43cca874c266bb57b9b',1,'lib_ansi_colors.h']]],
+  ['dark_5fsalmon_11',['DARK_SALMON',['../d1/deb/lib__ansi__colors_8h.html#a4943ec9d99c5dbe63901f5e722e1292a',1,'lib_ansi_colors.h']]],
+  ['dark_5fsea_5fgreen_12',['DARK_SEA_GREEN',['../d1/deb/lib__ansi__colors_8h.html#ae6302b661fb2b01e060af4c1dd16535f',1,'lib_ansi_colors.h']]],
+  ['dark_5fslate_5fblue_13',['DARK_SLATE_BLUE',['../d1/deb/lib__ansi__colors_8h.html#a3a50bfe9594e560cb8768298a7cfc66c',1,'lib_ansi_colors.h']]],
+  ['dark_5fslate_5fgray_14',['DARK_SLATE_GRAY',['../d1/deb/lib__ansi__colors_8h.html#a338ae7bee794f19d48c7f13350e87bc9',1,'lib_ansi_colors.h']]],
+  ['dark_5fturquoise_15',['DARK_TURQUOISE',['../d1/deb/lib__ansi__colors_8h.html#a7454dca7286329f218d64029bc25a8f5',1,'lib_ansi_colors.h']]],
+  ['dark_5fviolet_16',['DARK_VIOLET',['../d1/deb/lib__ansi__colors_8h.html#aa24c7528282152dbc223f5f9d4aca8f1',1,'lib_ansi_colors.h']]],
+  ['deep_5fpink_17',['DEEP_PINK',['../d1/deb/lib__ansi__colors_8h.html#a6edcee92103ec6b1fff8e25551fae5d9',1,'lib_ansi_colors.h']]],
+  ['deep_5fsky_5fblue_18',['DEEP_SKY_BLUE',['../d1/deb/lib__ansi__colors_8h.html#a4b2a277b918fffdcf834942ccafc2cc4',1,'lib_ansi_colors.h']]],
+  ['dim_5fgrey_19',['DIM_GREY',['../d1/deb/lib__ansi__colors_8h.html#a836f3ec97b3777b1cf5237dda99a7b02',1,'lib_ansi_colors.h']]],
+  ['dodger_5fblue_20',['DODGER_BLUE',['../d1/deb/lib__ansi__colors_8h.html#a4a9a111403b266330e190252d870f567',1,'lib_ansi_colors.h']]]
+];

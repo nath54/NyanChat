@@ -1,0 +1,19 @@
+var searchData=
+[
+  ['name_0',['name',['../d3/dfe/structChannel.html#a44d41ad048fecab154f14894582a74ce',1,'Channel']]],
+  ['navajo_5fwhite_1',['NAVAJO_WHITE',['../d1/deb/lib__ansi__colors_8h.html#ae15ec21422a13fd6bd01293d5a6b233e',1,'lib_ansi_colors.h']]],
+  ['navy_2',['NAVY',['../d1/deb/lib__ansi__colors_8h.html#ab2ee9bdede8e3af96ff696c7b2ba7416',1,'lib_ansi_colors.h']]],
+  ['nb_5fclients_3',['nb_clients',['../d3/dfe/structChannel.html#aceb4db4cf97948be62ba86bd0ffe6fe8',1,'Channel']]],
+  ['nb_5fcolors_4',['nb_colors',['../db/d66/structColorPalette.html#a13bf3e09f988e7d12864c1be39b7b87b',1,'ColorPalette']]],
+  ['nb_5fmax_5fchannels_5',['NB_MAX_CHANNELS',['../d8/dc3/server_8h.html#afd147c483b5543c14ec816a265c0e812',1,'server.h']]],
+  ['nb_5fmax_5fclients_6',['NB_MAX_CLIENTS',['../d8/dc3/server_8h.html#ab8fdad3db19e3d15c1f5e965a00a2bc9',1,'server.h']]],
+  ['nb_5fmax_5fconnected_5fclients_7',['NB_MAX_CONNECTED_CLIENTS',['../d8/dc3/server_8h.html#a08f88b8ad1561c424e313a9983697e66',1,'server.h']]],
+  ['nb_5fmax_5fmessages_8',['NB_MAX_MESSAGES',['../d8/dc3/server_8h.html#afb945283a3a4f0930ac3a79fe319155a',1,'server.h']]],
+  ['nb_5fmsg_5fwaiting_5facq_9',['nb_msg_waiting_acq',['../da/d59/structClientState.html#a6e1c493cc60d3f5d8d873beedb8df08c',1,'ClientState']]],
+  ['nb_5fmsgs_10',['nb_msgs',['../d3/dfe/structChannel.html#a809bf3d69aa7469b348616ece43c0039',1,'Channel']]],
+  ['nb_5fpoll_5ffds_11',['nb_poll_fds',['../dd/d86/structTcpConnection.html#ac5401f4b73bfe7d20fbc35b807295591',1,'TcpConnection']]],
+  ['nb_5frainbow_5fcolors_12',['NB_RAINBOW_COLORS',['../d9/d06/lib__ansi_8c.html#a448c9a9f935dfa35b989ebca70940c35',1,'lib_ansi.c']]],
+  ['need_5fcompress_5fpoll_5farr_13',['need_compress_poll_arr',['../dd/d86/structTcpConnection.html#ad145b1c4d7ddd8823146ecb984fda98e',1,'TcpConnection']]],
+  ['new_5fclients_5facceptation_14',['new_clients_acceptation',['../d4/d54/tcp__connection_8c.html#aaeb556d977d890a52a2bc40d54adb255',1,'tcp_connection.c']]],
+  ['nyanchat_15',['NyanChat',['../index.html',1,'']]]
+];

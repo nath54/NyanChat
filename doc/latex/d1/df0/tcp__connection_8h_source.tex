@@ -1,0 +1,189 @@
+\doxysection{tcp\+\_\+connection.\+h}
+\hypertarget{tcp__connection_8h_source}{}\label{tcp__connection_8h_source}\index{include/tcp\_connection.h@{include/tcp\_connection.h}}
+\mbox{\hyperlink{tcp__connection_8h}{Go to the documentation of this file.}}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ \textcolor{preprocessor}{\#pragma\ once}}
+\DoxyCodeLine{00002\ }
+\DoxyCodeLine{00003\ \textcolor{preprocessor}{\#include\ <sys/types.h>}}
+\DoxyCodeLine{00004\ \textcolor{preprocessor}{\#include\ <sys/socket.h>}}
+\DoxyCodeLine{00005\ \textcolor{preprocessor}{\#include\ <sys/poll.h>}}
+\DoxyCodeLine{00006\ \textcolor{preprocessor}{\#include\ <sys/errno.h>}}
+\DoxyCodeLine{00007\ \textcolor{preprocessor}{\#include\ <sys/ioctl.h>}}
+\DoxyCodeLine{00008\ \textcolor{preprocessor}{\#include\ <sys/time.h>}}
+\DoxyCodeLine{00009\ }
+\DoxyCodeLine{00010\ \textcolor{preprocessor}{\#include\ <netinet/in.h>}}
+\DoxyCodeLine{00011\ }
+\DoxyCodeLine{00012\ \textcolor{preprocessor}{\#include\ <arpa/inet.h>}}
+\DoxyCodeLine{00013\ }
+\DoxyCodeLine{00014\ \textcolor{preprocessor}{\#include\ <netdb.h>}}
+\DoxyCodeLine{00015\ \textcolor{preprocessor}{\#include\ <stdio.h>}}
+\DoxyCodeLine{00016\ \textcolor{preprocessor}{\#include\ <string.h>}}
+\DoxyCodeLine{00017\ \textcolor{preprocessor}{\#include\ <stdlib.h>}}
+\DoxyCodeLine{00018\ \textcolor{preprocessor}{\#include\ <stdbool.h>}}
+\DoxyCodeLine{00019\ \textcolor{preprocessor}{\#include\ <unistd.h>}}
+\DoxyCodeLine{00020\ \textcolor{preprocessor}{\#include\ <stdint.h>}}
+\DoxyCodeLine{00021\ }
+\DoxyCodeLine{00022\ \textcolor{preprocessor}{\#define\ INVALID\_SOCKET\ -\/1}}
+\DoxyCodeLine{00023\ \textcolor{preprocessor}{\#define\ SOCKET\_ERROR\ -\/1}}
+\DoxyCodeLine{00024\ }
+\DoxyCodeLine{00025\ }
+\DoxyCodeLine{00026\ \textcolor{keyword}{typedef}\ \textcolor{keywordtype}{int}\ \mbox{\hyperlink{tcp__connection_8h_a8dc8083897335125630f1af5dafd5831}{SOCKET}};}
+\DoxyCodeLine{00027\ \textcolor{keyword}{typedef}\ \textcolor{keyword}{struct\ }sockaddr\_in\ \mbox{\hyperlink{tcp__connection_8h_a29046dc0232f0e5c70adbc25090d77b8}{SOCKADDR\_IN}};}
+\DoxyCodeLine{00028\ \textcolor{keyword}{typedef}\ \textcolor{keyword}{struct\ }sockaddr\ \mbox{\hyperlink{tcp__connection_8h_ae334b73cedf7204187dce3f817576009}{SOCKADDR}};}
+\DoxyCodeLine{00029\ \textcolor{keyword}{typedef}\ \textcolor{keyword}{struct\ }in\_addr\ \mbox{\hyperlink{tcp__connection_8h_a328d951616d1a7f289fef8e6b23a926b}{IN\_ADDR}};}
+\DoxyCodeLine{00030\ }
+\DoxyCodeLine{00031\ \textcolor{keyword}{typedef}\ u\_int32\_t\ \mbox{\hyperlink{tcp__connection_8h_a945d766905ae60477daf7c8846d80f9b}{uint32}};}
+\DoxyCodeLine{00032\ }
+\DoxyCodeLine{00033\ \textcolor{comment}{//\ \#define\ BUFFER\_SIZE\ 1024}}
+\DoxyCodeLine{00034\ }
+\DoxyCodeLine{00035\ }
+\DoxyCodeLine{00036\ \textcolor{comment}{//\ Taille\ max\ d'un\ pseudo\ de\ clients\ ou\ d'un\ nom\ de\ salon}}
+\DoxyCodeLine{00037\ \textcolor{preprocessor}{\#define\ T\_NOM\_MAX\ 256}}
+\DoxyCodeLine{00038\ }
+\DoxyCodeLine{00039\ \textcolor{preprocessor}{\#define\ T\_MSG\_MAX\ 256}}
+\DoxyCodeLine{00040\ }
+\DoxyCodeLine{00041\ \textcolor{preprocessor}{\#define\ MAX\_POLL\_SOCKETS\ 200}}
+\DoxyCodeLine{00042\ }
+\DoxyCodeLine{00043\ \textcolor{preprocessor}{\#define\ TCP\_CON\_SERVER\ 0}}
+\DoxyCodeLine{00044\ \textcolor{preprocessor}{\#define\ TCP\_CON\_CLIENT\ 1}}
+\DoxyCodeLine{00045\ \textcolor{preprocessor}{\#define\ TCP\_CON\_PROXY\_SERVER\_SIDE\ 2}}
+\DoxyCodeLine{00046\ \textcolor{preprocessor}{\#define\ TCP\_CON\_PROXY\_CLIENTS\_SIDE\ 3}}
+\DoxyCodeLine{00047\ }
+\DoxyCodeLine{00048\ }
+\DoxyCodeLine{00049\ \textcolor{preprocessor}{\#define\ MSG\_NULL\ -\/1}}
+\DoxyCodeLine{00050\ \textcolor{preprocessor}{\#define\ MSG\_NORMAL\_CLIENT\_SERVER\ 0}}
+\DoxyCodeLine{00051\ \textcolor{preprocessor}{\#define\ MSG\_SERVER\_CLIENT\ 1}}
+\DoxyCodeLine{00052\ \textcolor{preprocessor}{\#define\ MSG\_CONNECTION\_CLIENT\ 2}}
+\DoxyCodeLine{00053\ \textcolor{preprocessor}{\#define\ MSG\_ERREUR\ 4}}
+\DoxyCodeLine{00054\ \textcolor{preprocessor}{\#define\ MSG\_ACQ\_POS\ 5}}
+\DoxyCodeLine{00055\ \textcolor{preprocessor}{\#define\ MSG\_ACQ\_NEG\ 6}}
+\DoxyCodeLine{00056\ }
+\DoxyCodeLine{00057\ \textcolor{comment}{//\ Structure\ utilisée\ pour\ les\ messages\ et}}
+\DoxyCodeLine{00058\ \textcolor{comment}{//\ \ les\ acquittements\ transmis\ par\ la\ connection}}
+\DoxyCodeLine{00059\ \textcolor{keyword}{typedef}\ \textcolor{keyword}{struct\ }\{\ \ \ \ }
+\DoxyCodeLine{00060\ \ \ \ \ \textcolor{comment}{/*}}
+\DoxyCodeLine{00061\ \textcolor{comment}{\ \ \ \ Modifier\ les\ defines\ juste\ au\ dessus\ si\ changements\ de\ valeurs}}
+\DoxyCodeLine{00062\ \textcolor{comment}{\ \ \ \ \ \ \ \ (}}
+\DoxyCodeLine{00063\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ -\/1=msg\ NULL,}}
+\DoxyCodeLine{00064\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ 0=msg\ normal\ client-\/>serveur,}}
+\DoxyCodeLine{00065\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ 1=msg\ serveur-\/>client,}}
+\DoxyCodeLine{00066\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ 2=connection\ client}}
+\DoxyCodeLine{00067\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ 3=fin\ de\ connection,}}
+\DoxyCodeLine{00068\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ 4=erreur,}}
+\DoxyCodeLine{00069\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ 5=acquittement\ positif,}}
+\DoxyCodeLine{00070\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ 6=acquittement\ négatif}}
+\DoxyCodeLine{00071\ \textcolor{comment}{\ \ \ \ \ \ \ \ )\ */}}
+\DoxyCodeLine{00072\ \ \ \ \ \textcolor{keywordtype}{int}\ \mbox{\hyperlink{structMessage_a1f300578860c37cb5a8b386c6ad27f1c}{type\_msg}};}
+\DoxyCodeLine{00073\ }
+\DoxyCodeLine{00074\ \ \ \ \ \textcolor{comment}{//\ Identifiant\ qui\ permet\ au\ client\ de\ savoir\ de\ quel\ message}}
+\DoxyCodeLine{00075\ \ \ \ \ \textcolor{comment}{//\ \ le\ serveur\ parle\ lorsqu'un\ acquittement\ est\ renvoyé}}
+\DoxyCodeLine{00076\ \ \ \ \ \textcolor{keywordtype}{int}\ \mbox{\hyperlink{structMessage_a5b067e5fdccf6faf79bd0b34ff0ca064}{id\_msg}};}
+\DoxyCodeLine{00077\ \ \ \ \ }
+\DoxyCodeLine{00078\ \ \ \ \ \textcolor{comment}{//\ pseudo\ du\ client}}
+\DoxyCodeLine{00079\ \ \ \ \ \textcolor{keywordtype}{char}\ pseudo\_source[\mbox{\hyperlink{tcp__connection_8h_aeb818ba2320ac54338775af361c645b9}{T\_NOM\_MAX}}];}
+\DoxyCodeLine{00080\ }
+\DoxyCodeLine{00081\ \ \ \ \ \textcolor{comment}{//\ Socket\ client\ du\ proxy\ (rempli\ par\ le\ proxy)}}
+\DoxyCodeLine{00082\ \ \ \ \ \textcolor{keywordtype}{int}\ \mbox{\hyperlink{structMessage_acb9eece6284dd54c43d2276e9ad769c8}{proxy\_client\_socket}};}
+\DoxyCodeLine{00083\ \ \ \ \ }
+\DoxyCodeLine{00084\ \ \ \ \ \textcolor{comment}{//\ 0\ =\ msg\ privé,\ 1\ =\ salon\ privé,\ 2\ =\ salon\ par\ défaut}}
+\DoxyCodeLine{00085\ \ \ \ \ \textcolor{keywordtype}{int}\ \mbox{\hyperlink{structMessage_a62514a071dad67bcc1cddc1d9e683398}{flag\_destination}};}
+\DoxyCodeLine{00086\ \ \ \ \ }
+\DoxyCodeLine{00087\ \ \ \ \ \textcolor{comment}{//\ pseudo\ du\ client\ destinataire,\ ou\ alors\ nom\ du\ salon}}
+\DoxyCodeLine{00088\ \ \ \ \ \textcolor{keywordtype}{char}\ destination[\mbox{\hyperlink{tcp__connection_8h_aeb818ba2320ac54338775af361c645b9}{T\_NOM\_MAX}}];}
+\DoxyCodeLine{00089\ \ \ \ \ }
+\DoxyCodeLine{00090\ \ \ \ \ \textcolor{comment}{//\ Taille\ du\ message}}
+\DoxyCodeLine{00091\ \ \ \ \ \mbox{\hyperlink{tcp__connection_8h_a945d766905ae60477daf7c8846d80f9b}{uint32}}\ \mbox{\hyperlink{structMessage_a2a96c29aafec844980a2400c72c414b8}{taille\_msg}};}
+\DoxyCodeLine{00092\ \ \ \ \ }
+\DoxyCodeLine{00093\ \ \ \ \ \textcolor{comment}{//\ Message\ de\ l’utilisateur}}
+\DoxyCodeLine{00094\ \ \ \ \ \textcolor{keywordtype}{char}\ msg[\mbox{\hyperlink{tcp__connection_8h_ac256122478c560cbacbd2cfac158579e}{T\_MSG\_MAX}}];}
+\DoxyCodeLine{00095\ \ \ \ \ }
+\DoxyCodeLine{00096\ \ \ \ \ \textcolor{comment}{//\ (pour\ détection\ \&\ correction)}}
+\DoxyCodeLine{00097\ \ \ \ \ \textcolor{comment}{//\ TODO:\ ajouter\ ici\ les\ ressources\ nécessaires\ pour\ les\ codes\ polynomiaux}}
+\DoxyCodeLine{00098\ \ \ \ \ \textcolor{comment}{//\ ???\ \ code;}}
+\DoxyCodeLine{00099\ }
+\DoxyCodeLine{00100\ \}\ \mbox{\hyperlink{structMessage}{Message}}\ \_\_attribute\_\_((packed));}
+\DoxyCodeLine{00101\ }
+\DoxyCodeLine{00102\ }
+\DoxyCodeLine{00103\ \textcolor{keyword}{typedef}\ \textcolor{keyword}{struct\ }\{}
+\DoxyCodeLine{00104\ \ \ \ \ \textcolor{comment}{//\ Base\ TCP\ Socket\ Connection}}
+\DoxyCodeLine{00105\ \ \ \ \ \mbox{\hyperlink{tcp__connection_8h_a8dc8083897335125630f1af5dafd5831}{SOCKET}}\ \mbox{\hyperlink{structTcpConnection_a9b3b92335db7b4009b3d1fe5733c664f}{sockfd}};\ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ Descripteur\ du\ fichier\ du\ socket}}
+\DoxyCodeLine{00106\ \ \ \ \ \mbox{\hyperlink{tcp__connection_8h_a29046dc0232f0e5c70adbc25090d77b8}{SOCKADDR\_IN}}\ \mbox{\hyperlink{structTcpConnection_ade82be69f41249fd4fe0b9049e9bf847}{addr}};\ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ @\ recepteur\ (serveur),\ @\ serveur\ (client)}}
+\DoxyCodeLine{00107\ }
+\DoxyCodeLine{00108\ \ \ \ \ \textcolor{comment}{//\ Polling}}
+\DoxyCodeLine{00109\ \ \ \ \ \textcolor{keyword}{struct\ }pollfd\ poll\_fds[\mbox{\hyperlink{tcp__connection_8h_a6f41fc0ef18eeaf17db8a65f06278cfd}{MAX\_POLL\_SOCKETS}}];\ \textcolor{comment}{//\ Tableau\ des\ sockets\ du\ polling}}
+\DoxyCodeLine{00110\ \ \ \ \ \mbox{\hyperlink{tcp__connection_8h_a29046dc0232f0e5c70adbc25090d77b8}{SOCKADDR\_IN}}\ poll\_addrs[\mbox{\hyperlink{tcp__connection_8h_a6f41fc0ef18eeaf17db8a65f06278cfd}{MAX\_POLL\_SOCKETS}}];\ \textcolor{comment}{//\ Adresses\ de\ ces\ sockets}}
+\DoxyCodeLine{00111\ \ \ \ \ socklen\_t\ poll\_ad\_len[\mbox{\hyperlink{tcp__connection_8h_a6f41fc0ef18eeaf17db8a65f06278cfd}{MAX\_POLL\_SOCKETS}}];\ \ \textcolor{comment}{//\ Taille\ véritable\ de\ ces\ addrs}}
+\DoxyCodeLine{00112\ \ \ \ \ nfds\_t\ \mbox{\hyperlink{structTcpConnection_ac5401f4b73bfe7d20fbc35b807295591}{nb\_poll\_fds}};\ \ \ \ \textcolor{comment}{//\ Nombre\ actuel\ de\ sockets\ de\ polling}}
+\DoxyCodeLine{00113\ }
+\DoxyCodeLine{00114\ \ \ \ \ \textcolor{comment}{//\ Variables\ pour\ le\ serveur}}
+\DoxyCodeLine{00115\ \ \ \ \ \mbox{\hyperlink{structMessage}{Message}}\ \mbox{\hyperlink{structTcpConnection_aa3f05be09e995c3f78b731660fb5c5af}{msg}};\ \ \ \ \textcolor{comment}{//\ Recevra\ les\ messages\ depuis\ recv}}
+\DoxyCodeLine{00116\ }
+\DoxyCodeLine{00117\ \ \ \ \ \textcolor{comment}{//\ Paramètres\ de\ la\ connexion}}
+\DoxyCodeLine{00118\ \ \ \ \ \textcolor{keywordtype}{int}\ \mbox{\hyperlink{structTcpConnection_a48676bbb3c561b8d9fd1fd315f6379f9}{type\_connection}};\ \ \ \ \textcolor{comment}{//\ 0\ =\ server,\ 1\ =\ client,}}
+\DoxyCodeLine{00119\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ 2\ =\ proxy\ côté\ server,\ 3\ =\ proxy\ côté\ clients}}
+\DoxyCodeLine{00120\ \ \ \ \ \textcolor{keywordtype}{int}\ \mbox{\hyperlink{structTcpConnection_a0cd0f24332b95cdba0a7f7d4428e1488}{timeout}};\ \ \ \ \textcolor{comment}{//\ Temps\ max\ d'inactivité\ avant\ fermeture\ de\ la\ connexion}}
+\DoxyCodeLine{00121\ \ \ \ \ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{structTcpConnection_a2d2ee2c637405525fdb6a7c3620f9cec}{end\_connection}};\ \textcolor{comment}{//\ S'il\ faut\ éteindre\ la\ connexion}}
+\DoxyCodeLine{00122\ \ \ \ \ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{structTcpConnection_ad145b1c4d7ddd8823146ecb984fda98e}{need\_compress\_poll\_arr}};\ \textcolor{comment}{//\ S'il\ faut\ compresser\ this-\/>poll\_fds}}
+\DoxyCodeLine{00123\ \}\ \mbox{\hyperlink{structTcpConnection}{TcpConnection}};}
+\DoxyCodeLine{00124\ }
+\DoxyCodeLine{00125\ }
+\DoxyCodeLine{00126\ }
+\DoxyCodeLine{00127\ \textcolor{keyword}{typedef}\ void(\mbox{\hyperlink{tcp__connection_8h_a7ec2c7dd8d234b2a9fa034a7cb4c3d38}{fn\_on\_msg}})(\mbox{\hyperlink{structTcpConnection}{TcpConnection}}*\ con,\ \mbox{\hyperlink{tcp__connection_8h_a8dc8083897335125630f1af5dafd5831}{SOCKET}}\ sock,}
+\DoxyCodeLine{00128\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{structMessage}{Message}}*\ msg,\ \textcolor{keywordtype}{size\_t}\ msg\_len,}
+\DoxyCodeLine{00129\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{void}*\ custom\_args);}
+\DoxyCodeLine{00130\ }
+\DoxyCodeLine{00131\ \textcolor{keyword}{typedef}\ void(\mbox{\hyperlink{tcp__connection_8h_a6b90802b684f4c6e4a6460305dea9246}{fn\_on\_stdin}})(\mbox{\hyperlink{structTcpConnection}{TcpConnection}}*\ con,}
+\DoxyCodeLine{00132\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{char}\ msg[\mbox{\hyperlink{tcp__connection_8h_ac256122478c560cbacbd2cfac158579e}{T\_MSG\_MAX}}],\ \textcolor{keywordtype}{size\_t}\ msg\_len,}
+\DoxyCodeLine{00133\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{void}*\ custom\_args);}
+\DoxyCodeLine{00134\ }
+\DoxyCodeLine{00135\ }
+\DoxyCodeLine{00136\ \textcolor{comment}{//\ static\ socklen\_t\ sockaddr\_size\ =\ sizeof(SOCKADDR\_IN);}}
+\DoxyCodeLine{00137\ }
+\DoxyCodeLine{00138\ \textcolor{comment}{//\ static\ int\ stdin\_fd\ =\ fileno(stdin);}}
+\DoxyCodeLine{00139\ \textcolor{preprocessor}{\#define\ stdin\_fd\ fileno(stdin)}}
+\DoxyCodeLine{00140\ }
+\DoxyCodeLine{00141\ }
+\DoxyCodeLine{00142\ \textcolor{comment}{//\ Initialisation\ d'un\ message\ vide}}
+\DoxyCodeLine{00143\ \textcolor{comment}{//\ \ pour\ éviter\ de\ manipuler\ des\ données\ non\ initialisées}}
+\DoxyCodeLine{00144\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{tcp__connection_8h_a0ffd9c4334ae52c203e8bbc9cc433a2d}{init\_empty\_message}}(\mbox{\hyperlink{structMessage}{Message}}*\ msg);}
+\DoxyCodeLine{00145\ }
+\DoxyCodeLine{00146\ }
+\DoxyCodeLine{00147\ \textcolor{comment}{//\ Initialisation\ d'un\ socket\ pour\ un\ serveur\ tcp}}
+\DoxyCodeLine{00148\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{tcp__connection_8h_aeb50092e9f24b5b60c75eb591bc2ef29}{tcp\_connection\_server\_init}}(\mbox{\hyperlink{structTcpConnection}{TcpConnection}}*\ con,}
+\DoxyCodeLine{00149\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{char}\ address\_receptor[],\ \textcolor{keywordtype}{int}\ port\_receptor,}
+\DoxyCodeLine{00150\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{int}\ nb\_max\_connections\_server,}
+\DoxyCodeLine{00151\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{int}\ timeout\_server);}
+\DoxyCodeLine{00152\ }
+\DoxyCodeLine{00153\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{tcp__connection_8h_aec14d667e4408ada6785d6e04141d0ce}{tcp\_connection\_client\_init}}(\mbox{\hyperlink{structTcpConnection}{TcpConnection}}*\ con,}
+\DoxyCodeLine{00154\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{char}*\ ip\_to\_connect,\ \textcolor{keywordtype}{int}\ port\_to\_connect,}
+\DoxyCodeLine{00155\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{int}\ timeout\_client);}
+\DoxyCodeLine{00156\ }
+\DoxyCodeLine{00157\ \textcolor{comment}{//\ Boucle\ principale\ d'une\ connection\ tcp}}
+\DoxyCodeLine{00158\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{tcp__connection_8h_a7923f950d4689a93ac87312b37a93634}{tcp\_connection\_mainloop}}(\mbox{\hyperlink{structTcpConnection}{TcpConnection}}*\ con,}
+\DoxyCodeLine{00159\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{tcp__connection_8h_a7ec2c7dd8d234b2a9fa034a7cb4c3d38}{fn\_on\_msg}}\ on\_msg,\ \textcolor{keywordtype}{void}*\ on\_msg\_custom\_args,}
+\DoxyCodeLine{00160\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{tcp__connection_8h_a6b90802b684f4c6e4a6460305dea9246}{fn\_on\_stdin}}\ on\_stdin,\ \textcolor{keywordtype}{void}*\ on\_stdin\_custom\_args);}
+\DoxyCodeLine{00161\ }
+\DoxyCodeLine{00162\ }
+\DoxyCodeLine{00163\ }
+\DoxyCodeLine{00164\ \textcolor{comment}{//\ Fermeture\ d'une\ connection\ tcp}}
+\DoxyCodeLine{00165\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{tcp__connection_8h_afb24e5b689cf814a58b31d3d939cff7f}{tcp\_connection\_close}}(\mbox{\hyperlink{structTcpConnection}{TcpConnection}}*\ con);}
+\DoxyCodeLine{00166\ }
+\DoxyCodeLine{00167\ }
+\DoxyCodeLine{00168\ \textcolor{comment}{//\ Envoi\ d'un\ message}}
+\DoxyCodeLine{00169\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{tcp__connection_8h_a66b797e788eb983313a7cfd420de7bca}{tcp\_connection\_send\_message}}(\mbox{\hyperlink{structTcpConnection}{TcpConnection}}*\ con,\ \mbox{\hyperlink{tcp__connection_8h_a8dc8083897335125630f1af5dafd5831}{SOCKET}}\ sock,}
+\DoxyCodeLine{00170\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{char}\ buffer[\mbox{\hyperlink{tcp__connection_8h_ac256122478c560cbacbd2cfac158579e}{T\_MSG\_MAX}}],\ \textcolor{keywordtype}{int}\ message\_size,}
+\DoxyCodeLine{00171\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{int}\ flags,}
+\DoxyCodeLine{00172\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{char}\ pseudo\_src[\mbox{\hyperlink{tcp__connection_8h_aeb818ba2320ac54338775af361c645b9}{T\_NOM\_MAX}}],}
+\DoxyCodeLine{00173\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{int}\ type\_destination,}
+\DoxyCodeLine{00174\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{char}\ destination[\mbox{\hyperlink{tcp__connection_8h_aeb818ba2320ac54338775af361c645b9}{T\_NOM\_MAX}}]);}
+\DoxyCodeLine{00175\ }
+\DoxyCodeLine{00176\ }
+\DoxyCodeLine{00177\ \textcolor{comment}{//\ Transmission\ d'un\ struct\ message}}
+\DoxyCodeLine{00178\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{tcp__connection_8h_ad6d140f3bb4888feb1ca1473cb82fec8}{tcp\_connection\_send\_struct\_message}}(\mbox{\hyperlink{structTcpConnection}{TcpConnection}}*\ con,\ \mbox{\hyperlink{tcp__connection_8h_a8dc8083897335125630f1af5dafd5831}{SOCKET}}\ sock,}
+\DoxyCodeLine{00179\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{structMessage}{Message}}*\ msg);}
+\DoxyCodeLine{00180\ }
+\DoxyCodeLine{00181\ }
+\DoxyCodeLine{00182\ \textcolor{comment}{//\ Fonction\ qui\ copie\ le\ contenu\ d'un\ message\ depuis\ src\ vers\ dest}}
+\DoxyCodeLine{00183\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{tcp__connection_8h_a29cb90b28c76fead4c2e638dd8e67f14}{copy\_message}}(\mbox{\hyperlink{structMessage}{Message}}*\ dest,\ \mbox{\hyperlink{structMessage}{Message}}*\ src);}
+
+\end{DoxyCode}

@@ -1,0 +1,49 @@
+\doxysection{server.\+h}
+\hypertarget{server_8h_source}{}\label{server_8h_source}\index{include/server.h@{include/server.h}}
+\mbox{\hyperlink{server_8h}{Go to the documentation of this file.}}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ \textcolor{preprocessor}{\#pragma\ once}}
+\DoxyCodeLine{00002\ }
+\DoxyCodeLine{00003\ \textcolor{preprocessor}{\#include\ "{}\mbox{\hyperlink{tcp__connection_8h}{tcp\_connection.h}}"{}}}
+\DoxyCodeLine{00004\ }
+\DoxyCodeLine{00005\ \textcolor{preprocessor}{\#define\ NB\_MAX\_CLIENTS\ 200}}
+\DoxyCodeLine{00006\ \textcolor{preprocessor}{\#define\ NB\_MAX\_MESSAGES\ 2000}}
+\DoxyCodeLine{00007\ }
+\DoxyCodeLine{00008\ \textcolor{keyword}{typedef}\ \textcolor{keyword}{struct\ }\{}
+\DoxyCodeLine{00009\ \ \ \ \ \textcolor{comment}{//\ Nom\ du\ salon\ textuel}}
+\DoxyCodeLine{00010\ \ \ \ \ \textcolor{keywordtype}{char}\ name[\mbox{\hyperlink{tcp__connection_8h_aeb818ba2320ac54338775af361c645b9}{T\_NOM\_MAX}}];}
+\DoxyCodeLine{00011\ }
+\DoxyCodeLine{00012\ \ \ \ \ \textcolor{comment}{//\ Pseudo\ du\ créateur\ du\ channel}}
+\DoxyCodeLine{00013\ \ \ \ \ \textcolor{keywordtype}{char}\ host[\mbox{\hyperlink{tcp__connection_8h_aeb818ba2320ac54338775af361c645b9}{T\_NOM\_MAX}}];}
+\DoxyCodeLine{00014\ }
+\DoxyCodeLine{00015\ \ \ \ \ \textcolor{comment}{//\ Liste\ des\ clients\ autorisés}}
+\DoxyCodeLine{00016\ \ \ \ \ \textcolor{keywordtype}{char}\ clients[\mbox{\hyperlink{tcp__connection_8h_aeb818ba2320ac54338775af361c645b9}{T\_NOM\_MAX}}][\mbox{\hyperlink{server_8h_ab8fdad3db19e3d15c1f5e965a00a2bc9}{NB\_MAX\_CLIENTS}}];}
+\DoxyCodeLine{00017\ }
+\DoxyCodeLine{00018\ \ \ \ \ \textcolor{comment}{//\ Nombre\ de\ clients}}
+\DoxyCodeLine{00019\ \ \ \ \ \textcolor{keywordtype}{int}\ \mbox{\hyperlink{structChannel_aceb4db4cf97948be62ba86bd0ffe6fe8}{nb\_clients}};}
+\DoxyCodeLine{00020\ }
+\DoxyCodeLine{00021\ \ \ \ \ \textcolor{comment}{//\ liste\ des\ messages}}
+\DoxyCodeLine{00022\ \ \ \ \ \mbox{\hyperlink{structMessage}{Message}}\ msgs[\mbox{\hyperlink{server_8h_afb945283a3a4f0930ac3a79fe319155a}{NB\_MAX\_MESSAGES}}];}
+\DoxyCodeLine{00023\ }
+\DoxyCodeLine{00024\ \ \ \ \ \textcolor{comment}{//\ Nombre\ de\ messages\ dans\ le\ salon}}
+\DoxyCodeLine{00025\ \ \ \ \ \textcolor{keywordtype}{int}\ \mbox{\hyperlink{structChannel_a809bf3d69aa7469b348616ece43c0039}{nb\_msgs}};}
+\DoxyCodeLine{00026\ }
+\DoxyCodeLine{00027\ \ \ \ \ \textcolor{comment}{//\ Indique\ qu’on\ a\ dépassé\ NB\_MAX\_MESSAGES\ messages\ dans\ le\ salon,}}
+\DoxyCodeLine{00028\ \ \ \ \ \textcolor{comment}{//\ \ donc\ on\ active\ la\ périodicité\ du\ tableau\ msgs}}
+\DoxyCodeLine{00029\ \ \ \ \ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{structChannel_aa5f18a5b8039a00aeb6ea0eff69cf719}{msgs\_boucle}};}
+\DoxyCodeLine{00030\ }
+\DoxyCodeLine{00031\ \}\ \mbox{\hyperlink{structChannel}{Channel}};}
+\DoxyCodeLine{00032\ }
+\DoxyCodeLine{00033\ }
+\DoxyCodeLine{00034\ \textcolor{preprocessor}{\#define\ NB\_MAX\_CHANNELS\ 128}}
+\DoxyCodeLine{00035\ \textcolor{preprocessor}{\#define\ NB\_MAX\_CONNECTED\_CLIENTS\ (MAX\_POLL\_SOCKETS\ -\/\ 4)}}
+\DoxyCodeLine{00036\ }
+\DoxyCodeLine{00037\ }
+\DoxyCodeLine{00038\ \textcolor{keyword}{typedef}\ \textcolor{keyword}{struct}\{}
+\DoxyCodeLine{00039\ \ \ \ \ }
+\DoxyCodeLine{00040\ \ \ \ \ \textcolor{comment}{//\ TODO\ :\ compléter\ cette\ structure}}
+\DoxyCodeLine{00041\ }
+\DoxyCodeLine{00042\ \}\ \mbox{\hyperlink{structServerState}{ServerState}};}
+\DoxyCodeLine{00043\ }
+
+\end{DoxyCode}

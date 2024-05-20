@@ -3,6 +3,7 @@ SDIR = src/
 BDIR = build/bin/
 IDIR = include/
 TDIR = test/
+DDIR = doc/
 UDIR = unity/src/
 
 CC = gcc
@@ -27,10 +28,10 @@ proxy: $(OBJ) $(ODIR)proxy.o
 	@printf "$(GREEN)Linking $@... $(DEFAULT)\n"
 	$(CC) $^ -o $(BDIR)$@ $(LDFLAGS)
 
-# Rule for building a C test executable
-test_%: $(OBJ) $(ODIR)test_%.o $(ODIR)unity.o
-	@printf "$(GREEN)Linking $@... $(DEFAULT)\n"
-	$(CC) $^ -o $(BDIR)$@ $(LDFLAGS)
+doc::
+	@mkdir -p $(DDIR) && $(RM) -r $(DDIR)*/
+	@printf "$(GREEN)Generating documentation...$(DEFAULT)\n"
+	@doxygen Doxyfile
 
 test: test_hashmap
 	@for test in $^; do \
@@ -41,6 +42,11 @@ test: test_hashmap
 clean:
 	@printf "$(GREEN)Cleaning... $(DEFAULT)\n"
 	$(RM) -r $(ODIR) $(BDIR) build/
+
+# Rule for building a C test executable
+test_%: $(OBJ) $(ODIR)test_%.o $(ODIR)unity.o
+	@printf "$(GREEN)Linking $@... $(DEFAULT)\n"
+	$(CC) $^ -o $(BDIR)$@ $(LDFLAGS)
 
 # Rule for compiling a C source file
 $(ODIR)%.o: $(SDIR)%.c

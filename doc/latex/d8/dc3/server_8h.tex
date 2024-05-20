@@ -1,0 +1,48 @@
+\doxysection{include/server.h File Reference}
+\hypertarget{server_8h}{}\label{server_8h}\index{include/server.h@{include/server.h}}
+{\ttfamily \#include "{}tcp\+\_\+connection.\+h"{}}\newline
+\doxysubsubsection*{Data Structures}
+\begin{DoxyCompactItemize}
+\item 
+struct \mbox{\hyperlink{structChannel}{Channel}}
+\item 
+struct \mbox{\hyperlink{structServerState}{Server\+State}}
+\end{DoxyCompactItemize}
+\doxysubsubsection*{Macros}
+\begin{DoxyCompactItemize}
+\item 
+\#define \mbox{\hyperlink{server_8h_ab8fdad3db19e3d15c1f5e965a00a2bc9}{NB\+\_\+\+MAX\+\_\+\+CLIENTS}}~200
+\item 
+\#define \mbox{\hyperlink{server_8h_afb945283a3a4f0930ac3a79fe319155a}{NB\+\_\+\+MAX\+\_\+\+MESSAGES}}~2000
+\item 
+\#define \mbox{\hyperlink{server_8h_afd147c483b5543c14ec816a265c0e812}{NB\+\_\+\+MAX\+\_\+\+CHANNELS}}~128
+\item 
+\#define \mbox{\hyperlink{server_8h_a08f88b8ad1561c424e313a9983697e66}{NB\+\_\+\+MAX\+\_\+\+CONNECTED\+\_\+\+CLIENTS}}~(\mbox{\hyperlink{tcp__connection_8h_a6f41fc0ef18eeaf17db8a65f06278cfd}{MAX\+\_\+\+POLL\+\_\+\+SOCKETS}} -\/ 4)
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Macro Definition Documentation}
+\Hypertarget{server_8h_ab8fdad3db19e3d15c1f5e965a00a2bc9}\label{server_8h_ab8fdad3db19e3d15c1f5e965a00a2bc9} 
+\index{server.h@{server.h}!NB\_MAX\_CLIENTS@{NB\_MAX\_CLIENTS}}
+\index{NB\_MAX\_CLIENTS@{NB\_MAX\_CLIENTS}!server.h@{server.h}}
+\doxysubsubsection{\texorpdfstring{NB\_MAX\_CLIENTS}{NB\_MAX\_CLIENTS}}
+{\footnotesize\ttfamily \#define NB\+\_\+\+MAX\+\_\+\+CLIENTS~200}
+
+\Hypertarget{server_8h_afb945283a3a4f0930ac3a79fe319155a}\label{server_8h_afb945283a3a4f0930ac3a79fe319155a} 
+\index{server.h@{server.h}!NB\_MAX\_MESSAGES@{NB\_MAX\_MESSAGES}}
+\index{NB\_MAX\_MESSAGES@{NB\_MAX\_MESSAGES}!server.h@{server.h}}
+\doxysubsubsection{\texorpdfstring{NB\_MAX\_MESSAGES}{NB\_MAX\_MESSAGES}}
+{\footnotesize\ttfamily \#define NB\+\_\+\+MAX\+\_\+\+MESSAGES~2000}
+
+\Hypertarget{server_8h_afd147c483b5543c14ec816a265c0e812}\label{server_8h_afd147c483b5543c14ec816a265c0e812} 
+\index{server.h@{server.h}!NB\_MAX\_CHANNELS@{NB\_MAX\_CHANNELS}}
+\index{NB\_MAX\_CHANNELS@{NB\_MAX\_CHANNELS}!server.h@{server.h}}
+\doxysubsubsection{\texorpdfstring{NB\_MAX\_CHANNELS}{NB\_MAX\_CHANNELS}}
+{\footnotesize\ttfamily \#define NB\+\_\+\+MAX\+\_\+\+CHANNELS~128}
+
+\Hypertarget{server_8h_a08f88b8ad1561c424e313a9983697e66}\label{server_8h_a08f88b8ad1561c424e313a9983697e66} 
+\index{server.h@{server.h}!NB\_MAX\_CONNECTED\_CLIENTS@{NB\_MAX\_CONNECTED\_CLIENTS}}
+\index{NB\_MAX\_CONNECTED\_CLIENTS@{NB\_MAX\_CONNECTED\_CLIENTS}!server.h@{server.h}}
+\doxysubsubsection{\texorpdfstring{NB\_MAX\_CONNECTED\_CLIENTS}{NB\_MAX\_CONNECTED\_CLIENTS}}
+{\footnotesize\ttfamily \#define NB\+\_\+\+MAX\+\_\+\+CONNECTED\+\_\+\+CLIENTS~(\mbox{\hyperlink{tcp__connection_8h_a6f41fc0ef18eeaf17db8a65f06278cfd}{MAX\+\_\+\+POLL\+\_\+\+SOCKETS}} -\/ 4)}
+

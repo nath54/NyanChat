@@ -1,0 +1,105 @@
+\doxysection{Tcp\+Connection Struct Reference}
+\hypertarget{structTcpConnection}{}\label{structTcpConnection}\index{TcpConnection@{TcpConnection}}
+
+
+{\ttfamily \#include $<$tcp\+\_\+connection.\+h$>$}
+
+\doxysubsubsection*{Data Fields}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{tcp__connection_8h_a8dc8083897335125630f1af5dafd5831}{SOCKET}} \mbox{\hyperlink{structTcpConnection_a9b3b92335db7b4009b3d1fe5733c664f}{sockfd}}
+\item 
+\mbox{\hyperlink{tcp__connection_8h_a29046dc0232f0e5c70adbc25090d77b8}{SOCKADDR\+\_\+\+IN}} \mbox{\hyperlink{structTcpConnection_ade82be69f41249fd4fe0b9049e9bf847}{addr}}
+\item 
+struct pollfd \mbox{\hyperlink{structTcpConnection_abfe3f6d0a5952f685fc152bed927b137}{poll\+\_\+fds}} \mbox{[}\mbox{\hyperlink{tcp__connection_8h_a6f41fc0ef18eeaf17db8a65f06278cfd}{MAX\+\_\+\+POLL\+\_\+\+SOCKETS}}\mbox{]}
+\item 
+\mbox{\hyperlink{tcp__connection_8h_a29046dc0232f0e5c70adbc25090d77b8}{SOCKADDR\+\_\+\+IN}} \mbox{\hyperlink{structTcpConnection_a5a4bc2d3b4a0aaad999c44495d4faf64}{poll\+\_\+addrs}} \mbox{[}\mbox{\hyperlink{tcp__connection_8h_a6f41fc0ef18eeaf17db8a65f06278cfd}{MAX\+\_\+\+POLL\+\_\+\+SOCKETS}}\mbox{]}
+\item 
+socklen\+\_\+t \mbox{\hyperlink{structTcpConnection_accd85ae783b5ee647cb4aedd0439926d}{poll\+\_\+ad\+\_\+len}} \mbox{[}\mbox{\hyperlink{tcp__connection_8h_a6f41fc0ef18eeaf17db8a65f06278cfd}{MAX\+\_\+\+POLL\+\_\+\+SOCKETS}}\mbox{]}
+\item 
+nfds\+\_\+t \mbox{\hyperlink{structTcpConnection_ac5401f4b73bfe7d20fbc35b807295591}{nb\+\_\+poll\+\_\+fds}}
+\item 
+\mbox{\hyperlink{structMessage}{Message}} \mbox{\hyperlink{structTcpConnection_aa3f05be09e995c3f78b731660fb5c5af}{msg}}
+\item 
+int \mbox{\hyperlink{structTcpConnection_a48676bbb3c561b8d9fd1fd315f6379f9}{type\+\_\+connection}}
+\item 
+int \mbox{\hyperlink{structTcpConnection_a0cd0f24332b95cdba0a7f7d4428e1488}{timeout}}
+\item 
+bool \mbox{\hyperlink{structTcpConnection_a2d2ee2c637405525fdb6a7c3620f9cec}{end\+\_\+connection}}
+\item 
+bool \mbox{\hyperlink{structTcpConnection_ad145b1c4d7ddd8823146ecb984fda98e}{need\+\_\+compress\+\_\+poll\+\_\+arr}}
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Field Documentation}
+\Hypertarget{structTcpConnection_a9b3b92335db7b4009b3d1fe5733c664f}\label{structTcpConnection_a9b3b92335db7b4009b3d1fe5733c664f} 
+\index{TcpConnection@{TcpConnection}!sockfd@{sockfd}}
+\index{sockfd@{sockfd}!TcpConnection@{TcpConnection}}
+\doxysubsubsection{\texorpdfstring{sockfd}{sockfd}}
+{\footnotesize\ttfamily \mbox{\hyperlink{tcp__connection_8h_a8dc8083897335125630f1af5dafd5831}{SOCKET}} Tcp\+Connection\+::sockfd}
+
+\Hypertarget{structTcpConnection_ade82be69f41249fd4fe0b9049e9bf847}\label{structTcpConnection_ade82be69f41249fd4fe0b9049e9bf847} 
+\index{TcpConnection@{TcpConnection}!addr@{addr}}
+\index{addr@{addr}!TcpConnection@{TcpConnection}}
+\doxysubsubsection{\texorpdfstring{addr}{addr}}
+{\footnotesize\ttfamily \mbox{\hyperlink{tcp__connection_8h_a29046dc0232f0e5c70adbc25090d77b8}{SOCKADDR\+\_\+\+IN}} Tcp\+Connection\+::addr}
+
+\Hypertarget{structTcpConnection_abfe3f6d0a5952f685fc152bed927b137}\label{structTcpConnection_abfe3f6d0a5952f685fc152bed927b137} 
+\index{TcpConnection@{TcpConnection}!poll\_fds@{poll\_fds}}
+\index{poll\_fds@{poll\_fds}!TcpConnection@{TcpConnection}}
+\doxysubsubsection{\texorpdfstring{poll\_fds}{poll\_fds}}
+{\footnotesize\ttfamily struct pollfd Tcp\+Connection\+::poll\+\_\+fds\mbox{[}\mbox{\hyperlink{tcp__connection_8h_a6f41fc0ef18eeaf17db8a65f06278cfd}{MAX\+\_\+\+POLL\+\_\+\+SOCKETS}}\mbox{]}}
+
+\Hypertarget{structTcpConnection_a5a4bc2d3b4a0aaad999c44495d4faf64}\label{structTcpConnection_a5a4bc2d3b4a0aaad999c44495d4faf64} 
+\index{TcpConnection@{TcpConnection}!poll\_addrs@{poll\_addrs}}
+\index{poll\_addrs@{poll\_addrs}!TcpConnection@{TcpConnection}}
+\doxysubsubsection{\texorpdfstring{poll\_addrs}{poll\_addrs}}
+{\footnotesize\ttfamily \mbox{\hyperlink{tcp__connection_8h_a29046dc0232f0e5c70adbc25090d77b8}{SOCKADDR\+\_\+\+IN}} Tcp\+Connection\+::poll\+\_\+addrs\mbox{[}\mbox{\hyperlink{tcp__connection_8h_a6f41fc0ef18eeaf17db8a65f06278cfd}{MAX\+\_\+\+POLL\+\_\+\+SOCKETS}}\mbox{]}}
+
+\Hypertarget{structTcpConnection_accd85ae783b5ee647cb4aedd0439926d}\label{structTcpConnection_accd85ae783b5ee647cb4aedd0439926d} 
+\index{TcpConnection@{TcpConnection}!poll\_ad\_len@{poll\_ad\_len}}
+\index{poll\_ad\_len@{poll\_ad\_len}!TcpConnection@{TcpConnection}}
+\doxysubsubsection{\texorpdfstring{poll\_ad\_len}{poll\_ad\_len}}
+{\footnotesize\ttfamily socklen\+\_\+t Tcp\+Connection\+::poll\+\_\+ad\+\_\+len\mbox{[}\mbox{\hyperlink{tcp__connection_8h_a6f41fc0ef18eeaf17db8a65f06278cfd}{MAX\+\_\+\+POLL\+\_\+\+SOCKETS}}\mbox{]}}
+
+\Hypertarget{structTcpConnection_ac5401f4b73bfe7d20fbc35b807295591}\label{structTcpConnection_ac5401f4b73bfe7d20fbc35b807295591} 
+\index{TcpConnection@{TcpConnection}!nb\_poll\_fds@{nb\_poll\_fds}}
+\index{nb\_poll\_fds@{nb\_poll\_fds}!TcpConnection@{TcpConnection}}
+\doxysubsubsection{\texorpdfstring{nb\_poll\_fds}{nb\_poll\_fds}}
+{\footnotesize\ttfamily nfds\+\_\+t Tcp\+Connection\+::nb\+\_\+poll\+\_\+fds}
+
+\Hypertarget{structTcpConnection_aa3f05be09e995c3f78b731660fb5c5af}\label{structTcpConnection_aa3f05be09e995c3f78b731660fb5c5af} 
+\index{TcpConnection@{TcpConnection}!msg@{msg}}
+\index{msg@{msg}!TcpConnection@{TcpConnection}}
+\doxysubsubsection{\texorpdfstring{msg}{msg}}
+{\footnotesize\ttfamily \mbox{\hyperlink{structMessage}{Message}} Tcp\+Connection\+::msg}
+
+\Hypertarget{structTcpConnection_a48676bbb3c561b8d9fd1fd315f6379f9}\label{structTcpConnection_a48676bbb3c561b8d9fd1fd315f6379f9} 
+\index{TcpConnection@{TcpConnection}!type\_connection@{type\_connection}}
+\index{type\_connection@{type\_connection}!TcpConnection@{TcpConnection}}
+\doxysubsubsection{\texorpdfstring{type\_connection}{type\_connection}}
+{\footnotesize\ttfamily int Tcp\+Connection\+::type\+\_\+connection}
+
+\Hypertarget{structTcpConnection_a0cd0f24332b95cdba0a7f7d4428e1488}\label{structTcpConnection_a0cd0f24332b95cdba0a7f7d4428e1488} 
+\index{TcpConnection@{TcpConnection}!timeout@{timeout}}
+\index{timeout@{timeout}!TcpConnection@{TcpConnection}}
+\doxysubsubsection{\texorpdfstring{timeout}{timeout}}
+{\footnotesize\ttfamily int Tcp\+Connection\+::timeout}
+
+\Hypertarget{structTcpConnection_a2d2ee2c637405525fdb6a7c3620f9cec}\label{structTcpConnection_a2d2ee2c637405525fdb6a7c3620f9cec} 
+\index{TcpConnection@{TcpConnection}!end\_connection@{end\_connection}}
+\index{end\_connection@{end\_connection}!TcpConnection@{TcpConnection}}
+\doxysubsubsection{\texorpdfstring{end\_connection}{end\_connection}}
+{\footnotesize\ttfamily bool Tcp\+Connection\+::end\+\_\+connection}
+
+\Hypertarget{structTcpConnection_ad145b1c4d7ddd8823146ecb984fda98e}\label{structTcpConnection_ad145b1c4d7ddd8823146ecb984fda98e} 
+\index{TcpConnection@{TcpConnection}!need\_compress\_poll\_arr@{need\_compress\_poll\_arr}}
+\index{need\_compress\_poll\_arr@{need\_compress\_poll\_arr}!TcpConnection@{TcpConnection}}
+\doxysubsubsection{\texorpdfstring{need\_compress\_poll\_arr}{need\_compress\_poll\_arr}}
+{\footnotesize\ttfamily bool Tcp\+Connection\+::need\+\_\+compress\+\_\+poll\+\_\+arr}
+
+
+
+The documentation for this struct was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+include/\mbox{\hyperlink{tcp__connection_8h}{tcp\+\_\+connection.\+h}}\end{DoxyCompactItemize}
