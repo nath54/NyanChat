@@ -112,7 +112,7 @@ typedef struct {
     nfds_t nb_poll_fds;    // Nombre actuel de sockets de polling
 
     // Variables pour le serveur
-    Message msg[1];
+    Message msg;    // Recevra les messages depuis recv
 
     // Paramètres de la connexion
     int type_connection;    // 0 = server, 1 = client,
@@ -125,7 +125,7 @@ typedef struct {
 
 
 typedef void(fn_on_msg)(TcpConnection* con, SOCKET sock,
-                        Message msg, size_t msg_len,
+                        Message* msg, size_t msg_len,
                         void* custom_args);
 
 typedef void(fn_on_stdin)(TcpConnection* con,
@@ -175,4 +175,8 @@ void tcp_connection_send_message(TcpConnection* con, SOCKET sock,
 
 // Transmission d'un struct message
 void tcp_connection_send_struct_message(TcpConnection* con, SOCKET sock,
-                                        Message msg);
+                                        Message* msg);
+
+
+// Fonction qui copie le contenu d'un message depuis src vers dest
+void copy_message(Message* dest, Message* src);

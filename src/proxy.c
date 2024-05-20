@@ -51,7 +51,7 @@ int randint(int maxi_val){
 
 
 void on_client_received(TcpConnection* con, SOCKET sock,
-                        Message msg, size_t msg_length,
+                        Message* msg, size_t msg_length,
                         void* custom_args)
 {
     (void)con;
@@ -59,7 +59,7 @@ void on_client_received(TcpConnection* con, SOCKET sock,
     (void)msg_length;
     (void)custom_args;
 
-    if(msg.type_msg == MSG_NULL)
+    if(msg->type_msg == MSG_NULL)
         return;
 
     //
@@ -67,13 +67,13 @@ void on_client_received(TcpConnection* con, SOCKET sock,
     // Normalement, la fonction qui a appelé cette fonction 
     //  a mis l'id du poll socket du client dans msg.proxy_client_socket
 
-    if(msg.type_msg == MSG_NORMAL_CLIENT_SERVER && msg.taille_msg >= 10){
+    if(msg->type_msg == MSG_NORMAL_CLIENT_SERVER && msg->taille_msg >= 10){
         // Ajouts potentiel d'erreurs
 
         if(randint(100) <= PROXY_ERROR_RATE){
-            
+
             // Ajout d'erreurs au message
-            code_add_noise_to_msg(&msg, randint(PROXY_MAX_ERROR_CREATED));
+            code_add_noise_to_msg(msg, randint(PROXY_MAX_ERROR_CREATED));
         }
 
     }
@@ -85,7 +85,7 @@ void on_client_received(TcpConnection* con, SOCKET sock,
 
 
 void on_server_received(TcpConnection* con, SOCKET sock,
-                        Message msg, size_t msg_length,
+                        Message* msg, size_t msg_length,
                         void* custom_args)
 {
     (void)con;
@@ -93,16 +93,16 @@ void on_server_received(TcpConnection* con, SOCKET sock,
     (void)msg_length;
     (void)custom_args;
 
-    if(msg.type_msg == MSG_NULL)
+    if(msg->type_msg == MSG_NULL)
         return;
 
     // Test du socket client à qui retransmettre le message
-    if(msg.proxy_client_socket == -1){
+    if(msg->proxy_client_socket == -1){
         fprintf(stderr, "Error: Unknown client socket on msg from serv!\n");
         return;
     }
-    else if(msg.proxy_client_socket < 0||
-            (size_t)msg.proxy_client_socket >= con->nb_poll_fds)
+    else if(msg->proxy_client_socket < 0||
+            (size_t)msg->proxy_client_socket >= con->nb_poll_fds)
     {
         fprintf(stderr,
                 "Error: Bad value of client socket on msg  from serv!\n");
@@ -112,7 +112,7 @@ void on_server_received(TcpConnection* con, SOCKET sock,
     // Le socket est à priori bon, on transmet le message
     tcp_connection_send_struct_message(
         &con_clients,
-        con_clients.poll_fds[msg.proxy_client_socket].fd,
+        con_clients.poll_fds[msg->proxy_client_socket].fd,
         msg
     );
 

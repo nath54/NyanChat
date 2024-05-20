@@ -128,7 +128,7 @@ void on_stdin_client(TcpConnection* con,
 
                 cstate->nb_msg_waiting_acq += 1;
                 tcp_connection_send_struct_message(con, con->sockfd,
-                                                   cstate->msg_waiting_acq[0]);
+                                                &(cstate->msg_waiting_acq[0]));
 
                 cstate->waiting_pseudo_confirmation = true;
             }
@@ -154,14 +154,14 @@ void on_stdin_client(TcpConnection* con,
         cstate->nb_msg_waiting_acq += 1;
 
         tcp_connection_send_struct_message(con, con->sockfd,
-                                        cstate->msg_waiting_acq[id_new_msg]);
+                                    &(cstate->msg_waiting_acq[id_new_msg]));
     }
 
 }
 
 
 void on_msg_client(TcpConnection* con, SOCKET sock, 
-                   Message msg, size_t msg_len,
+                   Message* msg, size_t msg_len,
                    void* custom_args){
     (void)con;
     (void)sock;
@@ -169,7 +169,7 @@ void on_msg_client(TcpConnection* con, SOCKET sock,
     ClientState* cstate = custom_args;
     (void)cstate;
     
-    printf("Message received: %s\n", msg.msg);
+    printf("Message received: %s\n", msg->msg);
 
 }
 

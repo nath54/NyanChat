@@ -100,6 +100,9 @@ void tcp_connection_server_init(TcpConnection* con,
 
     con->end_connection = false;
     con->need_compress_poll_arr = false;
+
+    // Init message vide, pour éviter undefined behaviors
+    init_empty_message(&(con->msg));
 }
 
 void tcp_connection_client_init(TcpConnection* con,
@@ -280,7 +283,7 @@ void read_poll_socket(TcpConnection* con, int id_poll,
         // On lit sur le socket
         // rc pour Return Code
         int rc = recv(con->poll_fds[id_poll].fd,
-                      con->msg, sizeof(con->msg), MSG_DONTWAIT);
+                      &(con->msg), sizeof(con->msg), MSG_DONTWAIT);
 
         // Plus rien à lire
         if(rc < 0){
@@ -302,13 +305,13 @@ void read_poll_socket(TcpConnection* con, int id_poll,
         // On a reçu des données
         size_t msg_len = rc;
 
-        printf("Msg reçu : %s\n", con->msg[0].msg);
+        printf("Msg reçu : %s\n", con->msg.msg);
 
         if(con->type_connection == TCP_CON_PROXY_CLIENTS_SIDE){
-            con->msg[0].proxy_client_socket = id_poll;
+            con->msg.proxy_client_socket = id_poll;
         }
 
-        on_msg(con, con->poll_fds[id_poll].fd, con->msg[0], msg_len,
+        on_msg(con, con->poll_fds[id_poll].fd, &(con->msg), msg_len,
                on_msg_custom_args);
 
     } while(true);
@@ -470,15 +473,15 @@ void tcp_connection_send_message(TcpConnection* con, SOCKET sock,
     strcpy(msg.pseudo_source, pseudo_src);
     strcpy(msg.destination, destination);
 
-    tcp_connection_send_struct_message(con, sock, msg);
+    tcp_connection_send_struct_message(con, sock, &msg);
 }
 
 
 void tcp_connection_send_struct_message(TcpConnection* con, SOCKET sock,
-                                        Message msg)
+                                        Message* msg)
 {
 
-    int bytes_sent = send(sock, &msg, sizeof(msg), 0);
+    int bytes_sent = send(sock, msg, sizeof(msg), 0);
 
     printf("%d bytes sent!\n", bytes_sent);
 
@@ -489,3 +492,16 @@ void tcp_connection_send_struct_message(TcpConnection* con, SOCKET sock,
 }
 
 
+// Fonction qui copie le contenu d'un message depuis src vers dest
+void copy_message(Message* dest, Message* src){
+    dest->type_msg = src->type_msg;
+    dest->id_msg = src->id_msg;
+    strcpy(dest->pseudo_source, src->pseudo_source);
+    dest->proxy_client_socket = src->proxy_client_socket;
+    dest->flag_destination = src->flag_destination;
+    strcpy(dest->destination, src->destination);
+    dest->taille_msg = src->taille_msg;
+    strcpy(dest->msg, src->msg);
+    //
+    // TODO: copier les variables qui gèrent les codes correcteurs
+}

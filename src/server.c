@@ -21,29 +21,23 @@
 #include "../include/server.h"
 
 
-Message gen_positive_acq_from_msg(Message* msg){
-    Message acq;
-    init_empty_message(&acq);
-    acq.type_msg = MSG_ACQ_POS;
-    acq.id_msg = msg->id_msg;
-
-    return acq;
+void gen_positive_acq_from_msg(Message* msg, Message* acq){
+    init_empty_message(acq);
+    acq->type_msg = MSG_ACQ_POS;
+    acq->id_msg = msg->id_msg;
 }
 
 
-Message gen_negative_acq_from_msg(Message* msg){
-    Message acq;
-    init_empty_message(&acq);
-    acq.type_msg = MSG_ACQ_NEG;
-    acq.id_msg = msg->id_msg;
-
-    return acq;
+void gen_negative_acq_from_msg(Message* msg, Message* acq){
+    init_empty_message(acq);
+    acq->type_msg = MSG_ACQ_NEG;
+    acq->id_msg = msg->id_msg;
 }
 
 
 // Fonction qui traite les messages reçus
 void on_msg_received(TcpConnection* con, SOCKET sock,
-                     Message msg, size_t msg_length,
+                     Message* msg, size_t msg_length,
                      void* custom_args)
 {
     (void)con;
@@ -52,17 +46,17 @@ void on_msg_received(TcpConnection* con, SOCKET sock,
     ServerState* sstate = custom_args;
     (void)sstate;
 
-    if(msg.type_msg == MSG_NORMAL_CLIENT_SERVER && msg.taille_msg >= 10){
+    if(msg->type_msg == MSG_NORMAL_CLIENT_SERVER && msg->taille_msg >= 10){
         
         // test detection d'erreurs
-        int res = code_detect_error(&msg);
+        int res = code_detect_error(msg);
         bool msg_bon = true;
 
         if(res != 0){
             // Erreur détectée
 
             if(res == 1){ // On peut corriger?
-                if(code_correct_error(&msg) != 0){
+                if(code_correct_error(msg) != 0){
                     msg_bon = false;
                 }
             }
@@ -73,27 +67,32 @@ void on_msg_received(TcpConnection* con, SOCKET sock,
         }
 
         // Envoi des acquittements
+        Message acq;
         if(msg_bon){
             // Acquittement positif: on a bien reçu le message
+            gen_negative_acq_from_msg(msg, &acq);
+
             tcp_connection_send_struct_message(
                 con,
                 sock,
-                gen_positive_acq_from_msg(&msg)
+                &acq
             );
         }
         else{
             // Acquittement négatif: on n'a pas bien reçu le message
+            gen_negative_acq_from_msg(msg, &acq);
+
             tcp_connection_send_struct_message(
                 con,
                 sock,
-                gen_negative_acq_from_msg(&msg)
+                &acq
             );
         }
 
 
     }
 
-    printf("Message reçu : \"%s\"\n", msg.msg);
+    printf("Message reçu : \"%s\"\n", msg->msg);
 }
 
 
