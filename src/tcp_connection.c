@@ -20,6 +20,7 @@
 
 
 // Initialisation d'un message vide
+//  pour éviter de manipuler des données non initialisées
 void init_empty_message(Message* msg){
     msg->type_msg = MSG_NULL;
     msg->id_msg = -1;
@@ -466,6 +467,7 @@ void tcp_connection_send_message(TcpConnection* con, SOCKET sock,
 {
     (void)flags;
     Message msg;
+    init_empty_message(&msg);
     strcpy(msg.msg, buffer);
     msg.taille_msg = message_size;
     msg.type_msg = 1;
@@ -481,7 +483,7 @@ void tcp_connection_send_struct_message(TcpConnection* con, SOCKET sock,
                                         Message* msg)
 {
 
-    int bytes_sent = send(sock, msg, sizeof(msg), 0);
+    int bytes_sent = send(sock, msg, sizeof(*msg), 0);
 
     printf("%d bytes sent!\n", bytes_sent);
 

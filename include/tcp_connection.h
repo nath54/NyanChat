@@ -140,6 +140,7 @@ typedef void(fn_on_stdin)(TcpConnection* con,
 
 
 // Initialisation d'un message vide
+//  pour éviter de manipuler des données non initialisées
 void init_empty_message(Message* msg);
 
 
