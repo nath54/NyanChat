@@ -67,7 +67,7 @@ void on_client_received(TcpConnection* con, SOCKET sock,
     // Normalement, la fonction qui a appelé cette fonction 
     //  a mis l'id du poll socket du client dans msg.proxy_client_socket
 
-    if (msg->msg_type == MSG_NORMAL_CLIENT_SERVER && msg->msg_length >= 10){
+    if (msg->msg_type == MSG_STD_CLIENT_SERVER && msg->msg_length >= 10){
         // Ajouts potentiel d'erreurs
 
         if(randint(100) <= PROXY_ERROR_RATE){

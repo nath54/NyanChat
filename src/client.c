@@ -201,7 +201,7 @@ void on_msg_client(TcpConnection* con, SOCKET sock,
         CHKN( strcat(path_priv, "rsa_pub") );
 
         // Gestion erreur
-        if(msg->msg_type == MSG_ERREUR){
+        if(msg->msg_type == MSG_ERROR){
             // Pseudo non utilisable, il faut donc le dire à l'utilisateur
             //  et lui demander d'en rentrer un autre
             //  il faudra donc aussi supprimer les fichiers de clés rsa
@@ -278,7 +278,7 @@ void on_msg_client(TcpConnection* con, SOCKET sock,
                                         msg->src_pseudo, msg->msg);
                 break;
 
-            case MSG_ERREUR:
+            case MSG_ERROR:
                 printf("\033[31mError from server: %s\033[m\n", msg->msg);
                 break;
 

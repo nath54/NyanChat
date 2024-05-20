@@ -46,14 +46,18 @@ typedef u_int32_t uint32;
 #define TCP_CON_PROXY_SERVER_SIDE 2
 #define TCP_CON_PROXY_CLIENTS_SIDE 3
 
-
 #define MSG_NULL -1
-#define MSG_NORMAL_CLIENT_SERVER 0
+#define MSG_STD_CLIENT_SERVER 0
 #define MSG_SERVER_CLIENT 1
 #define MSG_CONNECTION_CLIENT 2
-#define MSG_ERREUR 4
+#define MSG_ERROR 4
 #define MSG_ACK_POS 5
 #define MSG_ACK_NEG 6
+
+#define ERROR_MSG_CON_DIFF_KEYS "Error: this pseudo already has another key"
+#define ERROR_MSG_BAD_DECODED "Error: misdecoded the connection code"
+#define ERROR_MSG_STILL_ACTIVE_CLIENT "Error: you still have an active session"
+#define ERROR_ALREADY_MAX_CLIENTS "Error: already max clients connected!"
 
 /* Structure used for messages and acknowledgments
     transmitted by the connection
