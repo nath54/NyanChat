@@ -35,24 +35,32 @@ int generate_keypair(const char* private_key_file, const char* public_key_file,
     ctx = EVP_PKEY_CTX_new_id(EVP_PKEY_RSA, NULL);
     if (!ctx) {
         fprintf(stderr, "Error creating context\n");
+        ERR_print_errors_fp(stderr);
+        fprintf(stderr, "\n");
         goto cleanup;
     }
 
     // Initialize key generation
     if (EVP_PKEY_keygen_init(ctx) <= 0) {
         fprintf(stderr, "Error initializing key generation\n");
+        ERR_print_errors_fp(stderr);
+        fprintf(stderr, "\n");
         goto cleanup;
     }
 
     // Set RSA key size
     if (EVP_PKEY_CTX_set_rsa_keygen_bits(ctx, key_size) <= 0) {
         fprintf(stderr, "Error setting RSA key size\n");
+        ERR_print_errors_fp(stderr);
+        fprintf(stderr, "\n");
         goto cleanup;
     }
 
     // Generate the key pair
     if (EVP_PKEY_keygen(ctx, &pkey) <= 0) {
         fprintf(stderr, "Error generating key pair\n");
+        ERR_print_errors_fp(stderr);
+        fprintf(stderr, "\n");
         goto cleanup;
     }
 
@@ -61,18 +69,24 @@ int generate_keypair(const char* private_key_file, const char* public_key_file,
     public_fp = fopen(public_key_file, "wb");
     if (!private_fp || !public_fp) {
         fprintf(stderr, "Error opening files for writing keys\n");
+        ERR_print_errors_fp(stderr);
+        fprintf(stderr, "\n");
         goto cleanup;
     }
 
     // Write private key in PEM format
     if (!PEM_write_PrivateKey(private_fp, pkey, NULL, NULL, 0, NULL, NULL)) {
         fprintf(stderr, "Error writing private key\n");
+        ERR_print_errors_fp(stderr);
+        fprintf(stderr, "\n");
         goto cleanup;
     }
 
     // Write public key in PEM format
     if (!PEM_write_PUBKEY(public_fp, pkey)) {
         fprintf(stderr, "Error writing public key\n");
+        ERR_print_errors_fp(stderr);
+        fprintf(stderr, "\n");
         goto cleanup;
     }
 
@@ -117,6 +131,7 @@ int encrypt_message(const char* message, size_t message_len,
     if (!public_fp) {
         fprintf(stderr, "Error opening public key file\n");
         ERR_print_errors_fp(stderr);
+        fprintf(stderr, "\n");
         goto cleanup;
     }
 
@@ -125,6 +140,7 @@ int encrypt_message(const char* message, size_t message_len,
     if (!pkey) {
         fprintf(stderr, "Error reading public key\n");
         ERR_print_errors_fp(stderr);
+        fprintf(stderr, "\n");
         goto cleanup;
     }
 
@@ -133,6 +149,7 @@ int encrypt_message(const char* message, size_t message_len,
     if (!ctx) {
         fprintf(stderr, "Error creating context\n");
         ERR_print_errors_fp(stderr);
+        fprintf(stderr, "\n");
         goto cleanup;
     }
 
@@ -140,6 +157,7 @@ int encrypt_message(const char* message, size_t message_len,
     if (EVP_PKEY_encrypt_init(ctx) <= 0) {
         fprintf(stderr, "Error initializing encryption\n");
         ERR_print_errors_fp(stderr);
+        fprintf(stderr, "\n");
         goto cleanup;
     }
 
@@ -147,6 +165,7 @@ int encrypt_message(const char* message, size_t message_len,
     if (EVP_PKEY_CTX_set_rsa_padding(ctx, RSA_PKCS1_PADDING) <= 0) {
         fprintf(stderr, "Error setting padding\n");
         ERR_print_errors_fp(stderr);
+        fprintf(stderr, "\n");
         goto cleanup;
     }
 
@@ -154,6 +173,7 @@ int encrypt_message(const char* message, size_t message_len,
     if (EVP_PKEY_encrypt(ctx, NULL, &outlen, (unsigned char*)message, message_len) <= 0) {
         fprintf(stderr, "Error determining buffer length\n");
         ERR_print_errors_fp(stderr);
+        fprintf(stderr, "\n");
         goto cleanup;
     }
 
@@ -163,6 +183,7 @@ int encrypt_message(const char* message, size_t message_len,
     if (!encrypted) {
         fprintf(stderr, "Error allocating memory\n");
         ERR_print_errors_fp(stderr);
+        fprintf(stderr, "\n");
         goto cleanup;
     }
 
@@ -170,6 +191,7 @@ int encrypt_message(const char* message, size_t message_len,
     if (EVP_PKEY_encrypt(ctx, encrypted, &outlen, (unsigned char*)message, message_len) <= 0) {
         fprintf(stderr, "Error encrypting message\n");
         ERR_print_errors_fp(stderr);
+        fprintf(stderr, "\n");
         free(encrypted);
         goto cleanup;
     }
@@ -216,7 +238,9 @@ int decrypt_message(unsigned char* encrypted_message, size_t encrypted_len,
     // Open the private key file
     private_fp = fopen(private_key_file, "rb");
     if (!private_fp) {
-        fprintf(stderr, "Error opening private key file\n");
+        fprintf(stderr, "Error opening private key file: %s\n", private_key_file);
+        ERR_print_errors_fp(stderr);
+        fprintf(stderr, "\n");
         goto cleanup;
     }
 
@@ -224,6 +248,8 @@ int decrypt_message(unsigned char* encrypted_message, size_t encrypted_len,
     pkey = PEM_read_PrivateKey(private_fp, NULL, NULL, NULL);
     if (!pkey) {
         fprintf(stderr, "Error reading private key\n");
+        ERR_print_errors_fp(stderr);
+        fprintf(stderr, "\n");
         goto cleanup;
     }
 
@@ -231,24 +257,32 @@ int decrypt_message(unsigned char* encrypted_message, size_t encrypted_len,
     ctx = EVP_PKEY_CTX_new(pkey, NULL);
     if (!ctx) {
         fprintf(stderr, "Error creating context\n");
+        ERR_print_errors_fp(stderr);
+        fprintf(stderr, "\n");
         goto cleanup;
     }
 
     // Initialize decryption
     if (EVP_PKEY_decrypt_init(ctx) <= 0) {
         fprintf(stderr, "Error initializing decryption\n");
+        ERR_print_errors_fp(stderr);
+        fprintf(stderr, "\n");
         goto cleanup;
     }
 
     // Set padding
     if (EVP_PKEY_CTX_set_rsa_padding(ctx, RSA_PKCS1_PADDING) <= 0) {
         fprintf(stderr, "Error setting padding\n");
+        ERR_print_errors_fp(stderr);
+        fprintf(stderr, "\n");
         goto cleanup;
     }
 
     // Determine buffer length
     if (EVP_PKEY_decrypt(ctx, NULL, &outlen, encrypted_message, encrypted_len) <= 0) {
         fprintf(stderr, "Error determining buffer length\n");
+        ERR_print_errors_fp(stderr);
+        fprintf(stderr, "\n");
         goto cleanup;
     }
 
@@ -262,6 +296,8 @@ int decrypt_message(unsigned char* encrypted_message, size_t encrypted_len,
     // Perform decryption
     if (EVP_PKEY_decrypt(ctx, decrypted, &outlen, encrypted_message, encrypted_len) <= 0) {
         fprintf(stderr, "Error decrypting message\n");
+        ERR_print_errors_fp(stderr);
+        fprintf(stderr, "\n");
         free(decrypted);
         goto cleanup;
     }

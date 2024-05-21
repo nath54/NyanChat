@@ -188,7 +188,7 @@ void on_msg_client(TcpConnection* con, SOCKET sock,
     ClientState* cstate = custom_args;
     (void)cstate;
     
-    printf("Message received: %s\n", msg->msg);
+    // printf("Message received: %s\n", msg->msg);
 
     if(cstate->waiting_pseudo_confirmation){
         // On vérifie que l'on a bien soit:
@@ -260,7 +260,7 @@ void on_msg_client(TcpConnection* con, SOCKET sock,
                                 decrypted_message, decrypted_length);
             
         }
-        else if(msg->msg_type == MSG_ACK_POS){
+        else if(msg->msg_type == MSG_WELL_CONNECTED){
             cstate->connected = true;
             cstate->waiting_pseudo_confirmation = false;
             printf("Bien connecté au serveur!\n");

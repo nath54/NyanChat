@@ -56,7 +56,10 @@ typedef u_int32_t uint32;
 #define MSG_ERROR 4
 #define MSG_ACK_POS 5
 #define MSG_ACK_NEG 6
-#define MSG_RSA_ENCODED 7
+#define MSG_RSA_ENCODED 7  // Indique que l'on a reçu un message encodé qu'il faut décoder
+#define MSG_WELL_CONNECTED 8  // Indique que ce client est bien connecté
+#define MSG_CLIENT_CONNECTED 9  // Indique qu'un autre client s'est connecté
+#define MSG_CLIENT_DISCONNECTED 10  // Indique qu'un autre client s'est déconnecté
 
 #define ERROR_MSG_CON_DIFF_KEYS "Error: this pseudo already has another key"
 #define ERROR_MSG_BAD_DECODED "Error: misdecoded the connection code"

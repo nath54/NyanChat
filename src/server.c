@@ -261,6 +261,8 @@ void on_msg_received(TcpConnection* con, SOCKET sock,
                            cli->pseudo, new_cli_idx);
         }
 
+        /*
+        Problème dans la fonction decrypt du client, on abandonne ca pour l'instant
         // Si on arrive ici, on encode un code random associé à ce client
         //      et on l'envoie, dans l'attente d'une réponse
         if(cli->code_to_verify == NULL){
@@ -284,6 +286,28 @@ void on_msg_received(TcpConnection* con, SOCKET sock,
         msg_code.msg_type = MSG_RSA_ENCODED;
         strcpy(msg_code.msg, encrypted_msg);
         tcp_connection_message_send(con, sock, &msg_code);
+        */
+       
+        /*
+        On dit que le client est directement bien connecté.
+        */
+
+        // On enregistre la clé RSA de côté
+        //   (il faudra quand même l'avoir pour se connecter, c'est déjà ca) 
+        FILE* fstorekey = fopen(path_key, "w");
+        fwrite(cli->public_key, sizeof(char), strlen(cli->public_key),
+                                                                fstorekey);
+        fclose(fstorekey);
+
+        cli->connected = true;
+        free(cli->code_to_verify);
+        cli->code_to_verify = NULL;
+
+        // On envoie un message pour indiquer la bonne connection au client
+        Message connected_msg;
+        init_empty_message(&connected_msg);
+        connected_msg.msg_type = MSG_WELL_CONNECTED;
+        tcp_connection_message_send(con, sock, &connected_msg);
     }
     else if(msg->msg_type == MSG_STD_CLIENT_SERVER &&
             msg->msg_length >= 10
