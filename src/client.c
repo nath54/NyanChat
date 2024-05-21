@@ -150,10 +150,6 @@ void on_stdin_client(TcpConnection* con,
                 char* key_read;
                 size_t key_length;
                 CHK( read_rsa_key(path_pub, &key_read, &key_length) );
-                // load_rsa_key(path_pub,
-                //              cstate->msg_waiting_ack[0].msg,
-                //              MAX_MSG_LENGTH,
-                //              &(cstate->msg_waiting_ack[0].msg_length));
                 printf("RSA Key length : %ld\n", key_length);
                 if(key_length >= MAX_MSG_LENGTH){
                     fprintf(stderr, "Error: clé RSA trop longue, "
@@ -162,6 +158,7 @@ void on_stdin_client(TcpConnection* con,
                 }
                 strcpy(cstate->msg_waiting_ack[0].msg, key_read);
                 cstate->msg_waiting_ack[0].msg_length = key_length;
+                free(key_read);
                 cstate->nb_msg_waiting_ack += 1;
                 //
                 tcp_connection_message_send(con, con->sockfd,

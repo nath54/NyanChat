@@ -315,49 +315,6 @@ cleanup:
 }
 
 
-// Charge un fichier de clé rsa vers la chaine dest
-void load_rsa_key(char* rsa_key, char* dest, size_t t_max, uint32_t* t_read) {
-    FILE* file = fopen(rsa_key, "rb"); // Open in binary mode
-
-    if (file == NULL) {
-        fprintf(stderr, "Error opening file: %s\n", rsa_key);
-        exit(EXIT_FAILURE);
-    }
-
-    // Seek to the end of the file to get the file size
-    fseek(file, 0, SEEK_END);
-    size_t file_size = ftell(file);
-    rewind(file); // rewind back to the beginning
-
-    // Check if file size is larger than authorized size
-    if (file_size > t_max) {
-        fprintf(stderr, "Error: File size exceeds maximum size (%zu)\n",
-                                                                    t_max);
-        fclose(file);
-        exit(EXIT_FAILURE);
-    }
-
-    // Read the file content into dest
-    size_t bytes_read = fread(dest, 1, file_size, file);
-
-    printf("File debug: %s - size : %ld - read : %ld\n", rsa_key, file_size, bytes_read);
-
-    // Check if all bytes were read successfully
-    if (bytes_read != file_size) {
-        fprintf(stderr, "Error reading file: %s\n", rsa_key);
-        fclose(file);
-        exit(EXIT_FAILURE);
-    }
-
-    *(t_read) = bytes_read;
-
-    // Add null terminator to the end of the string
-    dest[bytes_read] = '\0';
-
-    fclose(file);
-}
-
-
 /**
  * Reads an RSA key file and stores its content into a char array.
  * 

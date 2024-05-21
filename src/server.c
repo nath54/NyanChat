@@ -171,9 +171,9 @@ void on_msg_received(TcpConnection* con, SOCKET sock,
 
         if (stat(path_key, &st) != -1){
             // S'il y en a une, on la compare avec celle envoyée
-            char pub_key[MAX_MSG_LENGTH];
-            uint32 t_key;
-            load_rsa_key(path_key, pub_key, MAX_MSG_LENGTH, &t_key);
+            char* pub_key;
+            size_t key_length;
+            CHK( read_rsa_key(path_key, &pub_key, &key_length) );
 
             if(strcmp(msg->msg, pub_key) != 0){
                 // Si les deux clés sont différentes,
@@ -210,6 +210,8 @@ void on_msg_received(TcpConnection* con, SOCKET sock,
                     }
                 }
             }
+
+            free(pub_key);
         }
 
         // On va s'occuper du client, en créer un autre, ou reset l'existant
