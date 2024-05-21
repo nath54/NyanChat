@@ -19,8 +19,13 @@
 #include "lib_chks.h"
 
 
-// Initialisation d'un message vide
-//  pour éviter de manipuler des données non initialisées
+/**
+ * @brief Initialize a message with default values (empty message).
+ * @note This function is used to avoid undefined behaviors
+ *       when manipulating uninitialized data.
+ * 
+ * @param msg The message to initialize (passed by reference)
+ */
 void init_empty_message(Message* msg){
     msg->msg_type = MSG_NULL;
     msg->msg_id = -1;
@@ -32,78 +37,71 @@ void init_empty_message(Message* msg){
 }
 
 
-// Initialisation d'un socket pour un serveur tcp
+// Initialization of a tcp server socket
 void tcp_connection_server_init(TcpConnection* con,
                  char address_receptor[], int port_receptor,
                  int nb_max_connections_server,
                  int timeout_server)
 {
-
     con->type_connection = TCP_CON_SERVER;
 
-    // Création du socket
+    // Create socket
     CHK( con->sockfd = socket(AF_INET, SOCK_STREAM | SOCK_NONBLOCK, 0) );
 
-    // nous sommes un serveur, nous acceptons n'importe quelle adresse
+    // The server accepts any address
     con->addr.sin_addr.s_addr = htonl(INADDR_ANY);
 
-    // famille d'adresse
+    // Address family
     con->addr.sin_family = AF_INET;
 
-    // recuperation du port du recepteur
+    // Collection of the port of the receptor
     con->addr.sin_port = htons(port_receptor);
 
-    // adresse IPv4 du recepteur
+    // IPv4 address of the receptor
     inet_aton(address_receptor, &(con->addr.sin_addr));
 
-    // association de la socket et des param reseaux du recepteur
+    // Association of the socket and the network parameters of the receptor
     if (bind(con->sockfd, (SOCKADDR *)&con->addr, sizeof(con->addr)) != 0){
-        perror("erreur lors de l'appel a bind -> ");
+        perror("Error during bind call -> ");
         exit(errno);
     }
 
-    // Préparation à l'écoute des nouvelles connections
+    // Preparation to listen to new connections
     printf("Listen\n");
     CHK( listen(con->sockfd, nb_max_connections_server) );
 
-    // Initialisation du polling
+    // Polling initialization
     
-    // - Mise à zéro 
+    // - Reset
     CHKN( memset(con->poll_fds,    0, sizeof(con->poll_fds)) );
     CHKN( memset(con->poll_addrs,  0, sizeof(con->poll_addrs)) );
     CHKN( memset(con->poll_ad_len, 0, sizeof(con->poll_ad_len)) );
 
-    // - Initialisaiton du socket écouteur initial
+    // - Initial listener socket initialization
     con->poll_fds[0].fd = con->sockfd;
     con->poll_fds[0].events = POLLIN;
     con->nb_poll_fds = 1;
 
-    // - Initialisation de l'écoute des évenements stdin
+    // - Initialization of the listening of stdin events
     con->poll_fds[1].fd = stdin_fd;
     con->poll_fds[1].events = POLLIN;
     con->nb_poll_fds = 2;
 
-    // Valeur du timeout en milisecondes
-    if (timeout_server > 0){
-        con->timeout = timeout_server * 60 * 1000;
-    }
-    else {
-        con->timeout = -1;
-    }
+    // Timeout value in milliseconds
+    con->timeout = (timeout_server > 0) ? timeout_server * 60 * 1000 : -1;
 
     con->end_connection = false;
     con->need_compress_poll_arr = false;
 
-    // Init message vide, pour éviter undefined behaviors
+    // Init as empty message to avoid undefined behaviors
     init_empty_message(&(con->msg));
 }
 
-
-// Initialise une connexion tcp côté client
+// Initialization of a tcp client connection
 void tcp_connection_client_init(TcpConnection* con,
                                 char* ip_to_connect, int port_to_connect,
-                                int timeout_client){
-
+                                int timeout_client)
+{
     con->type_connection = TCP_CON_CLIENT;
 
     // Create socket
@@ -117,77 +115,73 @@ void tcp_connection_client_init(TcpConnection* con,
     // Connect to server
     CHK( connect(con->sockfd, (SOCKADDR*)&con->addr, sizeof(SOCKADDR)) );
 
-    // Initialisation du polling
+    // Polling initialization
     
-    // - Mise à zéro 
-    CHKN( memset(con->poll_fds, 0 , sizeof(con->poll_fds)) );
-    CHKN( memset(con->poll_addrs, 0 , sizeof(con->poll_addrs)) );
-    CHKN( memset(con->poll_ad_len, 0 , sizeof(con->poll_ad_len)) );
+    // - Reset
+    CHKN( memset(con->poll_fds,    0, sizeof(con->poll_fds)) );
+    CHKN( memset(con->poll_addrs,  0, sizeof(con->poll_addrs)) );
+    CHKN( memset(con->poll_ad_len, 0, sizeof(con->poll_ad_len)) );
 
-    // - Initialisaiton du socket écouteur initial
+    // - Initial listener socket initialization
     con->poll_fds[0].fd = con->sockfd;
     con->poll_fds[0].events = POLLIN;
     con->nb_poll_fds = 1;
 
-    // - Initialisation de l'écoute des évenements stdin
+    // - Initialization of the listening of stdin events
     con->poll_fds[1].fd = stdin_fd;
     con->poll_fds[1].events = POLLIN;
     con->nb_poll_fds = 2;
 
-    // Valeur du timeout en milisecondes
-    if (timeout_client > 0){
-        con->timeout = timeout_client * 60 * 1000;
-    }
-    else {
-        con->timeout = -1;
-    }
+    // Timeout value in milliseconds
+    con->timeout = (timeout_client > 0) ? timeout_client * 60 * 1000 : -1;
 
     con->end_connection = false;
     con->need_compress_poll_arr = false;
 }
 
 
-// Test des erreurs potentielles lors de l'appel à la fonction poll
-bool test_poll_errors(int rc){
-    // Poll a eu une erreur
-    if(rc < 0){
+// Test of potential errors when calling the poll function
+bool test_poll_errors(int rc)
+{
+    // Poll got an error
+    if (rc < 0) {
         perror("  poll() failed");
         return true;
     }
 
-    // Poll est resté inactif pendant un certain temps -> Timeout
-    if(rc == 0){
+    // Poll stayed inactive for a certain time -> Timeout
+    if (rc == 0) {
         fprintf(stderr, "  poll() timed out.  End program.\n");
         return true;
     }
     
-    // Il n'y a pas eu d'erreurs
+    // No error
     return false;
 }
 
 
-// On écoute toutes les nouvelles demandes de connections
+// Listening to all new connection requests
 void new_clients_acceptation(TcpConnection* con) {
-    // Variable pour stoquer des sockets
+    // Variable to stock sockets
     SOCKET new_sock;
 
     do {
 
-        if (con->nb_poll_fds < MAX_POLL_SOCKETS){
+        if (con->nb_poll_fds < MAX_POLL_SOCKETS) {
 
             SOCKADDR_IN connected_addr;
             socklen_t con_addr_len;
 
             printf("On accepte.\n");
-            // Acceptation de la nouvelle connection
-            new_sock = accept(con->sockfd,
-                                (SOCKADDR*)&connected_addr, &con_addr_len);
+            // Acceptance of the new connection
+            new_sock = accept(con->sockfd, (SOCKADDR*)&connected_addr,
+                              &con_addr_len);
 
-            // Test erreur
-            if(new_sock < 0){
+            // Error test
+            if (new_sock < 0) {
 
-                // Erreur grave, on quitte le serveur
-                if (errno != EWOULDBLOCK){
+                // Serious error, quitting the server
+                if (errno != EWOULDBLOCK) {
                     perror("  accept() failed");
                     con->end_connection = true;
                     break;
@@ -199,61 +193,56 @@ void new_clients_acceptation(TcpConnection* con) {
             printf("  New incoming connection - %d - %d\n",
                         new_sock, connected_addr.sin_addr.s_addr);
 
-            // Enregistrement de la nouvelle connection
+            // Registering the new connection
             con->poll_fds[con->nb_poll_fds].fd = new_sock;
             con->poll_fds[con->nb_poll_fds].events = POLLIN;
             con->poll_addrs[con->nb_poll_fds] = connected_addr;
             con->poll_ad_len[con->nb_poll_fds] = con_addr_len;
             con->nb_poll_fds++;
             printf("Nb poll file descriptors : %ld\n", con->nb_poll_fds);
+            
         } else {
             printf("  New incoming connection refused:"
                     " maximum connection reached.\n");
         }
 
     }
-    while(new_sock != -1);
+    while (new_sock != -1);
 
-    printf("Fin acceptation\n");
+    printf("End of acceptance\n");
 
 }
 
 
-// Compresse le tableau con->poll_fds
-void compress_poll_socket_array(TcpConnection* con, int current_nb_poll_socks){
-
-    // last_ok_sock contient l'index du dernier socket non fermé
+// Compression of the con->poll_fds array
+void compress_poll_socket_array(TcpConnection* con, int current_nb_poll_socks)
+{
+    // last_ok_socket contains the index of the last non-closed socket
     int last_ok_sock = current_nb_poll_socks;            
-    while (last_ok_sock > 0 && con->poll_fds[last_ok_sock].fd == -1){
-        last_ok_sock--;
-    }
+    while (last_ok_sock > 0 && con->poll_fds[last_ok_sock].fd == -1)
+        { last_ok_sock--; }
 
-    // On teste chaque descripteur de socket
-    for (int i=0; i < last_ok_sock; i++){
+    // Testing each socket descriptor
+    for (int i = 0; i < last_ok_sock; i++) {
         
-        // Si socket fermé
-        //   -> on met à la place le dernier socket non fermé trouvé
-        if(con->poll_fds[i].fd == -1){
+        // If closed socket, we put the last non-closed socket found
+        if (con->poll_fds[i].fd == -1) {
             con->poll_fds[i].fd = con->poll_fds[last_ok_sock].fd;
             con->poll_addrs[i] = con->poll_addrs[last_ok_sock];
             con->poll_ad_len[i] = con->poll_ad_len[last_ok_sock];
             con->poll_fds[last_ok_sock].fd = -1;
-            // On remet à jour le dernier socket non fermé
-            while(last_ok_sock > 0
-                    && con->poll_fds[last_ok_sock].fd == -1)
-            {
-                last_ok_sock--;
-            }
+            // Updating the last non-closed socket
+            while(last_ok_sock > 0 && con->poll_fds[last_ok_sock].fd == -1)
+                { last_ok_sock--; }
         }
     }
 
-    // S'il n'y a plus de sockets actifs, on ferme le serveur
-    if(con->poll_fds[0].fd == -1){
+    // Closure of the server if there are no more active sockets
+    if (con->poll_fds[0].fd == -1) {
         con->nb_poll_fds = 0;
         con->end_connection = true;
-    }
-    else{
-        // On met à jour le nombre de sockets toujours ouverts
+    } else {
+        // Updating the number of still opened sockets
         con->nb_poll_fds = last_ok_sock + 1;
     }
 }

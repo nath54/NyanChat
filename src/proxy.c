@@ -26,7 +26,7 @@
 
 #include "lib_chks.h"
 
-/* ------------------ VARIABLES GLOBALES ------------------ */
+/* -------------------- GLOBAL VARIABLES -------------------- */
 
 sem_t semaphore;
 int etat_server;
@@ -42,12 +42,11 @@ int port_clients;
 TcpConnection con_server;
 TcpConnection con_clients;
 
-/* ------------------ FIN VARIABLES GLOBALES ------------------*/
+/* ----------------- END OF GLOBAL VARIABLES -----------------*/
 
 
-int randint(int maxi_val){
-    return rand() % maxi_val;
-}
+int randint(int max_val)
+    { return rand() % max_val; }
 
 
 void on_client_received(TcpConnection* con, SOCKET sock,
@@ -62,24 +61,18 @@ void on_client_received(TcpConnection* con, SOCKET sock,
     if (msg->msg_type == MSG_NULL)
         return;
 
-    //
+    // The parent  function is supposed to have put
+    // the id of the client poll socket in msg.proxy_client_socket
 
-    // Normalement, la fonction qui a appelé cette fonction 
-    //  a mis l'id du poll socket du client dans msg.proxy_client_socket
-
-    if (msg->msg_type == MSG_STD_CLIENT_SERVER && msg->msg_length >= 10){
-        // Ajouts potentiel d'erreurs
-
-        if(randint(100) <= PROXY_ERROR_RATE){
-
-            // Ajout d'erreurs au message
+    if (msg->msg_type == MSG_STD_CLIENT_SERVER && msg->msg_length >= 10) {
+        // Potential additions of errors
+        if (randint(100) < PROXY_ERROR_RATE) {
+            // Addition of errors in the message
             code_add_noise_to_msg(msg, randint(PROXY_MAX_ERROR_CREATED));
         }
-
     }
 
-    tcp_connection_message_send(&con_server, con_server.poll_fds[0].fd,
-                                       msg);
+    tcp_connection_message_send(&con_server, con_server.poll_fds[0].fd, msg);
 
 }
 
@@ -96,12 +89,12 @@ void on_server_received(TcpConnection* con, SOCKET sock,
     if (msg->msg_type == MSG_NULL)
         return;
 
-    // Test du socket client à qui retransmettre le message
-    if (msg->proxy_client_socket == -1){
+    // Test of the client socket to whom to retransmit the message
+    if (msg->proxy_client_socket == -1) {
         fprintf(stderr, "Error: Unknown client socket on msg from serv!\n");
         return;
     }
-    else if (msg->proxy_client_socket < 0||
+    else if (msg->proxy_client_socket < 0 ||
             (size_t)msg->proxy_client_socket > con->nb_poll_fds)
     {
         fprintf(stderr,
@@ -110,12 +103,10 @@ void on_server_received(TcpConnection* con, SOCKET sock,
         return;
     }
 
-    // Le socket est à priori bon, on transmet le message
-    tcp_connection_message_send(
-        &con_clients,
-        con_clients.poll_fds[msg->proxy_client_socket].fd,
-        msg
-    );
+    // The socket seems to be good, transmission of the message
+    tcp_connection_message_send(&con_clients,
+                            con_clients.poll_fds[msg->proxy_client_socket].fd,
+                            msg);
 
 }
 
@@ -124,28 +115,26 @@ void* gestion_server(void* arg)
 {
     (void)arg;
 
-    printf("Avant connexion serveur!\n");
+    printf("Before server connection!\n");
 
-    // Initialisation de la connection qui va écouter le serveur
+    // Initialization of the connection that will listen to the server
     tcp_connection_client_init(&con_server, ip_server, port_server, -1);
     con_server.type_connection = TCP_CON_PROXY_SERVER_SIDE;
 
-    printf("Après connexion serveur!\n");
+    printf("After server connection!\n");
 
     etat_server = SERVER_OK;
     sem_post(&semaphore);
 
-    printf("C'est bon, on a passé la sémaphore!\n");
+    printf("Semaphore passed!\n");
 
-    // Boucle principale de la connection tcp qui écoute le serveur
-    tcp_connection_mainloop(&con_server,
-                            on_server_received, NULL,
-                            NULL, NULL);
+    // Main loop of the tcp connection that listens to the server
+    tcp_connection_mainloop(&con_server, on_server_received, NULL, NULL, NULL);
 
-    // fermeture de la connection qui a écouté le serveur
+    // Closure of the connection that listened to the server
     tcp_connection_close(&con_server);
 
-    // Si la connection a coupé ici, il faut couper le côté clients
+    // If connection has been cut here, we must cut the clients side
     con_clients.end_connection = true;
 
     return NULL;
@@ -155,18 +144,16 @@ void* gestion_server(void* arg)
 void* gestion_clients(void* arg)
 {
     (void)arg;
-    // Initialisation de la connection qui va écouter les clients
-    tcp_connection_server_init(&con_clients,
-                               "127.0.0.1", port_clients, 20, -1);
+    // Initialization of the connection that will listen to the clients
+    tcp_connection_server_init(&con_clients, "127.0.0.1", port_clients, 20, -1);
     con_clients.type_connection = TCP_CON_PROXY_CLIENTS_SIDE;
 
-
-    // Boucle principale de la connection tcp qui écoute les clients
+    // Main loop of the tcp connection that listens to the clients
     tcp_connection_mainloop(&con_clients,
                             on_client_received, NULL,
                             NULL, NULL);
 
-    // fermeture de la connection qui a écouté les clients
+    // Closure of the connection that listened to the clients
     tcp_connection_close(&con_clients);
 
     return NULL;
@@ -184,12 +171,12 @@ int main(int argc, char* argv[])
     port_server = atoi(argv[2]);
     port_clients = atoi(argv[3]);
 
-    if (port_server < 5000 || port_server > 65000){
-        fprintf(stderr, "Bad value of port_server : %d !\n", port_server);
+    if (port_server < 5000 || port_server > 65000) {
+        fprintf(stderr, "Bad value of port_server: %d !\n", port_server);
         exit(EXIT_FAILURE);
     }
-    if (port_clients < 5000 || port_clients > 65000){
-        fprintf(stderr, "Bad value of port_clients : %d !\n", port_clients);
+    if (port_clients < 5000 || port_clients > 65000) {
+        fprintf(stderr, "Bad value of port_clients: %d !\n", port_clients);
         exit(EXIT_FAILURE);
     }
 
@@ -204,27 +191,21 @@ int main(int argc, char* argv[])
 
     TCHK( pthread_create(&thread_server, NULL, gestion_server, NULL) );
 
-    printf("On attends la sémaphore...\n");
+    printf("Waiting for semaphore...\n");
 
     TCHK( sem_wait(&semaphore) );
     TCHK( sem_destroy(&semaphore) );
 
-    printf("Semaphore bien passée de l'autre côté !\n");
+    printf("Semaphore passed on the other side!\n");
 
-    if (etat_server != SERVER_OK){
-
+    if (etat_server != SERVER_OK) {
         TCHK( pthread_join(thread_server, NULL) );
-
-        fprintf(stderr, "Cannot connect to server!\n");
+        fprintf(stderr, "Cannot connect to the server!\n");
         exit(EXIT_FAILURE);
     }
 
 
     TCHK( pthread_create(&thread_clients, NULL, gestion_clients, NULL) );
-
-    //
-
-    //
 
     TCHK( pthread_join(thread_server, NULL) );
 
