@@ -305,6 +305,12 @@ void read_poll_socket(TcpConnection* con, int id_poll,
     } while (true);
 
     if (close_conn){
+        if(con->type_connection == TCP_CON_CLIENT ||
+           con->type_connection == TCP_CON_PROXY_SERVER_SIDE)
+        {
+            // Connection fermée, il faut quitter l'application
+            con->end_connection = true;
+        }
         CHK( close(con->poll_fds[id_poll].fd) );
         con->poll_fds[id_poll].fd = -1;
         con->need_compress_poll_arr = true;

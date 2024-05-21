@@ -74,3 +74,15 @@ int decrypt_message(unsigned char* encrypted_message, size_t encrypted_len,
 
 // Charge un fichier de clé rsa vers la chaine dest
 void load_rsa_key(char* rsa_key, char* dest, size_t t_max, uint32_t* t_read);
+
+
+/**
+ * Reads an RSA key file and stores its content into a char array.
+ * 
+ * @param rsa_key_file The file containing the RSA key.
+ * @param key_content A pointer to hold the key content. The caller must free this buffer.
+ * @param key_len A pointer to hold the length of the key content.
+ * 
+ * @return RSA_OP_SUCCESS on success, RSA_OP_FAILURE on failure.
+ */
+int read_rsa_key(const char* rsa_key_file, char** key_content, size_t* key_len);

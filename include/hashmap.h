@@ -71,7 +71,7 @@ int hashmap_find(Hashmap* h, char* key);
 uint hashmap_get(Hashmap* h, char* key);
 
 /**
- * @brief Insert a new element in the Hashmap \p h, if it doesn't already exist.
+ * @brief Insert a new element in the Hashmap \p h, if it doesn't already exist
  * 
  * @param h The given Hashmap.
  * @param key The Item::key to add.

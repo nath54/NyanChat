@@ -137,14 +137,8 @@ void on_stdin_client(TcpConnection* con,
                     printf("Génération d'une paire de clé RSA : \n");
                     printf("  - chemin privée : %s\n", path_priv);
                     printf("  - chemin publique : %s\n", path_pub);
-                    printf("  - longueur : %d\n", MAX_MSG_LENGTH/2);
-                    if( generate_keypair(path_priv, path_pub,
-                                         MAX_MSG_LENGTH/2) == RSA_OP_FAILURE)
-                    {
-                        fprintf(stderr, "Erreur génération des clés rsa!\n");
-                        exit(EXIT_FAILURE);
-                    }
-
+                    printf("  - longueur : %d\n", RSA_KEY_LENGTH);
+                    CHK( generate_keypair(path_priv, path_pub, RSA_KEY_LENGTH) );
                     printf("rsa keypair generated\n");
                 }
 
@@ -153,15 +147,26 @@ void on_stdin_client(TcpConnection* con,
                 cstate->msg_waiting_ack[0].msg_type = MSG_CONNECTION_CLIENT;
                 cstate->msg_waiting_ack[0].msg_id = 0;
                 strcpy(cstate->msg_waiting_ack[0].src_pseudo, msg);
-                load_rsa_key(path_pub,
-                             cstate->msg_waiting_ack[0].msg,
-                             MAX_MSG_LENGTH,
-                             &(cstate->msg_waiting_ack[0].msg_length));
-
+                char* key_read;
+                size_t key_length;
+                CHK( read_rsa_key(path_pub, &key_read, &key_length) );
+                // load_rsa_key(path_pub,
+                //              cstate->msg_waiting_ack[0].msg,
+                //              MAX_MSG_LENGTH,
+                //              &(cstate->msg_waiting_ack[0].msg_length));
+                printf("RSA Key length : %ld\n", key_length);
+                if(key_length >= MAX_MSG_LENGTH){
+                    fprintf(stderr, "Error: clé RSA trop longue, "
+                                    "ne peut être envoyée!\n");
+                    exit(EXIT_FAILURE);
+                }
+                strcpy(cstate->msg_waiting_ack[0].msg, key_read);
+                cstate->msg_waiting_ack[0].msg_length = key_length;
                 cstate->nb_msg_waiting_ack += 1;
+                //
                 tcp_connection_message_send(con, con->sockfd,
                                             &(cstate->msg_waiting_ack[0]));
-
+                //
                 cstate->waiting_pseudo_confirmation = true;
             }
         }

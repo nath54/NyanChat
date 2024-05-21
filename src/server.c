@@ -55,7 +55,7 @@ Client* create_client(char pseudo[MAX_NAME_LENGTH], int id_poll_socket){
 
     c->connected = false;
     c->waiting_code_response = true;
-    c->code_to_verify = generate_random_code(MAX_MSG_LENGTH / 2);
+    c->code_to_verify = generate_random_code(RSA_KEY_LENGTH);
     c->public_key = NULL;
     strcpy(c->pseudo, pseudo);
     c->last_activity = time(NULL);
@@ -222,7 +222,7 @@ void on_msg_received(TcpConnection* con, SOCKET sock,
             cli->public_key = calloc(msg->msg_length, sizeof(char));
             strcpy(cli->public_key, msg->msg);
             cli->code_to_verify = generate_random_code(
-                                        MAX_MSG_LENGTH / 2);
+                                        RSA_KEY_LENGTH);
             cli->waiting_code_response = true;
             cli->last_activity = time(NULL);
         }

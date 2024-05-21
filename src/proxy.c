@@ -134,6 +134,9 @@ void* gestion_server(void* arg)
     // fermeture de la connection qui a écouté le serveur
     tcp_connection_close(&con_server);
 
+    // Si la connection a coupé ici, il faut couper le côté clients
+    con_clients.end_connection = true;
+
     return NULL;
 }
 

@@ -37,7 +37,9 @@ typedef u_int32_t uint32;
 #define MAX_NAME_LENGTH 256
 #define MIN_NAME_LENGTH 4
 
-#define MAX_MSG_LENGTH 4096
+// Doit pouvoir contenir une clé RSA
+#define MAX_MSG_LENGTH 2048
+#define RSA_KEY_LENGTH 1536
 
 #define MAX_POLL_SOCKETS 200
 

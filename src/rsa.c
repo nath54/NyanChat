@@ -120,6 +120,7 @@ int encrypt_message(const char* message, size_t message_len,
     }
 
     // Read the public key
+    errno = 0;
     pkey = PEM_read_PUBKEY(public_fp, NULL, NULL, NULL);
     if (!pkey) {
         fprintf(stderr, "Error reading public key\n");
@@ -293,6 +294,8 @@ void load_rsa_key(char* rsa_key, char* dest, size_t t_max, uint32_t* t_read) {
     // Read the file content into dest
     size_t bytes_read = fread(dest, 1, file_size, file);
 
+    printf("File debug: %s - size : %ld - read : %ld\n", rsa_key, file_size, bytes_read);
+
     // Check if all bytes were read successfully
     if (bytes_read != file_size) {
         fprintf(stderr, "Error reading file: %s\n", rsa_key);
@@ -307,4 +310,73 @@ void load_rsa_key(char* rsa_key, char* dest, size_t t_max, uint32_t* t_read) {
 
     fclose(file);
 }
+
+
+/**
+ * Reads an RSA key file and stores its content into a char array.
+ * 
+ * @param rsa_key_file The file containing the RSA key.
+ * @param key_content A pointer to hold the key content. The caller must free this buffer.
+ * @param key_len A pointer to hold the length of the key content.
+ * 
+ * @return RSA_OP_SUCCESS on success, RSA_OP_FAILURE on failure.
+ */
+int read_rsa_key(const char* rsa_key_file, char** key_content, size_t* key_len)
+{
+    FILE* file = NULL;
+    char* buffer = NULL;
+    int32_t length = 0;
+    int ret = RSA_OP_FAILURE;
+
+    // Open the RSA key file
+    file = fopen(rsa_key_file, "rb");
+    if (!file) {
+        fprintf(stderr, "Error opening RSA key file\n");
+        return 0;
+    }
+
+    // Seek to the end of the file to determine its length
+    if (fseek(file, 0, SEEK_END) != 0) {
+        fprintf(stderr, "Error seeking to end of file\n");
+        goto cleanup;
+    }
+
+    // Get the file length
+    length = ftell(file);
+    if (length == -1) {
+        fprintf(stderr, "Error determining file length\n");
+        goto cleanup;
+    }
+
+    // Return to the beginning of the file
+    if (fseek(file, 0, SEEK_SET) != 0) {
+        fprintf(stderr, "Error seeking to beginning of file\n");
+        goto cleanup;
+    }
+
+    // Allocate memory for the key content
+    buffer = (char*)malloc(length);
+    if (!buffer) {
+        fprintf(stderr, "Error allocating memory\n");
+        goto cleanup;
+    }
+
+    // Read the file content into the buffer
+    if (fread(buffer, 1, length, file) != (size_t)length) {
+        fprintf(stderr, "Error reading file content\n");
+        free(buffer);
+        goto cleanup;
+    }
+
+    // Set the output parameters
+    *key_content = buffer;
+    *key_len = length;
+    ret = RSA_OP_SUCCESS;
+
+cleanup:
+    if (file) fclose(file);
+
+    return ret;
+}
+
 
