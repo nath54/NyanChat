@@ -9,13 +9,13 @@ typedef struct {
     char pseudo[MAX_NAME_LENGTH];
     bool waiting_pseudo_confirmation;
 
-    // Salon actuel
-    int type_current_dest; // 0=salon par défaut, 1=salon privé, 2=msg_privé
-    // Nom du salon où il est, ou pseudo du client de msg privé
+    // Current place type to send messages
+    // 0=default channel, 1=private channel, 2=private discussion
+    int type_current_dest;
+    // Current place name, pseudo or channel name
     char destination[MAX_NAME_LENGTH];
 
-    // Liste de messages envoyés qui attendent un ackuittement
-    //  à initialiser au début du client, et à libérer à la fin
+    // List of sent messages that are waiting for an acknowledgement
     Message* msg_waiting_ack;
     size_t tot_msg_waiting_ack;
     size_t nb_msg_waiting_ack;
