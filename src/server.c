@@ -21,29 +21,11 @@
 #include "tcp_connection.h"
 #include "codes_detection_correction.h"
 #include "server.h"
-#include "rsa.h"
 #include "lib_chks.h"
 
+#include "useful_lib.h"
 
-#define PATH_SRV_RSA_KEYS "server_rsa_keys/"
-
-
-// Generate a random code to encode with client public key
-char* generate_random_code(uint32 code_length){
-    //
-    char* code = calloc(code_length, sizeof(char));
-    if(code == NULL){
-        fprintf(stderr, "\033[31mError allocation\033[m\n");
-    }
-    //
-    for(uint32 i=0; i<code_length - 1; i++){
-        code[i] = 32 + rand() % 82;
-    }
-    //
-    code[code_length - 1] = '\0';
-    //
-    return code;
-}
+#define PATH_SRV_CODES "pseudo_code_server/"
 
 
 // Create a Client struct
@@ -54,10 +36,6 @@ Client* create_client(char pseudo[MAX_NAME_LENGTH], int id_poll_socket){
     }
 
     c->connected = false;
-    c->waiting_code_response = false;
-    // c->code_to_verify = generate_random_code(RSA_KEY_LENGTH);
-    c->code_to_verify = NULL;
-    c->public_key = NULL;
     strcpy(c->pseudo, pseudo);
     c->last_activity = time(NULL);
     c->id_poll_socket_proxy = id_poll_socket;
@@ -68,11 +46,6 @@ Client* create_client(char pseudo[MAX_NAME_LENGTH], int id_poll_socket){
 
 // Free a client structure
 void free_client(Client** c){
-
-    if((*c)->code_to_verify != NULL){
-        free((*c)->code_to_verify);
-    }
-
     free(*c);
     *c = NULL;
 }
@@ -91,8 +64,8 @@ void init_server_state(ServerState* sstate){
 
     //
     struct stat st = {0};
-    if (stat(PATH_SRV_RSA_KEYS, &st) == -1){
-        CHK( mkdir(PATH_SRV_RSA_KEYS, 0700) );
+    if (stat(PATH_SRV_CODES, &st) == -1){
+        CHK( mkdir(PATH_SRV_CODES, 0700) );
     }
 }
 
@@ -166,19 +139,19 @@ void on_msg_received(TcpConnection* con, SOCKET sock,
             }
         }
 
-        // On teste s'il n'y a pas déjà une clé publique associée au pseudo
-        char path_key[MAX_NAME_LENGTH + 100] = PATH_SRV_RSA_KEYS;
+        // Test if doesn't exists a code stored for this pseudo
+        char path_key[MAX_NAME_LENGTH + 100] = PATH_SRV_CODES;
         CHKN( strcat(path_key, msg->src_pseudo) );
         struct stat st = {0};
 
         if (stat(path_key, &st) != -1){
             // S'il y en a une, on la compare avec celle envoyée
-            char* pub_key;
+            char* found_code;
             size_t key_length;
-            CHK( read_rsa_key(path_key, &pub_key, &key_length) );
+            CHK( read_file(path_key, &found_code, &key_length) );
 
-            if(strcmp(msg->msg, pub_key) != 0){
-                // Si les deux clés sont différentes,
+            if(strcmp(msg->msg, found_code) != 0){
+                // Si les deux codes sont différentes,
                 //   envoi d'un msg d'erreur au client qui veut se connecter
                 Message error_msg;
                 init_empty_message(&error_msg);
@@ -215,21 +188,13 @@ void on_msg_received(TcpConnection* con, SOCKET sock,
                 }
             }
 
-            free(pub_key);
+            free(found_code);
         }
 
         // On va s'occuper du client, en créer un autre, ou reset l'existant
         if(cli != NULL){
             // il faut "reset" les données du client
-            cli->connected = false;
             cli->id_poll_socket_proxy = msg->proxy_client_socket;
-            if(cli->code_to_verify != NULL){
-                free(cli->code_to_verify);
-            }
-            cli->public_key = calloc(msg->msg_length, sizeof(char));
-            strcpy(cli->public_key, msg->msg);
-            cli->code_to_verify = generate_random_code(MAX_MSG_ENCODABLE);
-            cli->waiting_code_response = true;
             cli->last_activity = time(NULL);
         }
         else{
@@ -259,57 +224,20 @@ void on_msg_received(TcpConnection* con, SOCKET sock,
                                                 msg->proxy_client_socket);
             cli = sstate->clients[new_cli_idx];
             //
-            cli->public_key = calloc(msg->msg_length, sizeof(char));
-            strcpy(cli->public_key, msg->msg);
-            cli->code_to_verify = generate_random_code(MAX_MSG_ENCODABLE);
-            cli->waiting_code_response = true;
-            //
             hashmap_insert(sstate->hm_pseudo_to_id,
                            cli->pseudo, new_cli_idx);
         }
 
         /*
-        Problème dans la fonction decrypt du client, on abandonne ca pour l'instant
-        // Si on arrive ici, on encode un code random associé à ce client
-        //      et on l'envoie, dans l'attente d'une réponse
-        if(cli->code_to_verify == NULL){
-            fprintf(stderr, "Error code logic server, call the devs!\n");
-            exit(EXIT_FAILURE);
-        }
-        char* encrypted_msg;
-        size_t t_encrypted;
-
-        FILE* ftmp;
-        CHKN( ftmp = fopen("tmp_key", "w") );
-        fwrite(cli->public_key, sizeof(char), strlen(cli->public_key), ftmp);
-        fclose(ftmp);
-        CHK( encrypt_message(cli->code_to_verify, strlen(cli->code_to_verify),
-                             "tmp_key",
-                             (unsigned char** )&encrypted_msg, &t_encrypted) );
-        remove("tmp_key");
-
-        Message msg_code;
-        init_empty_message(&msg_code);
-        msg_code.msg_type = MSG_RSA_ENCODED;
-        msg_code.proxy_client_socket = msg->proxy_client_socket;
-        strcpy(msg_code.msg, encrypted_msg);
-        tcp_connection_message_send(con, sock, &msg_code);
-        */
-       
-        /*
-        On dit que le client est directement bien connecté.
+        The client is now connected
         */
 
-        // On enregistre la clé RSA de côté
-        //   (il faudra quand même l'avoir pour se connecter, c'est déjà ca) 
-        FILE* fstorekey = fopen(path_key, "w");
-        fwrite(cli->public_key, sizeof(char), strlen(cli->public_key),
-                                                                fstorekey);
-        fclose(fstorekey);
+        // Storing the code associated to the pseudo
+        FILE* fstorecode = fopen(path_key, "w");
+        fwrite(msg->msg, sizeof(char), msg->msg_length, fstorecode);
+        fclose(fstorecode);
 
         cli->connected = true;
-        free(cli->code_to_verify);
-        cli->code_to_verify = NULL;
 
         // On envoie un message pour indiquer la bonne connection au client
         Message connected_msg;

@@ -40,9 +40,6 @@ typedef struct {
 
 typedef struct{
     bool connected;
-    bool waiting_code_response;
-    char* code_to_verify;
-    char* public_key;
     char pseudo[MAX_NAME_LENGTH];
     time_t last_activity;
     int id_poll_socket_proxy;

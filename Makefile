@@ -8,9 +8,9 @@ UDIR = unity/src/
 
 CC = gcc
 CFLAGS = -Werror -Wall -Wextra -g -I$(IDIR)
-LDFLAGS = -lcrypto -lssl -lm
+LDFLAGS = -lm
 
-SSHARED = bits.c tcp_connection.c rsa.c hashmap.c lib_ansi.c codes_detection_correction.c
+SSHARED = bits.c tcp_connection.c hashmap.c lib_ansi.c codes_detection_correction.c useful_lib.c
 OBJ := $(SSHARED:%.c=$(ODIR)%.o)
 
 # Targets

@@ -32,7 +32,7 @@ sudo pacman -S make gcc doxygen
 
 ## Architecture
 
-Only one server, only one proxy and many clients.
+Only one server, only one proxy (theorically more) and many clients.
 The proxy will be able to add errors on messages from clients.
 
 [TODO: Faire le Readme.md]

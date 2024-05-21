@@ -9,6 +9,8 @@ typedef struct {
     char pseudo[MAX_NAME_LENGTH];
     bool waiting_pseudo_confirmation;
 
+    char* connection_code;
+
     // Current place type to send messages
     // 0=default channel, 1=private channel, 2=private discussion
     int type_current_dest;

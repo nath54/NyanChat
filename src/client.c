@@ -14,11 +14,11 @@
 
 // #include "tcp_connection.h"
 #include "lib_ansi.h"
-#include "rsa.h"
 #include "lib_chks.h"
 #include "client.h"
+#include "useful_lib.h"
 
-#define PATH_RSA_KEYS "client_rsa_keys/"
+#define PATH_CLI_CODES "pseudo_code_clients/"
 
 
 // Find the next free slots of the msg_waiting_ack
@@ -86,15 +86,15 @@ void on_stdin_client(TcpConnection* con,
     ClientState* cstate = custom_args;
 
     if (strlen(cstate->pseudo) == 0){
-        // Pas de pseudo, pas connecté, donc soit:
-        //  - attente de l'entrée utilisateur pour le pseudo
-        //  - attente du serveur pour confirmation du pseudo (rien à faire)
+        // No nickname, not connected, so either:
+        //  - waiting for user input for the nickname
+        //  - waiting for the server to confirm the nickname (nothing to do)
 
         if (!cstate->waiting_pseudo_confirmation){
             // On n'attend pas le serveur, on attend l'entrée utilisateur
             // msg est censé contenir le pseudo demandé par le client
 
-            // On crée clée RSA puis
+            // On crée un code puis
             //  on envoie une demande de pseudo au serveur
 
             if (msg_len < MIN_NAME_LENGTH){
@@ -106,40 +106,31 @@ void on_stdin_client(TcpConnection* con,
                 // Registration (temporary or not) of the pseudo
                 strcpy(cstate->pseudo, msg);
 
-                // Creation of the directory for keys files if it doesn't exist
+                // Creation of the directory for codes files if it doesn't exist
                 struct stat st = {0};
 
-                if (stat(PATH_RSA_KEYS, &st) == -1){
-                    CHK( mkdir(PATH_RSA_KEYS, 0700) );
+                if (stat(PATH_CLI_CODES, &st) == -1){
+                    CHK( mkdir(PATH_CLI_CODES, 0700) );
                 }
 
-                // Keys directory for given pseudo
-                char path_dir[MAX_NAME_LENGTH + 100] = PATH_RSA_KEYS;
-                CHKN( strcat(path_dir, msg) );
-                CHKN( strcat(path_dir, "/") );
-
-                // Keys path
-                char path_pub[MAX_NAME_LENGTH + 100];
-                CHKN( strcpy(path_pub, path_dir) );
-                CHKN( strcat(path_pub, "rsa_pub") );
-                char path_priv[MAX_NAME_LENGTH + 100];
-                CHKN( strcpy(path_priv, path_dir) );
-                CHKN( strcat(path_priv, "rsa_priv") );
+                // Code directory for given pseudo
+                char path_code_pseudo[MAX_NAME_LENGTH + 100] = PATH_CLI_CODES;
+                CHKN( strcat(path_code_pseudo, msg) );
 
                 // Login test (first login with this pseudo)
-                if (stat(path_dir, &st) == -1) {
-                    // Need to create RSA files
+                if (stat(path_code_pseudo, &st) == -1) {
+                    // Need to create code file
 
-                    // Creaation of the directory for this pseudo
-                    CHK( mkdir(path_dir, 0700) );
+                    // Code creation
+                    cstate->connection_code = generate_random_code(CODE_LENGTH);
 
-                    // Keys creation
-                    printf("Génération d'une paire de clé RSA : \n");
-                    printf("  - chemin privée : %s\n", path_priv);
-                    printf("  - chemin publique : %s\n", path_pub);
-                    printf("  - longueur : %d\n", RSA_KEY_LENGTH);
-                    CHK( generate_keypair(path_priv, path_pub, RSA_KEY_LENGTH) );
-                    printf("rsa keypair generated\n");
+                    // Code storage
+                    FILE* fcode;
+                    CHKN( fcode = fopen(path_code_pseudo, "w") );
+                    CHKN( cstate->connection_code );
+                    fwrite(cstate->connection_code,
+                           sizeof(char), CODE_LENGTH, fcode);
+                    CHK( fclose(fcode) );
                 }
 
                 // Send connection request to the server
@@ -147,18 +138,8 @@ void on_stdin_client(TcpConnection* con,
                 cstate->msg_waiting_ack[0].msg_type = MSG_CONNECTION_CLIENT;
                 cstate->msg_waiting_ack[0].msg_id = 0;
                 strcpy(cstate->msg_waiting_ack[0].src_pseudo, msg);
-                char* key_read;
-                size_t key_length;
-                CHK( read_rsa_key(path_pub, &key_read, &key_length) );
-                printf("RSA Key length : %ld\n", key_length);
-                if(key_length >= MAX_MSG_LENGTH){
-                    fprintf(stderr, "Error: clé RSA trop longue, "
-                                    "ne peut être envoyée!\n");
-                    exit(EXIT_FAILURE);
-                }
-                strcpy(cstate->msg_waiting_ack[0].msg, key_read);
-                cstate->msg_waiting_ack[0].msg_length = key_length;
-                free(key_read);
+                strcpy(cstate->msg_waiting_ack[0].msg, cstate->connection_code);
+                cstate->msg_waiting_ack[0].msg_length = CODE_LENGTH;
                 cstate->nb_msg_waiting_ack += 1;
                 //
                 tcp_connection_message_send(con, con->sockfd,
@@ -196,31 +177,21 @@ void on_msg_client(TcpConnection* con, SOCKET sock,
         //       décodé, et donc qu'on est bien connecté
         // Sinon, on ignore, on est pas censé recevoir autre chose
 
-        // Répertoire des clés pour le pseudo
-        char path_dir[MAX_NAME_LENGTH + 100] = PATH_RSA_KEYS;
-        CHKN( strcat(path_dir, cstate->pseudo) );
-        CHKN( strcat(path_dir, "/") );
-        // Chemins des clés
-        char path_pub[MAX_NAME_LENGTH + 100];
-        CHKN( strcpy(path_pub, path_dir) );
-        CHKN( strcat(path_pub, "rsa_pub") );
-        char path_priv[MAX_NAME_LENGTH + 100];
-        CHKN( strcpy(path_priv, path_dir) );
-        CHKN( strcat(path_priv, "rsa_pub") );
+        // Connection code path
+        char path_code_pseudo[MAX_NAME_LENGTH + 100] = PATH_CLI_CODES;
+        CHKN( strcat(path_code_pseudo, cstate->pseudo) );
 
         // Gestion erreur
         if(msg->msg_type == MSG_ERROR){
             // Pseudo non utilisable, il faut donc le dire à l'utilisateur
             //  et lui demander d'en rentrer un autre
-            //  il faudra donc aussi supprimer les fichiers de clés rsa
+            //  il faudra donc aussi supprimer les fichiers de codes de connexion
 
             printf("\033[31mError, this pseudo is already taken, "
                     "please choose another pseudo!\033[m\nPseudo : ");
 
-            // SUPPRESSION DES FICHIERS DE CLE RSA:
-            remove(path_pub);
-            remove(path_priv);
-            rmdir(path_pub);
+            // SUPPRESSION DES FICHIERS DE CODE DE CONNEXION:
+            remove(path_code_pseudo);
 
             // Réinitialisation du pseudo
             strcpy(cstate->pseudo, "");
@@ -236,26 +207,6 @@ void on_msg_client(TcpConnection* con, SOCKET sock,
                 // On nettoie le message qui attend
                 init_empty_message(&(cstate->msg_waiting_ack[msg->msg_id]));
             }
-        }
-        else if(msg->msg_type == MSG_RSA_ENCODED){
-            // On décode le message avec notre clé privée,
-            //   et ensuite on le renvoie
-
-            char* decrypted_message;
-            size_t decrypted_length;
-
-            if( decrypt_message((unsigned char*)msg->msg, msg->msg_length,
-                                path_priv,
-                                (unsigned char** )(&decrypted_message),
-                                &decrypted_length) == -1)
-            {
-                fprintf(stderr, "\033[31mError from decrypt message!\033[m\n");
-                exit(EXIT_FAILURE);
-            }
-            
-            client_send_message(con, cstate,
-                                decrypted_message, decrypted_length);
-            
         }
         else if(msg->msg_type == MSG_WELL_CONNECTED){
             cstate->connected = true;
@@ -349,9 +300,12 @@ void init_client_state(ClientState* client_state){
         exit(EXIT_FAILURE);
     }
 
-    // Demande du pseudo client, première chose à faire
-    print_rainbow("Bienvenue sur NyanChat!\n");
-    printf("\nEntrez votre pseudo > ");
+    // 
+    client_state->connection_code = NULL;
+
+    // First thing to do: asking for client pseudo
+    print_rainbow("Welcome to NyanChat!\n");
+    printf("\nEnter your name > ");
 }
 
 
