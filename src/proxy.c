@@ -122,9 +122,19 @@ void on_server_received(TcpConnection* con, SOCKET sock,
 void* gestion_server(void* arg)
 {
     (void)arg;
+
+    printf("Avant connexion serveur!\n");
+
     // Initialisation de la connection qui va écouter le serveur
     tcp_connection_client_init(&con_server, ip_server, port_server, -1);
     con_server.type_connection = TCP_CON_PROXY_SERVER_SIDE;
+
+    printf("Après connexion serveur!\n");
+
+    etat_server = SERVER_OK;
+    sem_post(&semaphore);
+
+    printf("C'est bon, on a passé la sémaphore!\n");
 
     // Boucle principale de la connection tcp qui écoute le serveur
     tcp_connection_mainloop(&con_server,
@@ -193,8 +203,12 @@ int main(int argc, char* argv[])
 
     TCHK( pthread_create(&thread_server, NULL, gestion_server, NULL) );
 
+    printf("On attends la sémaphore...\n");
+
     TCHK( sem_wait(&semaphore) );
     TCHK( sem_destroy(&semaphore) );
+
+    printf("Semaphore bien passée de l'autre côté !\n");
 
     if (etat_server != SERVER_OK){
 

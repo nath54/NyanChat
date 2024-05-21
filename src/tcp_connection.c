@@ -63,6 +63,7 @@ void tcp_connection_server_init(TcpConnection* con,
     }
 
     // Préparation à l'écoute des nouvelles connections
+    printf("Listen\n");
     CHK( listen(con->sockfd, nb_max_connections_server) );
 
     // Initialisation du polling
@@ -297,6 +298,8 @@ void read_poll_socket(TcpConnection* con, int id_poll,
 
         if (con->type_connection == TCP_CON_PROXY_CLIENTS_SIDE){
             con->msg.proxy_client_socket = id_poll;
+            printf("Le message de %s a bien recu son id de poll proxy : %d\n",
+                                                 con->msg.src_pseudo, id_poll);
         }
 
         on_msg(con, con->poll_fds[id_poll].fd, &(con->msg), msg_len,

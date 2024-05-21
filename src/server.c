@@ -116,6 +116,7 @@ void gen_positive_ack_from_msg(Message* msg, Message* ack){
     init_empty_message(ack);
     ack->msg_type = MSG_ACK_POS;
     ack->msg_id = msg->msg_id;
+    ack->proxy_client_socket = msg->proxy_client_socket;
 }
 
 
@@ -124,6 +125,7 @@ void gen_negative_ack_from_msg(Message* msg, Message* ack){
     init_empty_message(ack);
     ack->msg_type = MSG_ACK_NEG;
     ack->msg_id = msg->msg_id;
+    ack->proxy_client_socket = msg->proxy_client_socket;
 }
 
 
@@ -181,6 +183,7 @@ void on_msg_received(TcpConnection* con, SOCKET sock,
                 Message error_msg;
                 init_empty_message(&error_msg);
                 error_msg.msg_type = MSG_ERROR;
+                error_msg.proxy_client_socket = msg->proxy_client_socket;
                 strcpy(error_msg.msg, ERROR_MSG_CON_DIFF_KEYS);
                 tcp_connection_message_send(con, sock, &error_msg);
                 return;
@@ -204,6 +207,7 @@ void on_msg_received(TcpConnection* con, SOCKET sock,
                         Message error_msg;
                         init_empty_message(&error_msg);
                         error_msg.msg_type = MSG_ERROR;
+                        error_msg.proxy_client_socket = msg->proxy_client_socket;
                         strcpy(error_msg.msg, ERROR_MSG_STILL_ACTIVE_CLIENT);
                         tcp_connection_message_send(con, sock, &error_msg);
                         return;
@@ -244,6 +248,7 @@ void on_msg_received(TcpConnection* con, SOCKET sock,
                 Message error_msg;
                 init_empty_message(&error_msg);
                 error_msg.msg_type = MSG_ERROR;
+                error_msg.proxy_client_socket = msg->proxy_client_socket;
                 strcpy(error_msg.msg, ERROR_ALREADY_MAX_CLIENTS);
                 tcp_connection_message_send(con, sock, &error_msg);
                 return;
@@ -286,6 +291,7 @@ void on_msg_received(TcpConnection* con, SOCKET sock,
         Message msg_code;
         init_empty_message(&msg_code);
         msg_code.msg_type = MSG_RSA_ENCODED;
+        msg_code.proxy_client_socket = msg->proxy_client_socket;
         strcpy(msg_code.msg, encrypted_msg);
         tcp_connection_message_send(con, sock, &msg_code);
         */
@@ -309,6 +315,7 @@ void on_msg_received(TcpConnection* con, SOCKET sock,
         Message connected_msg;
         init_empty_message(&connected_msg);
         connected_msg.msg_type = MSG_WELL_CONNECTED;
+        connected_msg.proxy_client_socket = msg->proxy_client_socket;
         tcp_connection_message_send(con, sock, &connected_msg);
     }
     else if(msg->msg_type == MSG_STD_CLIENT_SERVER &&
