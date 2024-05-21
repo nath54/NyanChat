@@ -102,10 +102,11 @@ void on_server_received(TcpConnection* con, SOCKET sock,
         return;
     }
     else if (msg->proxy_client_socket < 0||
-            (size_t)msg->proxy_client_socket >= con->nb_poll_fds)
+            (size_t)msg->proxy_client_socket > con->nb_poll_fds)
     {
         fprintf(stderr,
-                "Error: Bad value of client socket on msg  from serv!\n");
+                "Error: Bad value of client socket on msg  from serv %d / %ld!\n",
+                msg->proxy_client_socket, con->nb_poll_fds);
         return;
     }
 
