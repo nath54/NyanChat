@@ -116,26 +116,28 @@ typedef struct __attribute__((packed, aligned(4))) Message {
 } Message;
 
 
-typedef struct {
+typedef struct TcpConnection {
     // Base TCP Socket Connection
-    SOCKET sockfd;              // Descripteur du fichier du socket
-    SOCKADDR_IN addr;           // @ recepteur (serveur), @ serveur (client)
+    SOCKET sockfd;              // File descriptor of socket
+    SOCKADDR_IN addr;           // @ client (server), @ serveur (client)
 
     // Polling
-    struct pollfd poll_fds[MAX_POLL_SOCKETS]; // Tableau des sockets du polling
-    SOCKADDR_IN poll_addrs[MAX_POLL_SOCKETS]; // Adresses de ces sockets
+    struct pollfd poll_fds[MAX_POLL_SOCKETS]; // Sockets array of polling
+    SOCKADDR_IN poll_addrs[MAX_POLL_SOCKETS]; // Addresses of these sockets.
     socklen_t poll_ad_len[MAX_POLL_SOCKETS];  // Taille véritable de ces addrs
-    nfds_t nb_poll_fds;    // Nombre actuel de sockets de polling
+    nfds_t nb_poll_fds;    // Current number of sockets in polling.
 
     // Variables pour le serveur
-    struct Message msg;    // Recevra les messages depuis recv
+    struct Message msg;    // Will receive messages from rcv
 
     // Paramètres de la connexion
-    int type_connection;    // 0 = server, 1 = client,
-                            // 2 = proxy côté server, 3 = proxy côté clients
-    int timeout;    // Temps max d'inactivité avant fermeture de la connexion
-    bool end_connection; // S'il faut éteindre la connexion
-    bool need_compress_poll_arr; // S'il faut compresser this->poll_fds
+    int type_connection;    /* 0 = server, 1 = client,
+                               2 = proxy server side, 3 = proxy clients side
+                            */
+
+    int timeout;    // Maximum inactivity time before a closure of the connection.
+    bool end_connection; // Should the connection be closed?
+    bool need_compress_poll_arr; // Should this->poll_fds be compressed?
 } TcpConnection;
 
 
@@ -154,13 +156,23 @@ typedef void(fn_on_stdin)(TcpConnection* con,
 // static int stdin_fd = fileno(stdin);
 #define stdin_fd fileno(stdin)
 
-
-// Initialisation d'un message vide
-//  pour éviter de manipuler des données non initialisées
+/**
+ * @brief Initialiation of an empty message.
+ * @note Usefull to avoid manipulating uninitialized data.
+ * 
+ * @param msg The message to initialize.
+ */
 void init_empty_message(Message* msg);
 
-
-// Initialisation d'un socket pour un serveur tcp
+/**
+ * @brief Initialiation of a socket for a TCP server.
+ * 
+ * @param con 
+ * @param address_receptor 
+ * @param port_receptor 
+ * @param nb_max_connections_server 
+ * @param timeout_server 
+ */
 void tcp_connection_server_init(TcpConnection* con,
                                 char address_receptor[], int port_receptor,
                                 int nb_max_connections_server,
@@ -170,28 +182,60 @@ void tcp_connection_client_init(TcpConnection* con,
                                 char* ip_to_connect, int port_to_connect,
                                 int timeout_client);
 
-// Boucle principale d'une connection tcp
+/**
+ * @brief Main loop of a TCP connection.
+ * 
+ * @param con 
+ * @param on_msg 
+ * @param on_msg_custom_args 
+ * @param on_stdin 
+ * @param on_stdin_custom_args 
+ */
 void tcp_connection_mainloop(TcpConnection* con,
                              fn_on_msg on_msg, void* on_msg_custom_args,
                              fn_on_stdin on_stdin, void* on_stdin_custom_args);
 
 
 
-// Fermeture d'une connection tcp
+/**
+ * @brief Closure of a TCP connection.
+ * 
+ * @param con The TCP connection to close.
+ */
 void tcp_connection_close(TcpConnection* con);
 
 
-// Mise à jour d'un message
+/**
+ * @brief Update arguments of a message.
+ * 
+ * @param msg The message to update.
+ * @param buffer The new text of the message.
+ * @param size The size of the new text.
+ * @param type The new type of the message.
+ * @param flag The new flag for the message destination.
+ * @param pseudo_source The pseudo of the new source.
+ * @param destination The new destination.
+ */
 void tcp_connection_message_update(Message *msg, char buffer[MAX_MSG_LENGTH],
                                    uint32_t size, int type, int flag,
                                    char pseudo_source[MAX_NAME_LENGTH],
                                    char destination[MAX_NAME_LENGTH]);
 
-
-// Transmission d'un struct message
+/**
+ * @brief Transmission of a message.
+ * 
+ * @param con The connection to close in case of error.
+ * @param sock The socket to use.
+ * @param msg The message to send.
+ */
 void tcp_connection_message_send(TcpConnection* con, SOCKET sock,
                                  Message* msg);
 
 
-// Fonction qui copie le contenu d'un message depuis src vers dest
+/**
+ * @brief Copy a message from @p src to @p dest.
+ * 
+ * @param dest The destination message.
+ * @param src The source message.
+ */
 void copy_message(Message* dest, Message* src);

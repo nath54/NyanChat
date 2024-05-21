@@ -127,7 +127,7 @@ void gen_negative_ack_from_msg(Message* msg, Message* ack){
 }
 
 
-// Fonction qui traite les messages reçus
+// Function that processes received messages
 void on_msg_received(TcpConnection* con, SOCKET sock,
                      Message* msg, size_t msg_length,
                      void* custom_args)
@@ -296,7 +296,7 @@ void on_msg_received(TcpConnection* con, SOCKET sock,
         bool msg_bon = true;
         switch (code_detect_error(msg))
         {
-            case 0:  // Pas d'erreurs détectées
+            case 0:  // No detected error
                 break;
             
             case 1:
@@ -309,27 +309,19 @@ void on_msg_received(TcpConnection* con, SOCKET sock,
                 break;
         }
 
-        // Envoi des acquittements
+        // Acknowledgment sending
         Message ack;
-        if(msg_bon){
-            // Acquittement positif: on a bien reçu le message
+        if (msg_bon){
+            // Positive acknowledgment: we received the message correctly
             gen_negative_ack_from_msg(msg, &ack);
 
-            tcp_connection_message_send(
-                con,
-                sock,
-                &ack
-            );
+            tcp_connection_message_send(con, sock, &ack);
         }
-        else{
-            // Acquittement négatif: on n'a pas bien reçu le message
+        else {
+            // Negative acknowledgment: we did not receive the message correctly
             gen_negative_ack_from_msg(msg, &ack);
 
-            tcp_connection_message_send(
-                con,
-                sock,
-                &ack
-            );
+            tcp_connection_message_send(con, sock, &ack);
         }
 
     }
@@ -352,7 +344,7 @@ void on_stdin_server(TcpConnection* con,
     ServerState* sstate = custom_args;
     (void)sstate;
 
-    // On affiche juste l'entrée reçue
+    // Print the received input
     printf("Message écrit : \"%s\"\n", msg);
 
     // Test de commandes
@@ -363,13 +355,12 @@ void on_stdin_server(TcpConnection* con,
 }
 
 
-// Main
 int main(int argc, char **argv)
 {
     ServerState server_state;
     TcpConnection con;
 
-    // verification du nombre d'arguments sur la ligne de commande
+    // Check of the number of arguments on the command line
     if(argc != 2)
     {
         printf("Usage: %s port_local\n", argv[0]);
@@ -378,16 +369,16 @@ int main(int argc, char **argv)
 
     int port = atoi(argv[1]);
 
-    // Initialisation de la connection tcp du côté serveur
+    // Initialisation of the tcp connection on the server side
     init_server_state(&server_state);
     tcp_connection_server_init(&con, "127.0.0.1", port, 20, -1);
 
-    // Boucle principale de la connection tcp
+    // Main loop of the tcp connection
     tcp_connection_mainloop(&con,
                             on_msg_received, &server_state,
                             on_stdin_server, &server_state);
 
-    // fermeture de la connection
+    // Closure of the connection
     tcp_connection_close(&con);
     free_server_state(&server_state);
 

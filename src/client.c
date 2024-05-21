@@ -21,7 +21,7 @@
 #define PATH_RSA_KEYS "client_rsa_keys/"
 
 
-// Find the next free slot of the msg_waiting_ack
+// Find the next free slots of the msg_waiting_ack
 int find_next_msg_id(ClientState* cstate){
     size_t first_free = 0;
     if (cstate->nb_msg_waiting_ack == cstate->tot_msg_waiting_ack){
@@ -103,22 +103,22 @@ void on_stdin_client(TcpConnection* con,
                        "\nEntrez votre pseudo > ");
             }
             else {
-                // Enregistrement (temporaire ou pas) du pseudo
+                // Registration (temporary or not) of the pseudo
                 strcpy(cstate->pseudo, msg);
 
-                // Création du répertoire pour fichiers clés si non existant
+                // Creation of the directory for keys files if it doesn't exist
                 struct stat st = {0};
 
                 if (stat(PATH_RSA_KEYS, &st) == -1){
                     CHK( mkdir(PATH_RSA_KEYS, 0700) );
                 }
 
-                // Répertoire des clés pour le pseudo demandé
+                // Keys directory for given pseudo
                 char path_dir[MAX_NAME_LENGTH + 100] = PATH_RSA_KEYS;
                 CHKN( strcat(path_dir, msg) );
                 CHKN( strcat(path_dir, "/") );
 
-                // Chemins des clés
+                // Keys path
                 char path_pub[MAX_NAME_LENGTH + 100];
                 CHKN( strcpy(path_pub, path_dir) );
                 CHKN( strcat(path_pub, "rsa_pub") );
@@ -126,14 +126,14 @@ void on_stdin_client(TcpConnection* con,
                 CHKN( strcpy(path_priv, path_dir) );
                 CHKN( strcat(path_priv, "rsa_priv") );
 
-                // Test inscription (première connexion avec ce pseudo)
+                // Login test (first login with this pseudo)
                 if (stat(path_dir, &st) == -1) {
-                    // Il faut créer les fichiers clés RSA
+                    // Need to create RSA files
 
-                    // Création du répertoire pour le pseudo
+                    // Creaation of the directory for this pseudo
                     CHK( mkdir(path_dir, 0700) );
 
-                    // Création des clés
+                    // Keys creation
                     printf("Génération d'une paire de clé RSA : \n");
                     printf("  - chemin privée : %s\n", path_priv);
                     printf("  - chemin publique : %s\n", path_pub);
@@ -142,7 +142,7 @@ void on_stdin_client(TcpConnection* con,
                     printf("rsa keypair generated\n");
                 }
 
-                // Envoi de la demande de connection au serveur
+                // Send connection request to the server
                 init_empty_message(&(cstate->msg_waiting_ack[0]));
                 cstate->msg_waiting_ack[0].msg_type = MSG_CONNECTION_CLIENT;
                 cstate->msg_waiting_ack[0].msg_id = 0;
@@ -172,7 +172,7 @@ void on_stdin_client(TcpConnection* con,
         }
     }
     else if (cstate->connected){
-        // Bien connecté, on envoie des messages normalement
+        // Connected right, messaages caan be sended normaly
         client_send_message(con, cstate, msg, msg_len);
     }
 
