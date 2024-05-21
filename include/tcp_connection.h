@@ -132,10 +132,10 @@ typedef struct TcpConnection {
     socklen_t poll_ad_len[MAX_POLL_SOCKETS];  // Taille véritable de ces addrs
     nfds_t nb_poll_fds;    // Current number of sockets in polling.
 
-    // Variables pour le serveur
+    // Server vars
     struct Message msg;    // Will receive messages from rcv
 
-    // Paramètres de la connexion
+    // Connection parameters
     int type_connection;    /* 0 = server, 1 = client,
                                2 = proxy server side, 3 = proxy clients side
                             */
@@ -146,7 +146,7 @@ typedef struct TcpConnection {
 } TcpConnection;
 
 
-
+// Types for custom functions called on events
 typedef void(fn_on_msg)(TcpConnection* con, SOCKET sock,
                         Message* msg, size_t msg_len,
                         void* custom_args);
