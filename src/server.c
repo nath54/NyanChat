@@ -296,39 +296,36 @@ void on_msg_received(TcpConnection* con, SOCKET sock,
             }
         }
 
-
-        if(msg->msg_length >= 10){
-            // Error detection test
-            bool msg_bon = true;
-            switch (code_detect_error(msg))
-            {
-                case 0:  // No detected error
-                    break;
-                
-                case 1:
-                    if(code_correct_error(msg) != 0)
-                        msg_bon = false;
-                    break;
-
-                default:
+        // Error detection test
+        bool msg_bon = true;
+        switch (code_detect_error(msg))
+        {
+            case 0:  // No detected error
+                break;
+            
+            case 1:
+                if(code_correct_error(msg) != 0)
                     msg_bon = false;
-                    break;
-            }
+                break;
 
-            // Acknowledgment sending
-            Message ack;
-            if (msg_bon){
-                // Positive acknowledgment: we received the message correctly
-                gen_negative_ack_from_msg(msg, &ack);
+            default:
+                msg_bon = false;
+                break;
+        }
 
-                tcp_connection_message_send(con, sock, &ack);
-            }
-            else {
-                // Negative acknowledgment: we did not receive the message correctly
-                gen_negative_ack_from_msg(msg, &ack);
+        // Acknowledgment sending
+        Message ack;
+        if (msg_bon){
+            // Positive acknowledgment: we received the message correctly
+            gen_negative_ack_from_msg(msg, &ack);
 
-                tcp_connection_message_send(con, sock, &ack);
-            }
+            tcp_connection_message_send(con, sock, &ack);
+        }
+        else {
+            // Negative acknowledgment: we did not receive the message correctly
+            gen_negative_ack_from_msg(msg, &ack);
+
+            tcp_connection_message_send(con, sock, &ack);
         }
 
         //

@@ -52,6 +52,7 @@ int find_next_msg_id(ClientState* cstate){
 }
 
 
+// Sending a message to the server
 void client_send_message(TcpConnection* con,
                          ClientState* cstate,
                          char msg[MAX_MSG_LENGTH],
@@ -91,11 +92,12 @@ void on_stdin_client(TcpConnection* con,
         //  - waiting for the server to confirm the nickname (nothing to do)
 
         if (!cstate->waiting_pseudo_confirmation){
-            // On n'attend pas le serveur, on attend l'entrée utilisateur
-            // msg est censé contenir le pseudo demandé par le client
+            // We do not wait for the server, we wait for user input
+            // msg is supposed to contain the nickname requested by the client
 
-            // On crée un code puis
-            //  on envoie une demande de pseudo au serveur
+            // We create a code then
+            //  we send a nickname request to the server
+
 
             if (msg_len < MIN_NAME_LENGTH){
                 printf("Pseudo trop court, "
@@ -150,7 +152,7 @@ void on_stdin_client(TcpConnection* con,
         }
     }
     else if (cstate->connected){
-        // Connected right, messaages caan be sended normaly
+        // Connected right, messages can be sended normaly
         client_send_message(con, cstate, msg, msg_len);
     }
 
@@ -169,42 +171,43 @@ void on_msg_client(TcpConnection* con, SOCKET sock,
     // printf("Message received: %s\n", msg->msg);
 
     if(cstate->waiting_pseudo_confirmation){
-        // On vérifie que l'on a bien soit:
-        //   - une erreur -> pseudo non utilisable
-        //   - un message encodé du serveur
-        //       qu'il faudra décoder avec notre clé privée et lui renvoyer
-        //   - un acquittement positif qui indique que le message a bien été
-        //       décodé, et donc qu'on est bien connecté
-        // Sinon, on ignore, on est pas censé recevoir autre chose
+        // We check that we have either:
+        //   - an error -> unusable pseudo
+        //   - an encoded message from the server
+        //       that will have to be decoded with our private key and sent back to it
+        //   - a positive acknowledgment indicating that the message has been
+        //       decoded correctly, and therefore that we are well connected
+        // Otherwise, we ignore it, we are not supposed to receive anything else
 
         // Connection code path
         char path_code_pseudo[MAX_NAME_LENGTH + 100] = PATH_CLI_CODES;
         CHKN( strcat(path_code_pseudo, cstate->pseudo) );
 
-        // Gestion erreur
+        // Error gestion
         if(msg->msg_type == MSG_ERROR){
-            // Pseudo non utilisable, il faut donc le dire à l'utilisateur
-            //  et lui demander d'en rentrer un autre
-            //  il faudra donc aussi supprimer les fichiers de codes de connexion
+            // This pseudonym is not usable, so the user must be informed
+            // and asked to enter another one.
+            // The connection code files will also need to be deleted.
 
             printf("\033[31mError, this pseudo is already taken, "
                     "please choose another pseudo!\033[m\nPseudo : ");
 
-            // SUPPRESSION DES FICHIERS DE CODE DE CONNEXION:
+            // CONNECTION CODE FILES REMOVAL
             remove(path_code_pseudo);
 
-            // Réinitialisation du pseudo
+            // Pseudo reset
             strcpy(cstate->pseudo, "");
             cstate->waiting_pseudo_confirmation = false;
+            
+            // If an error is sent when the decoded message is returned,
+            //   this message must also be cleaned up
 
-            // Si erreur envoyée sur retour du message décodé,
-            //   il faut aussi nettoyer ce message
             // Test bad ACK
             if(msg->msg_id >= 0 &&
                (size_t)msg->msg_id < cstate->nb_msg_waiting_ack &&
                cstate->msg_waiting_ack[msg->msg_id].msg_type != MSG_NULL
             ){
-                // On nettoie le message qui attend
+                // We clean the waiting message
                 init_empty_message(&(cstate->msg_waiting_ack[msg->msg_id]));
             }
         }
@@ -216,11 +219,11 @@ void on_msg_client(TcpConnection* con, SOCKET sock,
             // TODO: récupérer les messages des salons, etc...
         }
         else{
-            // On ne fait rien, on n'est pas censé arriver ici
+            // We do nothing, we are not supposed to get here
         }
     }
     else if(cstate->connected){
-        // On est bien connecté, donc on reçoit les messages normalement
+        // We are well connected, so we can receive normally the messages
 
         switch (msg->msg_type)
         {
@@ -243,7 +246,7 @@ void on_msg_client(TcpConnection* con, SOCKET sock,
                             "bad negative ack from server\033[m\n");
                     return;
                 }
-                // Il faut renvoyer le message
+                // Have to resend the message
                 tcp_connection_message_send(con, con->sockfd,
                                     &(cstate->msg_waiting_ack[msg->msg_id]));
                 break;
@@ -258,7 +261,7 @@ void on_msg_client(TcpConnection* con, SOCKET sock,
                             "bad negative ack from server\033[m\n");
                     return;
                 }
-                // On nettoie le message qui attend
+                // Cleaning the awaiting message
                 init_empty_message(&(cstate->msg_waiting_ack[msg->msg_id]));
                 break;
 
@@ -270,7 +273,7 @@ void on_msg_client(TcpConnection* con, SOCKET sock,
 }
 
 
-// Initialise le client_state
+// Initialising the client_state
 void init_client_state(ClientState* client_state){
     // Init pseudo
     memset(client_state->pseudo, 0, MAX_NAME_LENGTH);

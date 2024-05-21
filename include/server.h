@@ -8,26 +8,26 @@
 #define NB_MAX_MESSAGES 2000
 
 typedef struct {
-    // Nom du salon textuel
+    // Channel name
     char name[MAX_NAME_LENGTH];
 
-    // Pseudo du créateur du channel
+    // Pseudo of the client that created this channel
     char host[MAX_NAME_LENGTH];
 
-    // Liste des clients autorisés
+    // List of authorized clients
     char clients[MAX_NAME_LENGTH][NB_MAX_CLIENTS];
 
-    // Nombre de clients
+    // Number of clients
     int nb_clients;
 
-    // liste des messages
+    // Liste of the lasts messages
     Message msgs[NB_MAX_MESSAGES];
 
-    // Nombre de messages dans le salon
+    // Number of messages in this channel
     int nb_msgs;
 
-    // Indique qu’on a dépassé NB_MAX_MESSAGES messages dans le salon,
-    //  donc on active la périodicité du tableau msgs
+    // Indicates that NB_MAX_MESSAGES messages have been exceeded in the chat room,
+    //  therefore the periodicity of the msgs table is activated
 	bool msgs_boucle;
 
 } Channel;
@@ -36,7 +36,7 @@ typedef struct {
 #define NB_MAX_CHANNELS 128
 #define NB_MAX_CONNECTED_CLIENTS (MAX_POLL_SOCKETS - 4)
 
-#define TIMEOUT_INACTIVE 30  // En secondes
+#define TIMEOUT_INACTIVE 30  // In seconds
 
 typedef struct{
     bool connected;

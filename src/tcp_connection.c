@@ -248,24 +248,24 @@ void compress_poll_socket_array(TcpConnection* con, int current_nb_poll_socks)
 }
 
 
-// Lit tous les messages possibles sur le socket con->poll_fds[id_poll].fd
-//   Pour chaque message lu, appelle la fonction on_msg sur le message reçu
+// Reads all possible messages on the socket con->poll_fds[id_poll].fd
+// For each message read, calls the on_msg function on the received message
 void read_poll_socket(TcpConnection* con, int id_poll,
                       fn_on_msg on_msg, void* on_msg_custom_args)
 {
 
-    // Variable pour savoir si un socket du poll se coupe ou pas
+    // To check if a poll socket has closed
     bool close_conn = false;
 
     do {
-        // On lit sur le socket
-        // rc pour Return Code
+        // We read the socket
+        // rc for Return Code
         int rc = recv(con->poll_fds[id_poll].fd,
                       &(con->msg), sizeof(con->msg), MSG_DONTWAIT);
 
-        // Plus rien à lire
+        // No more to read
         if (rc < 0){
-            // Erreur lors de la lecture
+            // Error from reading
             if (errno != EWOULDBLOCK) {
                 perror("  recv() failed");
                 close_conn = true;
@@ -273,17 +273,17 @@ void read_poll_socket(TcpConnection* con, int id_poll,
             break;
         }
 
-        // Connection fermée par le client
+        // Connection closed by client
         if (rc == 0){
             printf("  Connection closed\n");
             close_conn = true;
             break;
         }
 
-        // On a reçu des données
+        // Received a message
         size_t msg_len = rc;
 
-        printf("Msg reçu : %s\n", con->msg.msg);
+        printf("Msg received : %s\n", con->msg.msg);
 
         if (con->type_connection == TCP_CON_PROXY_CLIENTS_SIDE){
             con->msg.proxy_client_socket = id_poll;
@@ -300,7 +300,7 @@ void read_poll_socket(TcpConnection* con, int id_poll,
         if(con->type_connection == TCP_CON_CLIENT ||
            con->type_connection == TCP_CON_PROXY_SERVER_SIDE)
         {
-            // Connection fermée, il faut quitter l'application
+            // Connection closed, must have to end the connection
             con->end_connection = true;
         }
         CHK( close(con->poll_fds[id_poll].fd) );
@@ -310,7 +310,7 @@ void read_poll_socket(TcpConnection* con, int id_poll,
 }
 
 
-// Boucle principale d'une connection tcp
+// Mainloop of a tcp connection
 void tcp_connection_mainloop(TcpConnection* con,
                              fn_on_msg on_msg, void* on_msg_custom_args,
                              fn_on_stdin on_stdin, void* on_stdin_custom_args)
@@ -321,31 +321,31 @@ void tcp_connection_mainloop(TcpConnection* con,
         exit(EXIT_FAILURE);
     }
 
-    // Tant que le serveur tourne
+    // While server is running
     do{
 
         printf("Waiting for poll\n");
 
-        // On écoute les sockets avec poll
-        // rc pour Return Code
+        // We listen the sockets with poll
+        // rc for Return Code
         int rc = poll(con->poll_fds, con->nb_poll_fds, con->timeout);
 
         printf("test, rc=%d\n", rc);
         if (test_poll_errors(rc))
             break;
 
-        // Pour l'instant, on a tant de poll sockets
+        // Currently, we have that mush poll sockets
         int current_nb_poll_socks = con->nb_poll_fds;
 
-        // On parcours tous nos sockets, 
+        // Looping through all sockets
         for (int i = 0; i < current_nb_poll_socks; i++){
 
-            // Socket inactif
+            // Inactive socket
             if (con->poll_fds[i].revents == 0){
                 continue;
             }
 
-            // Erreur 
+            // Error
             if (con->poll_fds[i].revents != POLLIN){
                 fprintf(stderr, "  Error! revents = %d\n",
                                     con->poll_fds[i].revents);
@@ -358,19 +358,19 @@ void tcp_connection_mainloop(TcpConnection* con,
                 con->poll_fds[i].fd == con->sockfd)
             {
 
-                // Socket qui écoute les connections entrantes 
+                // Sockets that listen entering connections
                 new_clients_acceptation(con);
 
             } else if ((con->type_connection == TCP_CON_CLIENT ||
                         con->type_connection == TCP_CON_PROXY_SERVER_SIDE) &&
                         con->poll_fds[i].fd == con->sockfd){
 
-                // Socket qui écoute les connections entrantes 
+                // Socket that receive messages
                 read_poll_socket(con, i, on_msg, on_msg_custom_args);
 
             } else if (con->poll_fds[i].fd == stdin_fd) {
 
-                // Evenement stdin
+                // stdin event
 
                 // Read message from standard input
                 char buffer[MAX_MSG_LENGTH];
@@ -397,8 +397,8 @@ void tcp_connection_mainloop(TcpConnection* con,
 
                 printf("Readable socket : %d\n", con->poll_fds[i].fd);
 
-                // SOCKET lisible
-                // On reçoit des données tant que possible
+                // readable SOCKET
+                // We read as much data as we can
 
                 read_poll_socket(con, i, on_msg, on_msg_custom_args);
 
@@ -406,10 +406,10 @@ void tcp_connection_mainloop(TcpConnection* con,
 
         }
 
-        // S'il y a besoin de compresser le tableau des sockets du polling
-        //  on remet ensemble côtes à côtes tous les sockets 
-        //  on n'a pas besoin de toucher aux attributs revent,
-        //  ils sont normalement tous à la valeur POLLIN
+        // If the polling socket table needs to be compressed
+        //  we put all the sockets back together side by side
+        //  we don't need to touch the revent attributes,
+        //  they are normally all set to POLLIN
         if (con->need_compress_poll_arr){
 
             printf("Compress polls sockets array.\n");
@@ -424,13 +424,13 @@ void tcp_connection_mainloop(TcpConnection* con,
 }
 
 
-// Fermeture d'une connection tcp
+// Closing a tcp connection
 void tcp_connection_close(TcpConnection* con){
 
-    // Fermeture du socket qui écoute les connections entrantes
+    // Closing the main primary socket
     CHK( close(con->sockfd) );
 
-    // Fermeture de tous les autres sockets ouverts
+    // Closing all the other opened sockets
     for (unsigned long i=0; i<con->nb_poll_fds; i++){
         if (con->poll_fds[i].fd >= 0
             && con->poll_fds[i].fd != con->sockfd
@@ -479,7 +479,7 @@ void tcp_connection_message_send(TcpConnection* con, SOCKET sock,
 }
 
 
-// Fonction qui copie le contenu d'un message depuis src vers dest
+// Copy the content of a message src to a message dest
 void copy_message(Message* dest, Message* src){
     dest->msg_type = src->msg_type;
     dest->msg_id = src->msg_id;
