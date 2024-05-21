@@ -34,6 +34,5 @@ doc/*/
 *.pdb
 
 
-client_rsa_keys/
-server_rsa_keys/
+pseudo_code_*/*
 tmp_key

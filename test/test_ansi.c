@@ -15,20 +15,20 @@ void set_screen_border(int width, int height){
     // Cleaning screen
     printf("\033c");
 
-    // Ligne du dessus
+    // Top line
     set_cursor_position(0, 0);
     printf("#");
     for(int i=1; i<width-1; i++){
         printf("=");
     }
     printf("#\n");
-    // Bordures sur le côté
+    // Side borders
     for(int j=2; j<height; j++){
         printf("||");
         set_cursor_position(width-1, j);
         printf("||\n");
     }
-    //
+    // Bottom line
     printf("#");
     for(int i=1; i<width-1; i++){
         printf("=");
