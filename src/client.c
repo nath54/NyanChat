@@ -240,7 +240,7 @@ void on_msg_client(TcpConnection* con, SOCKET sock,
                 init_empty_message(&(cstate->msg_waiting_ack[msg->msg_id]));
             }
         }
-        else if(msg->msg_type == MSG_SERVER_CLIENT){
+        else if(msg->msg_type == MSG_RSA_ENCODED){
             // On décode le message avec notre clé privée,
             //   et ensuite on le renvoie
 

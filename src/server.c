@@ -54,8 +54,9 @@ Client* create_client(char pseudo[MAX_NAME_LENGTH], int id_poll_socket){
     }
 
     c->connected = false;
-    c->waiting_code_response = true;
-    c->code_to_verify = generate_random_code(RSA_KEY_LENGTH);
+    c->waiting_code_response = false;
+    // c->code_to_verify = generate_random_code(RSA_KEY_LENGTH);
+    c->code_to_verify = NULL;
     c->public_key = NULL;
     strcpy(c->pseudo, pseudo);
     c->last_activity = time(NULL);
@@ -221,8 +222,7 @@ void on_msg_received(TcpConnection* con, SOCKET sock,
             }
             cli->public_key = calloc(msg->msg_length, sizeof(char));
             strcpy(cli->public_key, msg->msg);
-            cli->code_to_verify = generate_random_code(
-                                        RSA_KEY_LENGTH);
+            cli->code_to_verify = generate_random_code(MAX_MSG_ENCODABLE);
             cli->waiting_code_response = true;
             cli->last_activity = time(NULL);
         }
@@ -254,6 +254,8 @@ void on_msg_received(TcpConnection* con, SOCKET sock,
             //
             cli->public_key = calloc(msg->msg_length, sizeof(char));
             strcpy(cli->public_key, msg->msg);
+            cli->code_to_verify = generate_random_code(MAX_MSG_ENCODABLE);
+            cli->waiting_code_response = true;
             //
             hashmap_insert(sstate->hm_pseudo_to_id,
                            cli->pseudo, new_cli_idx);
@@ -261,6 +263,10 @@ void on_msg_received(TcpConnection* con, SOCKET sock,
 
         // Si on arrive ici, on encode un code random associé à ce client
         //      et on l'envoie, dans l'attente d'une réponse
+        if(cli->code_to_verify == NULL){
+            fprintf(stderr, "Error code logic server, call the devs!\n");
+            exit(EXIT_FAILURE);
+        }
         char* encrypted_msg;
         size_t t_encrypted;
 
@@ -275,7 +281,7 @@ void on_msg_received(TcpConnection* con, SOCKET sock,
 
         Message msg_code;
         init_empty_message(&msg_code);
-        msg_code.msg_type = MSG_SERVER_CLIENT;
+        msg_code.msg_type = MSG_RSA_ENCODED;
         strcpy(msg_code.msg, encrypted_msg);
         tcp_connection_message_send(con, sock, &msg_code);
     }
@@ -283,7 +289,8 @@ void on_msg_received(TcpConnection* con, SOCKET sock,
             msg->msg_length >= 10
     ){
         
-        printf("Message reçu : \"%s\"\n", msg->msg);
+        printf("Received (from: %s) : \"%s\" (%d)\n",
+               msg->src_pseudo, msg->msg, msg->msg_length);
 
         // test detection d'erreurs
         bool msg_bon = true;
@@ -327,7 +334,8 @@ void on_msg_received(TcpConnection* con, SOCKET sock,
 
     }
     else if(msg->msg_type == MSG_STD_CLIENT_SERVER){  // Tout piti msg
-        printf("Message reçu : \"%s\"\n", msg->msg);
+        printf("Received (from: %s) : \"%s\" (%d)\n",
+               msg->src_pseudo, msg->msg, msg->msg_length);
     }
     else{
 

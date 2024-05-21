@@ -116,14 +116,15 @@ int encrypt_message(const char* message, size_t message_len,
     public_fp = fopen(public_key_file, "rb");
     if (!public_fp) {
         fprintf(stderr, "Error opening public key file\n");
+        ERR_print_errors_fp(stderr);
         goto cleanup;
     }
 
     // Read the public key
-    errno = 0;
     pkey = PEM_read_PUBKEY(public_fp, NULL, NULL, NULL);
     if (!pkey) {
         fprintf(stderr, "Error reading public key\n");
+        ERR_print_errors_fp(stderr);
         goto cleanup;
     }
 
@@ -131,40 +132,49 @@ int encrypt_message(const char* message, size_t message_len,
     ctx = EVP_PKEY_CTX_new(pkey, NULL);
     if (!ctx) {
         fprintf(stderr, "Error creating context\n");
+        ERR_print_errors_fp(stderr);
         goto cleanup;
     }
 
     // Initialize encryption
     if (EVP_PKEY_encrypt_init(ctx) <= 0) {
         fprintf(stderr, "Error initializing encryption\n");
+        ERR_print_errors_fp(stderr);
         goto cleanup;
     }
 
     // Set padding
     if (EVP_PKEY_CTX_set_rsa_padding(ctx, RSA_PKCS1_PADDING) <= 0) {
         fprintf(stderr, "Error setting padding\n");
+        ERR_print_errors_fp(stderr);
         goto cleanup;
     }
 
     // Determine buffer length
     if (EVP_PKEY_encrypt(ctx, NULL, &outlen, (unsigned char*)message, message_len) <= 0) {
         fprintf(stderr, "Error determining buffer length\n");
+        ERR_print_errors_fp(stderr);
         goto cleanup;
     }
 
     // Allocate buffer
-    encrypted = (unsigned char*)malloc(outlen);
+    // encrypted = (unsigned char*)malloc(outlen);
+    encrypted = (unsigned char*)calloc(4096, sizeof(char));
     if (!encrypted) {
         fprintf(stderr, "Error allocating memory\n");
+        ERR_print_errors_fp(stderr);
         goto cleanup;
     }
 
     // Perform encryption
     if (EVP_PKEY_encrypt(ctx, encrypted, &outlen, (unsigned char*)message, message_len) <= 0) {
         fprintf(stderr, "Error encrypting message\n");
+        ERR_print_errors_fp(stderr);
         free(encrypted);
         goto cleanup;
     }
+
+    printf("fichier encrypté\n");
 
     *encrypted_message = encrypted;
     *encrypted_len = outlen;

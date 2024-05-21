@@ -40,6 +40,7 @@ typedef u_int32_t uint32;
 // Doit pouvoir contenir une clé RSA
 #define MAX_MSG_LENGTH 2048
 #define RSA_KEY_LENGTH 1536
+#define MAX_MSG_ENCODABLE ((RSA_KEY_LENGTH / 8) - 20)
 
 #define MAX_POLL_SOCKETS 200
 
@@ -55,6 +56,7 @@ typedef u_int32_t uint32;
 #define MSG_ERROR 4
 #define MSG_ACK_POS 5
 #define MSG_ACK_NEG 6
+#define MSG_RSA_ENCODED 7
 
 #define ERROR_MSG_CON_DIFF_KEYS "Error: this pseudo already has another key"
 #define ERROR_MSG_BAD_DECODED "Error: misdecoded the connection code"
