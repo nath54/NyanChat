@@ -102,6 +102,31 @@ void gen_negative_ack_from_msg(Message* msg, Message* ack){
 }
 
 
+// Send a message to all the connected clients
+void broadcast_msg_to_all_connected_clients(TcpConnection* con, 
+                                            ServerState* sstate,
+                                            SOCKET proxy_sock,
+                                            Message* msg)
+{
+
+    Message new_msg;
+    init_empty_message(&new_msg);
+    strcpy(new_msg.msg, msg->msg);
+    new_msg.msg_length = msg->msg_length;
+    new_msg.msg_type = MSG_SERVER_CLIENT;
+    strcpy(new_msg.src_pseudo, msg->src_pseudo);
+
+    for(int i=0; i<NB_MAX_CONNECTED_CLIENTS; i++){
+        Client* c = sstate->clients[i];
+        if(c != NULL){
+            if(c->connected){
+                new_msg.proxy_client_socket = c->id_poll_socket_proxy;
+                tcp_connection_message_send(con, proxy_sock, &new_msg);
+            }
+        }
+    }
+}
+
 // Function that processes received messages
 void on_msg_received(TcpConnection* con, SOCKET sock,
                      Message* msg, size_t msg_length,
@@ -114,27 +139,27 @@ void on_msg_received(TcpConnection* con, SOCKET sock,
     (void)sstate;
 
     if(strlen(msg->src_pseudo) < MIN_NAME_LENGTH){
-        // Pas de pseudo, on bloque le message, on ne fait rien
+        // No pseudo, this is an error, we stop here
         return;
     }
 
     if(msg->msg_type == MSG_CONNECTION_CLIENT){
 
-        // Recherche de données sur un client avec le pseudo demandé
+        // Searching for a client with the given pseudo
         Client* cli = NULL;
         if( hashmap_find(sstate->hm_pseudo_to_id, msg->src_pseudo) != -1 ){
-            // On a trouvé une valeur
+            // Found a value
             uint idx_client = hashmap_get(sstate->hm_pseudo_to_id,
                                           msg->src_pseudo);
             if(idx_client < NB_MAX_CONNECTED_CLIENTS){
                 cli = sstate->clients[idx_client];
                 if(cli == NULL){
-                    // Mauvaise valeur, on va la supprimer
+                    // Bad value, remove it
                     hashmap_remove(sstate->hm_pseudo_to_id, msg->src_pseudo);
                 }
             }
             else{
-                // Mauvaise valeur, on va la supprimer
+                // Bad value, remove it
                 hashmap_remove(sstate->hm_pseudo_to_id, msg->src_pseudo);
             }
         }
@@ -145,14 +170,14 @@ void on_msg_received(TcpConnection* con, SOCKET sock,
         struct stat st = {0};
 
         if (stat(path_key, &st) != -1){
-            // S'il y en a une, on la compare avec celle envoyée
+            // If there is one, we compare it to the one sent
             char* found_code;
             size_t key_length;
             CHK( read_file(path_key, &found_code, &key_length) );
 
             if(strcmp(msg->msg, found_code) != 0){
-                // Si les deux codes sont différentes,
-                //   envoi d'un msg d'erreur au client qui veut se connecter
+                // If the two codes are different,
+                //   send an error message to the client who wants to connect
                 Message error_msg;
                 init_empty_message(&error_msg);
                 error_msg.msg_type = MSG_ERROR;
@@ -162,21 +187,21 @@ void on_msg_received(TcpConnection* con, SOCKET sock,
                 return;
 
             } else {
-                // Sinon, on teste si l'utilisateur a déjà une session active
+                // Otherwise, we check if the user already has an active session
                 if(cli != NULL && cli->connected == true){
-                    // Si oui, on test si le client est inactif
-                    //   depuis un certain temps
+                    // If yes, we check if the client has been inactive
+                    //   for a certain period of time
                     if(time(NULL) - cli->last_activity >= TIMEOUT_INACTIVE){
-                        // Si oui, on jarte le client déjà connecté
-                        //       -> (on remplace id_poll_socket_proxy)
-                        //           une session client est identifié par:
-                        //                - son pseudo 
-                        //                - et son id de socket du proxy
-                        // mais avant, on va quand même tester les clés
+                        // If yes, we discard the already connected client
+                        //       -> (we replace id_poll_socket_proxy)
+                        //           a client session is identified by:
+                        //                - its nickname
+                        //                - and its proxy socket ID
+                        // but before that, we will still test the keys
                         
                     }
                     else{
-                        // Sinon, on envoie un message d'erreur
+                        // Otherwise, we send an error message
                         Message error_msg;
                         init_empty_message(&error_msg);
                         error_msg.msg_type = MSG_ERROR;
@@ -191,16 +216,16 @@ void on_msg_received(TcpConnection* con, SOCKET sock,
             free(found_code);
         }
 
-        // On va s'occuper du client, en créer un autre, ou reset l'existant
+        // We take care of the client
         if(cli != NULL){
-            // il faut "reset" les données du client
+            // Have to "reset" client data
             cli->id_poll_socket_proxy = msg->proxy_client_socket;
             cli->last_activity = time(NULL);
         }
         else{
-            // il faut créer un client associé à ce pseudo
+            // Have to create a client associated to this pseudo
 
-            // On recherche la première case vide du tableau des clients
+            // Searching for the first empty case in the clients array
             int new_cli_idx = -1;
             for(int i=0; i<NB_MAX_CONNECTED_CLIENTS; i++){
                 if(sstate->clients[i] == NULL){
@@ -209,7 +234,7 @@ void on_msg_received(TcpConnection* con, SOCKET sock,
                 }
             }
             if(new_cli_idx == -1){
-                // Message d'erreur, plus de clients possibles
+                // Error message, no more clients possible
                 Message error_msg;
                 init_empty_message(&error_msg);
                 error_msg.msg_type = MSG_ERROR;
@@ -219,7 +244,7 @@ void on_msg_received(TcpConnection* con, SOCKET sock,
                 return;
             }
 
-            // On crée le client
+            // We create the client
             sstate->clients[new_cli_idx] = create_client(msg->src_pseudo,
                                                 msg->proxy_client_socket);
             cli = sstate->clients[new_cli_idx];
@@ -239,56 +264,97 @@ void on_msg_received(TcpConnection* con, SOCKET sock,
 
         cli->connected = true;
 
-        // On envoie un message pour indiquer la bonne connection au client
+        // We send a msg to tell the client he is well connected
         Message connected_msg;
         init_empty_message(&connected_msg);
         connected_msg.msg_type = MSG_WELL_CONNECTED;
         connected_msg.proxy_client_socket = msg->proxy_client_socket;
         tcp_connection_message_send(con, sock, &connected_msg);
     }
-    else if(msg->msg_type == MSG_STD_CLIENT_SERVER &&
-            msg->msg_length >= 10
-    ){
+    else if(msg->msg_type == MSG_STD_CLIENT_SERVER){
         
+        //
         printf("Received (from: %s) : \"%s\" (%d)\n",
                msg->src_pseudo, msg->msg, msg->msg_length);
 
-        // test detection d'erreurs
-        bool msg_bon = true;
-        switch (code_detect_error(msg))
+        // Check pseudo, if this pseudo is connected or not
+        Client* cli = NULL;
+        if( hashmap_find(sstate->hm_pseudo_to_id, msg->src_pseudo) != -1 ){
+            // Found a value
+            uint idx_client = hashmap_get(sstate->hm_pseudo_to_id,
+                                          msg->src_pseudo);
+            if(idx_client < NB_MAX_CONNECTED_CLIENTS){
+                cli = sstate->clients[idx_client];
+                if(cli == NULL){
+                    // Bad value, remove it
+                    hashmap_remove(sstate->hm_pseudo_to_id, msg->src_pseudo);
+                }
+            }
+            else{
+                // Bad value, remove it
+                hashmap_remove(sstate->hm_pseudo_to_id, msg->src_pseudo);
+            }
+        }
+
+
+        if(msg->msg_length >= 10){
+            // Error detection test
+            bool msg_bon = true;
+            switch (code_detect_error(msg))
+            {
+                case 0:  // No detected error
+                    break;
+                
+                case 1:
+                    if(code_correct_error(msg) != 0)
+                        msg_bon = false;
+                    break;
+
+                default:
+                    msg_bon = false;
+                    break;
+            }
+
+            // Acknowledgment sending
+            Message ack;
+            if (msg_bon){
+                // Positive acknowledgment: we received the message correctly
+                gen_negative_ack_from_msg(msg, &ack);
+
+                tcp_connection_message_send(con, sock, &ack);
+            }
+            else {
+                // Negative acknowledgment: we did not receive the message correctly
+                gen_negative_ack_from_msg(msg, &ack);
+
+                tcp_connection_message_send(con, sock, &ack);
+            }
+        }
+
+        //
+
+        switch (msg->dst_flag)
         {
-            case 0:  // No detected error
+            case MSG_FLAG_DEFAULT_CHANNEL:
+                broadcast_msg_to_all_connected_clients(con,
+                                                       sstate,
+                                                       sock,
+                                                       msg);
                 break;
             
-            case 1:
-                if(code_correct_error(msg) != 0)
-                    msg_bon = false;
+            case MSG_FLAG_PRIVATE_CHANNEL:
+                // TODO
+                break;
+
+            case MSG_FLAG_PRIVATE_MESSAGE:
+                // TODO
                 break;
 
             default:
-                msg_bon = false;
+                // Error here
                 break;
         }
 
-        // Acknowledgment sending
-        Message ack;
-        if (msg_bon){
-            // Positive acknowledgment: we received the message correctly
-            gen_negative_ack_from_msg(msg, &ack);
-
-            tcp_connection_message_send(con, sock, &ack);
-        }
-        else {
-            // Negative acknowledgment: we did not receive the message correctly
-            gen_negative_ack_from_msg(msg, &ack);
-
-            tcp_connection_message_send(con, sock, &ack);
-        }
-
-    }
-    else if(msg->msg_type == MSG_STD_CLIENT_SERVER){  // Tout piti msg
-        printf("Received (from: %s) : \"%s\" (%d)\n",
-               msg->src_pseudo, msg->msg, msg->msg_length);
     }
     else{
 
@@ -308,8 +374,8 @@ void on_stdin_server(TcpConnection* con,
     // Print the received input
     printf("Message écrit : \"%s\"\n", msg);
 
-    // Test de commandes
-    //   - Commande pour quitter le serveur
+    // Test for commands
+    //   - Quit the server
     if(strcmp(msg, "/quit") == 0){
         con->end_connection = true;
     }

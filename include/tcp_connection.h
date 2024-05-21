@@ -64,6 +64,10 @@ typedef u_int32_t uint32;
 #define ERROR_MSG_STILL_ACTIVE_CLIENT "Error: you still have an active session"
 #define ERROR_ALREADY_MAX_CLIENTS "Error: already max clients connected!"
 
+#define MSG_FLAG_DEFAULT_CHANNEL 0
+#define MSG_FLAG_PRIVATE_CHANNEL 1
+#define MSG_FLAG_PRIVATE_MESSAGE 2
+
 /* Structure used for messages and acknowledgments
     transmitted by the connection
 */
@@ -95,9 +99,9 @@ typedef struct __attribute__((packed, aligned(4))) Message {
     
     /*
     Flag for destination type:
-    0 = private message
+    0 = default channel
     1 = private channel
-    2 = default channel
+    2 = private message
     */
 	int dst_flag;
     
