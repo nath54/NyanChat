@@ -232,16 +232,36 @@ void get_terminal_size(int *width, int *height) {
 // Function to get the cursor position
 //  /!\\ Warning /!\\ : (x, y) parameter order
 void get_cursor_position(int *col, int *row) {
-    printf("\033[6n");  // ANSI escape code to query cursor position
-    scanf("\033[%d;%dR", row, col);  // Parse the response
+    // ANSI escape code to query cursor position
+    printf("\033[6n");
+    // Parse the response
+    scanf("\033[%d;%dR", row, col);
 }
 
 // Function to set the cursor position
 //  /!\\ Warning /!\\ : (x, y) parameter order
 void set_cursor_position(int col, int row) {
-    printf("\033[%d;%dH", row, col);  // ANSI escape code to set cursor position
+    // ANSI escape code to set cursor position
+    printf("\033[%d;%dH", row, col);
 }
 
+// Function to print a vertical line of a character
+//   Start and end points are both included
+void print_horizontal_line(char c, int x_start, int x_end, int y){
+    set_cursor_position(x_start, y);
+    for(int x=x_start; x<=x_end; x++){
+        printf("%c", c);
+    }
+}
+
+// Function that print an horizontal line of a character
+//   Start and end points are both included
+void print_vertical_line(char c, int x, int y_start, int y_end){
+    for(int y=y_start; y<=y_end; y++){
+        set_cursor_position(x, y);
+        printf("%c", c);
+    }
+}
 
 // Clean the terminal screen
 void clean_terminal(){
@@ -254,6 +274,19 @@ void clean_terminal(){
 void force_buffer_prints(){
     fflush(stdout);
 }
+
+
+// Enable cursor display
+void show_cursor(){
+    printf("\x1b[?25h");
+}
+
+
+// Disable cursor display
+void hide_cursor(){
+    printf("\x1b[?25l");
+}
+
 
 /*
     __________ Display related functions __________ 

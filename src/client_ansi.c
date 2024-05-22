@@ -51,26 +51,130 @@ termios_t orig_termios;
 
 void display_client_connection_window(ClientState* cstate){
     //
+    hide_cursor();
     clean_terminal();
     set_cursor_position(0, 0);
 
     set_screen_border(cstate->win_width, cstate->win_height);
 
-
     // TODO
 
+
+
+    
+    //
+    show_cursor();
 }
 
 
 void display_client_main_window(ClientState* cstate){
     //
+    hide_cursor();
     clean_terminal();
     set_cursor_position(0, 0);
 
+    int x_barriere_top = cstate->win_width - cstate->logo_main->tx - 1;
+    int y_barriere_bottom = cstate->win_height - 4;
+    int y_barriere_logo_right = 1 + cstate->logo_main->ty;
+
+    // Main architecture
     set_screen_border(cstate->win_width, cstate->win_height);
+    print_vertical_line('#', x_barriere_top, 1, y_barriere_bottom-1);
+    print_horizontal_line('#', y_barriere_logo_right, x_barriere_top+1, cstate->win_width-2);
+
+    // -- logo --
+    print_ascii_art_with_gradients(x_barriere_top+1, 1, cstate->logo_main, GREEN, YELLOW, RED);
+
+    // -- menus --
+    if(cstate->user_focus == FOCUS_RIGHT_TOP_PANEL){
+        set_bold();
+        set_cl_fg(FOCUS_COLOR);
+    }
+    print_vertical_line('|', x_barriere_top+1, 4, 6);
+    print_vertical_line('|', cstate->win_width-2, 4, 6);
+    if(cstate->user_focus == FOCUS_INPUT){
+        reset_ansi();
+    }
+
+    // TODO: display left / right arrow
+    // TODO: display menu name
+
+    // Transition menus - right panel
+    set_cursor_position(x_barriere_top+1, 8);
+    printf("#");
+    set_cursor_position(cstate->win_width-2, 8);
+    printf("#");
+    if(cstate->user_focus == FOCUS_RIGHT_TOP_PANEL ||
+       cstate->user_focus == FOCUS_RIGHT_BOTTOM_PANEL
+    ){
+        set_bold();
+        set_cl_fg(FOCUS_COLOR);
+    }
+    print_horizontal_line('-', x_barriere_top+2, cstate->win_width-3, 8);
+    if(cstate->user_focus == FOCUS_RIGHT_TOP_PANEL ||
+       cstate->user_focus == FOCUS_RIGHT_BOTTOM_PANEL
+    ){
+        reset_ansi();
+    }
+
+    // Right pannel
+    if(cstate->user_focus == FOCUS_RIGHT_BOTTOM_PANEL){
+        set_bold();
+        set_cl_fg(FOCUS_COLOR);
+    }
+    print_horizontal_line('-', x_barriere_top+1, cstate->win_width-2, cstate->win_height-6);
+    if(cstate->user_focus == FOCUS_RIGHT_BOTTOM_PANEL){
+        reset_ansi();
+    }
+
+    // TODO: content of the right panel + scroll
+
+    // Messages pannel
+    if(cstate->user_focus == FOCUS_LEFT_PANEL){
+        set_bold();
+        set_cl_fg(FOCUS_COLOR);
+    }
+    print_horizontal_line('-', 2, x_barriere_top-1, 2);
+    print_horizontal_line('-', 2, x_barriere_top-1, cstate->win_height-6);
+    if(cstate->user_focus == FOCUS_LEFT_PANEL){
+        reset_ansi();
+    }
 
 
-    // TODO
+    // TODO: content of the message panel + scroll
+
+
+    // -- Bottom input --
+    print_horizontal_line('#', y_barriere_bottom, 1, cstate->win_width-2);
+    if(cstate->user_focus == FOCUS_INPUT){
+        set_bold();
+        set_cl_fg(FOCUS_COLOR);
+    }
+    print_vertical_line('|', 1, cstate->win_height-4, cstate->win_height-2);
+    print_vertical_line('|', cstate->win_width-2, cstate->win_height-4, cstate->win_height-2);
+    print_horizontal_line('-', 2, cstate->win_width - 3, cstate->win_height-4);
+    print_horizontal_line('-', 2, cstate->win_width - 3, cstate->win_height-2);
+    if(cstate->user_focus == FOCUS_INPUT){
+        reset_ansi();
+    }
+
+    set_cursor_position(3, cstate->win_height-3);
+    printf(">");
+    if(cstate->input_length < cstate->win_width - 8){
+        printf(" %s", cstate->input);
+    }
+
+    // at the end, we set the cursor at the good input position, if input focus
+    if(cstate->user_focus == FOCUS_INPUT){
+        if(cstate->input_length < cstate->win_width - 8){
+            set_cursor_position(cstate->win_height-3, 6+cstate->input_cursor);
+        }
+        else{
+            // TODO
+        }
+        //
+        show_cursor();
+    }
 }
 
 
@@ -401,12 +505,18 @@ void init_cstate(ClientState* cstate){
     //
     cstate->win_height = 0;
     cstate->win_height = 0;
+
+    //
+    cstate->logo_connection = load_ascii_art("res/logo_connection.txt");
+    cstate->logo_main = load_ascii_art("res/logo_main.txt");
 }
 
 
 // Cleaning the client state
 void free_cstate(ClientState* cstate){
     free(cstate->msg_waiting_ack);
+    free_ascii_art(cstate->logo_connection);
+    free_ascii_art(cstate->logo_main);
 }
 
 

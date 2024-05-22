@@ -2,6 +2,7 @@
 
 #include <stdbool.h>
 #include "lib_client_server.h"
+#include "lib_ansi.h"
 
 typedef struct {
     char pseudo[MAX_NAME_LENGTH];
@@ -23,7 +24,7 @@ typedef struct {
 #define FOCUS_LEFT_PANEL 1
 #define FOCUS_RIGHT_TOP_PANEL 2
 #define FOCUS_RIGHT_BOTTOM_PANEL 3
-
+#define FOCUS_COLOR INDIGO
 
 typedef struct {
     // Pseudo
@@ -72,6 +73,10 @@ typedef struct {
     // For knowing the window size
     int win_width;
     int win_height;
+
+    // logo
+    AsciiArt* logo_connection;
+    AsciiArt* logo_main;
 
 } ClientState;
 

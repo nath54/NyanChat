@@ -134,9 +134,20 @@ void set_cursor_position(int row, int col);
 void clean_terminal();
 
 
+// Function to print a vertical line of a character
+void print_horizontal_line(char c, int x_start, int x_end, int y);
+
+// Function that print an horizontal line of a character
+void print_vertical_line(char c, int x, int y_start, int y_end);
+
 // Force the buffer of printfs to be send to stdout
 void force_buffer_prints();
 
+// Enable cursor display
+void show_cursor();
+
+// Disable cursor display
+void hide_cursor();
 
 /*
     __________ Display related functions __________ 
