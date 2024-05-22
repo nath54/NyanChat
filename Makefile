@@ -10,7 +10,7 @@ CC = gcc
 CFLAGS = -Werror -Wall -Wextra -g -I$(IDIR)
 LDFLAGS = -lm
 
-SSHARED = bits.c tcp_connection.c hashmap.c lib_ansi.c codes_detection_correction.c useful_lib.c
+SSHARED = bits.c tcp_connection.c hashmap.c lib_ansi.c code_errors.c useful_lib.c
 OBJ := $(SSHARED:%.c=$(ODIR)%.o)
 
 # Targets

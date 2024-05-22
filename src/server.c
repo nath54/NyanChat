@@ -19,7 +19,7 @@
 #include <unistd.h>
 
 #include "tcp_connection.h"
-#include "codes_detection_correction.h"
+#include "code_errors.h"
 #include "server.h"
 #include "lib_chks.h"
 

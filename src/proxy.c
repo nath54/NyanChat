@@ -22,7 +22,7 @@
 
 #include "tcp_connection.h"
 
-#include "codes_detection_correction.h"
+#include "code_errors.h"
 
 #include "lib_chks.h"
 #include "useful_lib.h"
@@ -65,7 +65,7 @@ void on_client_received(TcpConnection* con, SOCKET sock,
         // Potential additions of errors
         if (randint(100) < PROXY_ERROR_RATE) {
             // Addition of errors in the message
-            code_add_noise_to_msg(msg, randint(PROXY_MAX_ERROR_CREATED));
+            code_add_errors_to_msg(msg, randint(PROXY_MAX_ERROR_CREATED));
         }
     }
 

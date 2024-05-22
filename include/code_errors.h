@@ -25,5 +25,5 @@ int code_correct_error(Message* msg);
 // Function that will add noise to a message
 //   (called by the proxy)
 // Adds nb_errors errors to the Message
-void code_add_noise_to_msg(Message* msg, int nb_errors);
+void code_add_errors_to_msg(Message* msg, int nb_errors);
 
