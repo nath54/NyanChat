@@ -31,3 +31,12 @@ char* generate_random_code(uint32 code_length);
  * @return OP_SUCCESS on success, OP_FAILURE on failure.
  */
 int read_file(const char* file_path, char** content, size_t* len);
+
+
+// Get the number of lines of a file and get the max line length of a file
+void get_file_stats(FILE *f, int *num_lines, int *max_length);
+
+
+// Read a line of a file, and getting it in the pre-allocated line char array
+int read_file_line(FILE *f, char *line, int max_length);
+

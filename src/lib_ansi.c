@@ -1,4 +1,20 @@
+
+/*
+    ------------------------ Includes ------------------------
+*/
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <string.h>
+
 #include "lib_ansi.h"
+#include "useful_lib.h"
+
+/*
+    ------------------------ Color Related Functions ------------------------
+*/
+
 
 double my_clamp(double val, double vmin, double vmax){
     if(val < vmin){
@@ -54,41 +70,6 @@ void set_cl_bg(Color c){
     printf("\033[48;2;%d;%d;%dm", (int)c.r, (int)c.g, (int)c.b);
 }
 
-// Set the terminal font to bold
-void set_bold(){
-    printf("\033[1m");
-}
-
-// Unset the terminal font to bold
-void unset_bold(){
-    printf("\033[21m");
-}
-
-// Remove all the active ANSI effects for the next prints
-void reset_ansi(){
-    printf("\033[m");
-}
-
-// Function to get the terminal width and height
-void get_terminal_size(int *width, int *height) {
-    struct winsize w;
-    ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);
-    *width = w.ws_col;
-    *height = w.ws_row;
-}
-
-// Function to get the cursor position
-//  /!\\ Warning /!\\ : (x, y) parameter order
-void get_cursor_position(int *col, int *row) {
-    printf("\033[6n");  // ANSI escape code to query cursor position
-    scanf("\033[%d;%dR", row, col);  // Parse the response
-}
-
-// Function to set the cursor position
-//  /!\\ Warning /!\\ : (x, y) parameter order
-void set_cursor_position(int col, int row) {
-    printf("\033[%d;%dH", row, col);  // ANSI escape code to set cursor position
-}
 
 
 // Rainbow colors
@@ -126,53 +107,75 @@ void print_rainbow(char* txt){
 }
 
 
-//
-void get_file_stats(FILE *f, int *num_lines, int *max_length) {
-  int current_length;
-  char buffer[BUFSIZ];
 
-  *num_lines = 0;
-  *max_length = 0;
+/*
+    ------------------------ Other ANSI Code functions ------------------------
+*/
 
-  // Read the file line by line
-  while (fgets(buffer, sizeof(buffer), f) != NULL) {
-    (*num_lines)++;  // Increment line count
 
-    // Remove trailing newline (if present)
-    current_length = strlen(buffer);
-    if (buffer[current_length - 1] == '\n') {
-      current_length--;
-    }
+// Set the terminal font to bold
+void set_bold(){
+    printf("\033[1m");
+}
 
-    // Update max length if necessary
-    if (current_length > *max_length) {
-      *max_length = current_length;
-    }
-  }
+// Unset the terminal font to bold
+void unset_bold(){
+    printf("\033[21m");
+}
 
-  // Reset the file pointer to the beginning
-  rewind(f);
+// Remove all the active ANSI effects for the next prints
+void reset_ansi(){
+    printf("\033[m");
 }
 
 
-//
-int read_file_line(FILE *f, char *line, int max_length) {
-    // Read a line from the file
-    if (fgets(line, max_length + 1, f) == NULL) {
-        return -1;  // Indicate end of file or error
-    }
 
-    // Remove trailing newline (if present)
-    int length = strlen(line);
-    if (line[length - 1] == '\n') {
-        line[length - 1] = '\0';  // Replace newline with null terminator
-    }
+/*
+    ------------------------ Console Output Functions ------------------------
+*/
 
-    return 0;  // Success
+
+// Clean the terminal screen
+void clean_terminal(){
+    write(STDOUT_FILENO, "\x1b[2J", 4);
 }
 
 
-//
+/*
+    ------------------------ Terminal Functions ------------------------
+*/
+
+
+// Function to get the terminal width and height
+void get_terminal_size(int *width, int *height) {
+    struct winsize w;
+    ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);
+    *width = w.ws_col;
+    *height = w.ws_row;
+}
+
+// Function to get the cursor position
+//  /!\\ Warning /!\\ : (x, y) parameter order
+void get_cursor_position(int *col, int *row) {
+    printf("\033[6n");  // ANSI escape code to query cursor position
+    scanf("\033[%d;%dR", row, col);  // Parse the response
+}
+
+// Function to set the cursor position
+//  /!\\ Warning /!\\ : (x, y) parameter order
+void set_cursor_position(int col, int row) {
+    printf("\033[%d;%dH", row, col);  // ANSI escape code to set cursor position
+}
+
+
+
+/*
+    ------------------------ Ascii Art Functions ------------------------
+*/
+
+
+
+// Loading an ascii art structure
 AsciiArt* load_ascii_art(char* file_path){
     //
     AsciiArt* art = calloc(1, sizeof(AsciiArt));
@@ -215,7 +218,7 @@ AsciiArt* load_ascii_art(char* file_path){
 }
 
 
-//
+// Freeing an ascii art structure
 void free_ascii_art(AsciiArt* art){
     for(int l=0; l<art->ty; l++){
         free(art->art[l]);
@@ -225,7 +228,7 @@ void free_ascii_art(AsciiArt* art){
 }
 
 
-// 
+// Displaying an ascii art at the position x, y
 void print_ascii_art(int x, int y, AsciiArt* art){
     for(int l=0; l<art->ty; l++){
         set_cursor_position(x, y+l);
@@ -243,7 +246,7 @@ void print_ascii_art(int x, int y, AsciiArt* art){
 }
 
 
-// 
+// Displaying a colored ascii art at the position x, y
 void print_ascii_art_with_colors(int x, int y, ColoredAsciiArt* art,
                                                ColorPalette palette)
 {
@@ -268,7 +271,7 @@ void print_ascii_art_with_colors(int x, int y, ColoredAsciiArt* art,
 }
 
 
-// 
+// Displaying an ascii art at the position x, y with gradient colors
 void print_ascii_art_with_gradients(int x, int y,
                                     AsciiArt* art,
                                     Color cl_top_left,
