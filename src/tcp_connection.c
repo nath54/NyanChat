@@ -372,7 +372,7 @@ void tcp_connection_mainloop(TcpConnection* con,
 
             } else if ((con->type_connection == TCP_CON_CLIENT ||
                         con->type_connection == TCP_CON_PROXY_SERVER_SIDE) &&
-                        con->poll_fds[i].fd == con->sockfd){
+                        con->poll_fds[i].fd == con->sockfd) {
 
                 // Socket that receive messages
                 read_poll_socket(con, i, on_msg, on_msg_custom_args);
@@ -483,11 +483,8 @@ void tcp_connection_message_update(Message *msg, char buffer[MAX_MSG_LENGTH],
 void tcp_connection_message_send(TcpConnection* con, SOCKET sock,
                                  Message* msg)
 {
-
     int bytes_sent = send(sock, msg, sizeof(*msg), 0);
-
     printf("%d bytes sent!\n", bytes_sent);
-
     if (bytes_sent == -1) {
         perror("send");
         con->end_connection = true;
