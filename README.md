@@ -35,4 +35,7 @@ sudo pacman -S make gcc doxygen
 Only one server, only one proxy (theorically more) and many clients.
 The proxy will be able to add errors on messages from clients.
 
-[TODO: Faire le Readme.md]
+### Files
+
+- `bits.h` and `bits.c` contain functions related to bits manipulation.
+- `proxy.c` contain mechanics of the proxy (receiving and sending messages, adding errors)

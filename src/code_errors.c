@@ -30,13 +30,6 @@ int code_correct_error(Message* msg)
 }
 
 
-/**
- * @brief Add noises to a message.
- * @note This function is called by the proxy.
- * 
- * @param msg The message to add noise to.
- * @param nb_errors The number of errors to add.
- */
 void code_add_errors_to_msg(Message* msg, int nb_errors)
 {
     int word_to_change;

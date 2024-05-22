@@ -1,6 +1,5 @@
 #pragma once
 
-
 // To include the Message struct
 #include "tcp_connection.h"
 
@@ -22,8 +21,12 @@ int code_detect_error(Message* msg);
 int code_correct_error(Message* msg);
 
 
-// Function that will add noise to a message
-//   (called by the proxy)
-// Adds nb_errors errors to the Message
+/**
+ * @brief Add noises to a message.
+ * @note This function is called by the proxy.
+ * 
+ * @param msg The message to add noise to.
+ * @param nb_errors The number of errors to add.
+ */
 void code_add_errors_to_msg(Message* msg, int nb_errors);
 

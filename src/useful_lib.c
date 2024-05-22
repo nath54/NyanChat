@@ -1,5 +1,3 @@
-
-
 #include <string.h>
 
 #include "useful_lib.h"
