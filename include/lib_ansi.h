@@ -99,16 +99,6 @@ void reset_ansi();
 
 
 /*
-    ------------------------ Console Output Functions ------------------------
-*/
-
-
-// Clean the terminal screen
-void clean_terminal();
-
-
-
-/*
     ------------------------ Terminal Functions ------------------------
 */
 
@@ -140,6 +130,12 @@ void get_cursor_position(int *row, int *col);
 // Function to set the cursor position
 void set_cursor_position(int row, int col);
 
+// Clean the terminal screen
+void clean_terminal();
+
+
+// Force the buffer of printfs to be send to stdout
+void force_buffer_prints();
 
 
 /*

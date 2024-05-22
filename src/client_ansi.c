@@ -65,9 +65,13 @@ void display_client_main_window(ClientState* cstate){
 
 
 void display_client_error_win_size(ClientState* cstate){
-    (void)cstate;
-
-    // TODO
+    clean_terminal();
+    set_cursor_position(0, 0);
+    printf("Terminal windows too small : (%d, %d)\n"
+           "Please resize it at least (%d, %d)\n",
+           cstate->win_width, cstate->win_height,
+           MIN_TERMINAL_WIDTH, MIN_TERMINAL_HEIGHT);
+    force_buffer_prints();
 }
 
 

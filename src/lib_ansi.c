@@ -141,18 +141,6 @@ void reset_ansi(){
 */
 
 
-// Clean the terminal screen
-void clean_terminal(){
-    write(STDOUT_FILENO, "\x1b[2J", 4);
-}
-
-
-/*
-    ------------------------ Terminal Functions ------------------------
-*/
-
-
-
 /*
     __________ Terminal Settings related functions __________ 
 */
@@ -255,6 +243,17 @@ void set_cursor_position(int col, int row) {
 }
 
 
+// Clean the terminal screen
+void clean_terminal(){
+    // write(STDOUT_FILENO, "\x1b[2J", 4);
+    printf("\033c");
+}
+
+
+// Force the buffer of printfs to be send to stdout
+void force_buffer_prints(){
+    fflush(stdout);
+}
 
 /*
     __________ Display related functions __________ 
