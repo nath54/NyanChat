@@ -16,6 +16,8 @@
 #include <string.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <termios.h>
+#include <ctype.h>
 
 // #include "tcp_connection.h"
 #include "lib_ansi.h"
@@ -30,9 +32,8 @@
     ------------------------ Global Variables ------------------------
 */
 
-
-
-
+// To save the original state of the terminal to restore it at the end
+termios_t orig_termios;
 
 
 /*

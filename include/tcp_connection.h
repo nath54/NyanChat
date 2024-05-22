@@ -140,6 +140,9 @@ typedef struct TcpConnection {
                                2 = proxy server side, 3 = proxy clients side
                             */
 
+    //
+    bool ansi_stdin;
+
     int timeout;    // Maximum inactivity time before a closure of the connection.
     bool end_connection; // Should the connection be closed?
     bool need_compress_poll_arr; // Should this->poll_fds be compressed?

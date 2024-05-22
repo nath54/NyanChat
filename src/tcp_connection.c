@@ -44,6 +44,7 @@ void tcp_connection_server_init(TcpConnection* con,
                  int timeout_server)
 {
     con->type_connection = TCP_CON_SERVER;
+    con->ansi_stdin = false;
 
     // Create socket
     CHK( con->sockfd = socket(AF_INET, SOCK_STREAM | SOCK_NONBLOCK, 0) );
@@ -103,6 +104,7 @@ void tcp_connection_client_init(TcpConnection* con,
                                 int timeout_client)
 {
     con->type_connection = TCP_CON_CLIENT;
+    con->ansi_stdin = false;
 
     // Create socket
     CHK( con->sockfd = socket(AF_INET, SOCK_STREAM, 0) );
@@ -382,17 +384,24 @@ void tcp_connection_mainloop(TcpConnection* con,
                 // Read message from standard input
                 char buffer[MAX_MSG_LENGTH];
 
-                int bytes_read = read(stdin_fd, buffer, MAX_MSG_LENGTH);
-                if (bytes_read == 0) {
-                    printf("User closed input\n");
-                    break;
-                } else if (bytes_read == -1) {
-                    perror("read");
-                    break;
-                }
+                int bytes_read = 0;
+                if(!con->ansi_stdin){
+                    // Standard stdin
+                    bytes_read = read(stdin_fd, buffer, MAX_MSG_LENGTH);
+                    if (bytes_read == 0) {
+                        printf("User closed input\n");
+                        break;
+                    } else if (bytes_read == -1) {
+                        perror("read");
+                        break;
+                    }
 
-                // Replace the last \n by \0
-                buffer[bytes_read - 1] = '\0';
+                    // Replace the last \n by \0
+                    buffer[bytes_read - 1] = '\0';
+                } else{
+                    // Raw Ansi stdin
+                    CHKERRNO( bytes_read = read(STDIN_FILENO, buffer, 1), EAGAIN );
+                }
 
                 if (on_stdin != NULL){
                     on_stdin(con, buffer, bytes_read, on_stdin_custom_args);

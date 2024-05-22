@@ -7,9 +7,15 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
+#include <termios.h>
+#include <ctype.h>
+#include <errno.h>
 
 #include "lib_ansi.h"
 #include "useful_lib.h"
+#include "lib_chks.h"
+
+
 
 /*
     ------------------------ Color Related Functions ------------------------
@@ -146,6 +152,87 @@ void clean_terminal(){
 */
 
 
+
+/*
+    __________ Terminal Settings related functions __________ 
+*/
+
+
+// Reset the terminal to the state it was at before enabling the Raw Mode
+void resetTerminalMode(int ev, void* args) {
+    (void)ev;
+    termios_t* orig_termios = args;
+    CHK( tcsetattr(STDIN_FILENO, TCSAFLUSH, orig_termios) );
+        
+}
+
+// Enabling Raw Mode : allow to get all the key presses one by one
+void enableRawMode(termios_t* orig_termios) {
+    // Saving the original state of the terminal
+    CHK( tcgetattr(STDIN_FILENO, orig_termios) );
+
+    // Reset the terminal when exit is called
+    on_exit(resetTerminalMode, (void*)orig_termios);
+
+    // Copying the terminal state to modify it
+    struct termios raw = *orig_termios;
+
+    /* Turning off flags:
+        - ECHO: feature causes each key you type to be printed to the terminal,
+                so you can see what you’re typing.
+                This is useful in canonical mode,
+                but really gets in the way
+                when we are trying to carefully render a user interface
+                in raw mode. 
+        - ICANON: (reading line-by-line) so now we can read byte-by-byte
+        - ISIG: disabling the SIGINT and SIGTSTP signals
+        - IXON: disabling the Ctrl-S and Ctrl-Q signals
+        - IEXTEN: disabling the Ctrl-V signal
+        - ICRNL: fixing Ctrl-M signal
+        - OPOST: turning off ouput processing (\r\n)
+        - BRKINT: When BRKINT is turned on,
+                    a break conditionwill cause a SIGINT signal
+                    to be sent to the program, like pressing Ctrl-C.
+        - INPCK: enables parity checking,
+                   which doesn’t seem to apply to modern terminal emulators.
+        - ISTRIP: causes the 8th bit of each input byte to be stripped,
+                    meaning it will set it to 0.
+                    This is probably already turned off.
+        - CS8: is not a flag, it is a bit mask with multiple bits,
+               which we set using the bitwise-OR (|) operator
+               unlike all the flags we are turning off.
+               It sets the character size (CS) to 8 bits per byte.
+    */ 
+    raw.c_iflag &= ~(BRKINT | ICRNL | INPCK | ISTRIP | IXON);
+    raw.c_oflag &= ~(OPOST);
+    raw.c_cflag |= (CS8);
+    raw.c_lflag &= ~(ECHO | ICANON | IEXTEN | ISIG);
+    /*
+    // Timeout for read()
+
+    The VMIN value sets the minimum number of bytes of input needed before
+    read() can return. We set it to 0 so that read() returns as soon as there
+    is any input to be read. The VTIME value sets the maximum amount of time
+    to wait before read() returns. It is in tenths of a second, so we set it
+    to 1/10 of a second, or 100 milliseconds. If read() times out, it will
+    return 0, which makes sense because its usual return value is the number
+    of bytes read.
+    */
+    raw.c_cc[VMIN] = 0;
+    raw.c_cc[VTIME] = 1;
+
+
+    // Set the new terminal state
+    CHK( tcsetattr(STDIN_FILENO, TCSAFLUSH, &raw) );
+}
+
+
+/*
+    __________ Other Terminal related functions __________ 
+*/
+
+
+
 // Function to get the terminal width and height
 void get_terminal_size(int *width, int *height) {
     struct winsize w;
@@ -165,6 +252,39 @@ void get_cursor_position(int *col, int *row) {
 //  /!\\ Warning /!\\ : (x, y) parameter order
 void set_cursor_position(int col, int row) {
     printf("\033[%d;%dH", row, col);  // ANSI escape code to set cursor position
+}
+
+
+
+/*
+    __________ Display related functions __________ 
+*/
+
+
+// Displaying screen 
+void set_screen_border(int width, int height){
+    // Cleaning screen
+    printf("\033c");
+
+    // Top line
+    set_cursor_position(0, 0);
+    printf("#");
+    for(int i=1; i<width-1; i++){
+        printf("=");
+    }
+    printf("#\n");
+    // Side borders
+    for(int j=2; j<height; j++){
+        printf("||");
+        set_cursor_position(width-1, j);
+        printf("||\n");
+    }
+    // Bottom line
+    printf("#");
+    for(int i=1; i<width-1; i++){
+        printf("=");
+    }
+    printf("#");
 }
 
 

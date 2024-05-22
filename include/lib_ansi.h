@@ -13,6 +13,18 @@
 #include "lib_ansi_colors.h"
 
 
+
+/*
+    ------------------------ Defines ------------------------
+*/
+
+#define CTRL_KEY(k) ((k) & 0x1f)
+
+typedef struct termios termios_t;
+
+
+
+
 /*
     ------------------------ Structs ------------------------
 */
@@ -101,6 +113,24 @@ void clean_terminal();
 */
 
 
+/*
+    __________ Terminal Settings related functions __________ 
+*/
+
+
+// Reset the terminal to the state it was at before enabling the Raw Mode
+//   args is in fact termios_t*
+void resetTerminalMode(int ev, void* args);
+
+// Enabling Raw Mode : allow to get all the key presses one by one
+void enableRawMode(termios_t* orig_termios);
+
+
+/*
+    __________ Other Terminal related functions __________ 
+*/
+
+
 // Function to get the terminal width and height
 void get_terminal_size(int *width, int *height);
 
@@ -109,6 +139,16 @@ void get_cursor_position(int *row, int *col);
 
 // Function to set the cursor position
 void set_cursor_position(int row, int col);
+
+
+
+/*
+    __________ Display related functions __________ 
+*/
+
+
+// Displaying screen 
+void set_screen_border(int width, int height);
 
 
 
