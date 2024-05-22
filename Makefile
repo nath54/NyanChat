@@ -14,9 +14,13 @@ SSHARED = bits.c tcp_connection.c hashmap.c lib_ansi.c codes_detection_correctio
 OBJ := $(SSHARED:%.c=$(ODIR)%.o)
 
 # Targets
-all: client server proxy
+all: client client_ansi server proxy
 
 client: $(OBJ) $(ODIR)client.o
+	@printf "$(GREEN)Linking $@... $(DEFAULT)\n"
+	$(CC) $^ -o $(BDIR)$@ $(LDFLAGS)
+
+client_ansi: $(OBJ) $(ODIR)client_ansi.o
 	@printf "$(GREEN)Linking $@... $(DEFAULT)\n"
 	$(CC) $^ -o $(BDIR)$@ $(LDFLAGS)
 

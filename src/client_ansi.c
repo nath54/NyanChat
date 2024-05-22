@@ -1,3 +1,8 @@
+
+/*
+    ------------------------ Includes ------------------------
+*/
+
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <unistd.h>
@@ -19,6 +24,55 @@
 #include "useful_lib.h"
 
 #define PATH_CLI_CODES "pseudo_code_clients/"
+
+
+/*
+    ------------------------ Global Variables ------------------------
+*/
+
+
+
+
+
+
+/*
+    ------------------------ Side Display Functions ------------------------
+*/
+
+
+
+
+
+/*
+    ------------------------ Client Display Functions ------------------------
+*/
+
+
+void display_client_connection_window(ClientState* cstate){
+    (void)cstate;
+}
+
+
+void display_client_main_window(ClientState* cstate){
+    (void)cstate;
+}
+
+
+void display_client(ClientState* cstate){
+    if(cstate->connected){
+        display_client_main_window(cstate);
+    }
+    else{
+        display_client_connection_window(cstate);
+    }
+}
+
+
+
+
+/*
+    ------------------------ Send Message Functions ------------------------
+*/
 
 
 // Find the next free slots of the msg_waiting_ack
@@ -79,6 +133,36 @@ void client_send_message(TcpConnection* con,
 }
 
 
+
+/*
+    ------------------------ On Event Functions ------------------------
+*/
+
+
+void on_client_input_connection_window(TcpConnection* con,
+                                       ClientState* cstate,
+                                       char msg[MAX_MSG_LENGTH],
+                                       size_t msg_len)
+{
+    (void)con;
+    (void)cstate;
+    (void)msg;
+    (void)msg_len;
+}
+
+
+void on_client_input_main_window(TcpConnection* con,
+                                 ClientState* cstate,
+                                 char msg[MAX_MSG_LENGTH],
+                                 size_t msg_len)
+{
+    (void)con;
+    (void)cstate;
+    (void)msg;
+    (void)msg_len;
+}
+
+
 void on_stdin_client(TcpConnection* con,
                     char msg[MAX_MSG_LENGTH],
                     size_t msg_len,
@@ -86,90 +170,12 @@ void on_stdin_client(TcpConnection* con,
 {
     ClientState* cstate = custom_args;
 
-    if (strlen(cstate->pseudo) == 0){
-        // No nickname, not connected, so either:
-        //  - waiting for user input for the nickname
-        //  - waiting for the server to confirm the nickname (nothing to do)
-
-        if (!cstate->waiting_pseudo_confirmation){
-            // We do not wait for the server, we wait for user input
-            // msg is supposed to contain the nickname requested by the client
-
-            // We create a code then
-            //  we send a nickname request to the server
-
-
-            if (msg_len < MIN_NAME_LENGTH){
-                printf("Pseudo trop court, "
-                       "doit avoir une taille entre 4 et 64 !\n"
-                       "\nEntrez votre pseudo > ");
-            }
-            else {
-                // Registration (temporary or not) of the pseudo
-                strcpy(cstate->pseudo, msg);
-
-                // Creation of the directory for codes files if it doesn't exist
-                struct stat st = {0};
-
-                if (stat(PATH_CLI_CODES, &st) == -1){
-                    CHK( mkdir(PATH_CLI_CODES, 0700) );
-                }
-
-                // Code directory for given pseudo
-                char path_code_pseudo[MAX_NAME_LENGTH + 100] = PATH_CLI_CODES;
-                CHKN( strcat(path_code_pseudo, msg) );
-
-                // Login test (first login with this pseudo)
-                if (stat(path_code_pseudo, &st) == -1) {
-                    // Need to create code file
-
-                    // Code creation
-                    cstate->connection_code = generate_random_code(CODE_LENGTH);
-
-                    // Code storage
-                    FILE* fcode;
-                    CHKN( fcode = fopen(path_code_pseudo, "w") );
-                    CHKN( cstate->connection_code );
-                    fwrite(cstate->connection_code,
-                           sizeof(char), CODE_LENGTH, fcode);
-                    CHK( fclose(fcode) );
-                }
-                else{
-                    // Need to load the code
-                    size_t code_length;
-                    CHK( read_file(path_code_pseudo,
-                                   &(cstate->connection_code),
-                                   &code_length) );
-                    //
-                    if(code_length != CODE_LENGTH){
-                        fprintf(stderr,
-                                "Error: code length error : %ld != %d!\n",
-                                code_length, CODE_LENGTH);
-                        exit(EXIT_FAILURE);
-                    }
-                }
-
-                // Send connection request to the server
-                init_empty_message(&(cstate->msg_waiting_ack[0]));
-                cstate->msg_waiting_ack[0].msg_type = MSG_CONNECTION_CLIENT;
-                cstate->msg_waiting_ack[0].msg_id = 0;
-                strcpy(cstate->msg_waiting_ack[0].src_pseudo, msg);
-                strcpy(cstate->msg_waiting_ack[0].msg, cstate->connection_code);
-                cstate->msg_waiting_ack[0].msg_length = CODE_LENGTH;
-                cstate->nb_msg_waiting_ack += 1;
-                //
-                tcp_connection_message_send(con, con->sockfd,
-                                            &(cstate->msg_waiting_ack[0]));
-                //
-                cstate->waiting_pseudo_confirmation = true;
-            }
-        }
+    if(cstate->connected){
+        on_client_input_main_window(con, cstate, msg, msg_len);
     }
-    else if (cstate->connected){
-        // Connected right, messages can be sended normaly
-        client_send_message(con, cstate, msg, msg_len);
+    else{
+        on_client_input_connection_window(con, cstate, msg, msg_len);
     }
-
 }
 
 
@@ -287,9 +293,15 @@ void on_msg_client(TcpConnection* con, SOCKET sock,
 }
 
 
+
+/*
+    ------------------------ Client State Functions ------------------------
+*/
+
+
 // Initialising the client_state
-void init_client_state(ClientState* cstate){
-    
+void init_cstate(ClientState* cstate){
+
     // Init pseudo
     CHKN( memset(cstate->pseudo, '\0', MAX_NAME_LENGTH) );
 
@@ -352,21 +364,23 @@ void init_client_state(ClientState* cstate){
     //
     cstate->win_height = 0;
     cstate->win_height = 0;
-
-    // First thing to do: asking for client pseudo
-    print_rainbow("Welcome to NyanChat!\n");
-    printf("\nEnter your name > ");
 }
 
 
-void free_client_state(ClientState* client_state){
-    free(client_state->msg_waiting_ack);
+// Cleaning the client state
+void free_cstate(ClientState* cstate){
+    free(cstate->msg_waiting_ack);
 }
+
+
+/*
+    ------------------------ Main Functions ------------------------
+*/
 
 
 int main(int argc, char* argv[]) {
     
-    ClientState client_state;
+    ClientState cstate;
     TcpConnection con;
 
     // Check arguments
@@ -383,15 +397,15 @@ int main(int argc, char* argv[]) {
         exit(EXIT_FAILURE);
     }
 
-    init_client_state(&client_state);
+    init_cstate(&cstate);
     tcp_connection_client_init(&con, ip_proxy, port_proxy, -1);
 
     tcp_connection_mainloop(&con,
-                            on_msg_client, &client_state,
-                            on_stdin_client, &client_state);
+                            on_msg_client, &cstate,
+                            on_stdin_client, &cstate);
 
     tcp_connection_close(&con);
-    free_client_state(&client_state);
+    free_cstate(&cstate);
 
     return 0;
 }

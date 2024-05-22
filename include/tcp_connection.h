@@ -34,7 +34,7 @@ typedef u_int32_t uint32;
 
 
 // Taille max d'un pseudo de clients ou d'un nom de salon
-#define MAX_NAME_LENGTH 256
+#define MAX_NAME_LENGTH 64
 #define MIN_NAME_LENGTH 4
 
 //
