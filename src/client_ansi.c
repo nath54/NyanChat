@@ -50,7 +50,12 @@ termios_t orig_termios;
 
 
 void display_client_connection_window(ClientState* cstate){
-    (void)cstate;
+    //
+    clean_terminal();
+    set_cursor_position(0, 0);
+
+    set_screen_border(cstate->win_width, cstate->win_height);
+
 
     // TODO
 
@@ -58,7 +63,12 @@ void display_client_connection_window(ClientState* cstate){
 
 
 void display_client_main_window(ClientState* cstate){
-    (void)cstate;
+    //
+    clean_terminal();
+    set_cursor_position(0, 0);
+
+    set_screen_border(cstate->win_width, cstate->win_height);
+
 
     // TODO
 }
