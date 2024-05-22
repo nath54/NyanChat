@@ -7,6 +7,19 @@
 #include <errno.h>
 
 
+// static noreturn void raler(const char *msg)
+// {
+//     perror(msg);
+//     exit(1);
+// }
+
+#define raler(msg)                                                            \
+    {                                                                         \
+        perror(msg);                                                          \
+        exit(EXIT_FAILURE);                                                   \
+    }
+
+
 #define CHK(op)                                                               \
     do                                                                        \
     {                                                                         \
@@ -31,12 +44,4 @@
         if ((errno = (op)) > 0)                                               \
             raler(#op);                                                       \
     } while (0)
-
-
-
-static noreturn void raler(const char *msg)
-{
-    perror(msg);
-    exit(1);
-}
 

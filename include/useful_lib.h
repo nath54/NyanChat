@@ -12,6 +12,11 @@
 
 typedef u_int32_t uint32;
 
+
+// Return random number between 0 and max_val-1
+int randint(int max_val);
+
+
 /*
 Here you can find all the little functions that can be useful,
 but where you don't know where to put.

@@ -6,6 +6,13 @@
 #include "lib_chks.h"
 
 
+// Return random number between 0 and max_val-1
+int randint(int max_val) {
+    return rand() % max_val;
+}
+
+
+
 // Generate a random code
 char* generate_random_code(uint32 code_length){
     //

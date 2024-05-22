@@ -51,15 +51,37 @@ termios_t orig_termios;
 
 void display_client_connection_window(ClientState* cstate){
     (void)cstate;
+
+    // TODO
+
 }
 
 
 void display_client_main_window(ClientState* cstate){
     (void)cstate;
+
+    // TODO
 }
 
 
+void display_client_error_win_size(ClientState* cstate){
+    (void)cstate;
+
+    // TODO
+}
+
+
+
+
 void display_client(ClientState* cstate){
+    get_terminal_size(&(cstate->win_width), &(cstate->win_height));
+    //
+    if(cstate->win_width < MIN_TERMINAL_WIDTH ||
+       cstate->win_height < MIN_TERMINAL_HEIGHT
+    ){
+        display_client_error_win_size(cstate);
+    }
+    //
     if(cstate->connected){
         display_client_main_window(cstate);
     }

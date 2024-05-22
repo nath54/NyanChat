@@ -25,6 +25,7 @@
 #include "codes_detection_correction.h"
 
 #include "lib_chks.h"
+#include "useful_lib.h"
 
 /* -------------------- GLOBAL VARIABLES -------------------- */
 
@@ -43,10 +44,6 @@ TcpConnection con_server;
 TcpConnection con_clients;
 
 /* ----------------- END OF GLOBAL VARIABLES -----------------*/
-
-
-int randint(int max_val)
-    { return rand() % max_val; }
 
 
 void on_client_received(TcpConnection* con, SOCKET sock,

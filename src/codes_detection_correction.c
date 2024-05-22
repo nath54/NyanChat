@@ -1,5 +1,7 @@
 #include "codes_detection_correction.h"
-
+#include "lib_chks.h"
+#include "useful_lib.h"
+#include "bits.h"
 
 // Function to detect an error in the message
 // Returns 0 if no errors are detected,
@@ -33,11 +35,22 @@ int code_correct_error(Message* msg){
 //   (called by the proxy)
 // Adds nb_errors errors to the Message
 void code_add_noise_to_msg(Message* msg, int nb_errors){
-    
-    (void)msg;
-    (void)nb_errors;
 
-    // TODO: compléter cette fonction
+    uint16_t msg_copy[MAX_MSG_LENGTH];
+
+    for(size_t i=0; i<MAX_MSG_LENGTH; i++){
+        if(i < msg->msg_length){
+            msg_copy[i] = (uint16_t)(msg->msg[i]);
+        }
+        else{
+            msg_copy[i] = 0;
+        }
+    }
+
+    for(int i=0; i<nb_errors; i++){
+        //
+        chg_nth_bit(randint(8), msg_copy[randint(msg->msg_length)]);
+    }
 
 }
 
