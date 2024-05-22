@@ -60,7 +60,7 @@ void client_send_message(TcpConnection* con,
 {
     int id_new_msg = find_next_msg_id(cstate);
 
-    cstate->msg_waiting_ack[id_new_msg].msg_type = 1;
+    cstate->msg_waiting_ack[id_new_msg].msg_type = MSG_STD_CLIENT_SERVER;
     cstate->msg_waiting_ack[id_new_msg].msg_id = id_new_msg;
     strcpy(cstate->msg_waiting_ack[id_new_msg].src_pseudo,
                                                 cstate->pseudo);
@@ -133,6 +133,20 @@ void on_stdin_client(TcpConnection* con,
                     fwrite(cstate->connection_code,
                            sizeof(char), CODE_LENGTH, fcode);
                     CHK( fclose(fcode) );
+                }
+                else{
+                    // Need to load the code
+                    size_t code_length;
+                    CHK( read_file(path_code_pseudo,
+                                   &(cstate->connection_code),
+                                   &code_length) );
+                    //
+                    if(code_length != CODE_LENGTH){
+                        fprintf(stderr,
+                                "Error: code length error : %ld != %d!\n",
+                                code_length, CODE_LENGTH);
+                        exit(EXIT_FAILURE);
+                    }
                 }
 
                 // Send connection request to the server

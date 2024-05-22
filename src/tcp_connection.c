@@ -282,8 +282,15 @@ void read_poll_socket(TcpConnection* con, int id_poll,
 
         // Received a message
         size_t msg_len = rc;
-
-        printf("Msg received : %s\n", con->msg.msg);
+        
+        if(msg_len > 0){
+            printf("Msg received : %s\n", con->msg.msg);
+        }
+        else{
+            printf("Received empty msg\n");
+        }
+        printf("Message type : %d\n", con->msg.msg_type);
+        printf("Message dst flag : %d\n", con->msg.dst_flag);
 
         if (con->type_connection == TCP_CON_PROXY_CLIENTS_SIDE){
             con->msg.proxy_client_socket = id_poll;

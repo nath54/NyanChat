@@ -33,6 +33,6 @@ doc/*/
 *.idb
 *.pdb
 
-
+*vgcore*
 pseudo_code_*/*
 tmp_key

@@ -95,7 +95,7 @@ void on_server_received(TcpConnection* con, SOCKET sock,
         return;
     }
     else if (msg->proxy_client_socket < 0 ||
-            (size_t)msg->proxy_client_socket > con->nb_poll_fds)
+            (size_t)msg->proxy_client_socket >= con_clients.nb_poll_fds)
     {
         fprintf(stderr,
                 "Error: Bad value of client socket on msg  from serv %d / %ld!\n",
@@ -160,6 +160,9 @@ void* gestion_clients(void* arg)
 }
 
 
+
+// TODO: résoudre le problème de nb_poll_fds qui ne s'incrémente pas
+
 int main(int argc, char* argv[])
 {
     if (argc != 4) {
@@ -213,9 +216,5 @@ int main(int argc, char* argv[])
     
     return EXIT_SUCCESS;
 }
-
-
-
-
 
 

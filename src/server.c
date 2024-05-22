@@ -109,6 +109,7 @@ void broadcast_msg_to_all_connected_clients(TcpConnection* con,
                                             Message* msg)
 {
 
+    printf("Broadcasting message from %s\n", msg->src_pseudo);
     Message new_msg;
     init_empty_message(&new_msg);
     strcpy(new_msg.msg, msg->msg);
@@ -120,6 +121,7 @@ void broadcast_msg_to_all_connected_clients(TcpConnection* con,
         Client* c = sstate->clients[i];
         if(c != NULL){
             if(c->connected){
+                printf(" |->Broadcasting to %s\n", c->pseudo);
                 new_msg.proxy_client_socket = c->id_poll_socket_proxy;
                 tcp_connection_message_send(con, proxy_sock, &new_msg);
             }
@@ -317,15 +319,19 @@ void on_msg_received(TcpConnection* con, SOCKET sock,
         Message ack;
         if (msg_bon){
             // Positive acknowledgment: we received the message correctly
-            gen_negative_ack_from_msg(msg, &ack);
+            gen_positive_ack_from_msg(msg, &ack);
 
             tcp_connection_message_send(con, sock, &ack);
         }
         else {
             // Negative acknowledgment: we did not receive the message correctly
+            // So, we ask to resend it and we stop here
+            
             gen_negative_ack_from_msg(msg, &ack);
 
             tcp_connection_message_send(con, sock, &ack);
+            
+            return;
         }
 
         //
