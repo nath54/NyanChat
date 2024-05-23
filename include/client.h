@@ -70,6 +70,9 @@ typedef struct {
     int input_length;
     int input_cursor;
 
+    int cursor_x;
+    int cursor_y;
+
     // For knowing the window size
     int win_width;
     int win_height;

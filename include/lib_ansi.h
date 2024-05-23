@@ -125,10 +125,10 @@ void enableRawMode(termios_t* orig_termios);
 void get_terminal_size(int *width, int *height);
 
 // Function to get the cursor position
-void get_cursor_position(int *row, int *col);
+void get_cursor_position(int *col, int *row);
 
 // Function to set the cursor position
-void set_cursor_position(int row, int col);
+void set_cursor_position(int col, int row);
 
 // Clean the terminal screen
 void clean_terminal();
@@ -148,6 +148,10 @@ void show_cursor();
 
 // Disable cursor display
 void hide_cursor();
+
+// Print centered text, crop if text too large
+void print_centered_text(char* txt, size_t len, int x_start, int x_end, int y);
+
 
 /*
     __________ Display related functions __________ 

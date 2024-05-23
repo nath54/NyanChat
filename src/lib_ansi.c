@@ -288,6 +288,33 @@ void hide_cursor(){
 }
 
 
+// Print centered text, crop if text too large
+void print_centered_text(char* txt, size_t len, int x_start, int x_end, int y){
+    //
+    if(x_end - x_start < 0){
+        return;
+    }
+    size_t dx = x_end - x_start;
+
+    if(dx >= len){
+        int x_txt = x_start + ((x_end - x_start) - len) / 2;
+        set_cursor_position(x_txt, y);
+        printf("%s", txt);
+    }
+    else{
+        char tmp_c;
+        tmp_c = txt[dx];
+        txt[dx] = '\0';
+
+        set_cursor_position(x_start, y);
+        printf("%s", txt);
+
+        txt[dx] = tmp_c;
+
+    }
+}
+
+
 /*
     __________ Display related functions __________ 
 */

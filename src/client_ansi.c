@@ -57,13 +57,46 @@ void display_client_connection_window(ClientState* cstate){
 
     set_screen_border(cstate->win_width, cstate->win_height);
 
-    // TODO
+    int x_logo = (cstate->win_width - cstate->logo_connection->tx) / 2;
+    int y_logo = 6;
+    print_ascii_art_with_gradients(
+        x_logo, y_logo,
+        cstate->logo_connection,
+        CYAN, VIOLET, ORANGE
+    );
 
+    int y_fin_logo = y_logo + cstate->logo_connection->ty;
 
+    char welcome_txt[] = "Welcome in NyanChat!";
+    print_centered_text(welcome_txt, strlen(welcome_txt),
+                        2, cstate->win_width-3, y_fin_logo + 4);
 
+    char pseudo_txt[] = "Please enter your pseudo to continue:";
+    print_centered_text(pseudo_txt, strlen(pseudo_txt),
+                        2, cstate->win_width-3, y_fin_logo + 6);
     
+    int x_inp = (cstate->win_width - MAX_NAME_LENGTH - 6) / 2;
+    int tx_inp = MAX_NAME_LENGTH;
+
+    print_horizontal_line('-', x_inp, x_inp + tx_inp + 4, y_fin_logo + 8);
+    print_horizontal_line('-', x_inp, x_inp + tx_inp + 4, y_fin_logo + 10);
+    set_cursor_position(x_inp, y_fin_logo + 9);
+    printf(">");
+    set_cursor_position(x_inp + tx_inp + 4, y_fin_logo + 9);
+    printf("|");
+
+    set_cursor_position(x_inp + 2, y_fin_logo + 9);
+    if(cstate->input_length > 0){
+        printf("%s", cstate->input);
+    }
+
+    cstate->cursor_x = x_inp + 2 + cstate->input_cursor;
+    cstate->cursor_y = y_fin_logo + 9;
+
     //
+    set_cursor_position(cstate->cursor_x, cstate->cursor_y);
     show_cursor();
+    force_buffer_prints();
 }
 
 
@@ -167,14 +200,19 @@ void display_client_main_window(ClientState* cstate){
     // at the end, we set the cursor at the good input position, if input focus
     if(cstate->user_focus == FOCUS_INPUT){
         if(cstate->input_length < cstate->win_width - 8){
-            set_cursor_position(cstate->win_height-3, 6+cstate->input_cursor);
+            cstate->cursor_x = 6+cstate->input_cursor;
         }
         else{
+            cstate->cursor_x = cstate->win_width - 6;
             // TODO
         }
+        cstate->cursor_y = cstate->win_height-3;
         //
+        set_cursor_position(cstate->cursor_x, cstate->cursor_y);
         show_cursor();
     }
+
+    force_buffer_prints();
 }
 
 
@@ -501,6 +539,8 @@ void init_cstate(ClientState* cstate){
     CHKN( memset(cstate->input, '\0', MAX_MSG_LENGTH) );
     cstate->input_length = 0;
     cstate->input_cursor = 0;
+    cstate->cursor_x = 0;
+    cstate->cursor_y = 0;
 
     //
     cstate->win_height = 0;
