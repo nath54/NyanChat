@@ -22,7 +22,24 @@
 
 typedef struct termios termios_t;
 
+#define SPECIAL_CHAR_ARROW 'A'
 
+#define ARROW_TOP 't'
+#define ARROW_BOTTOM 'b'
+#define ARROW_LEFT 'l'
+#define ARROW_RIGHT 'r'
+
+#define SPECIAL_CHAR_KEYS 'K'
+
+#define K_PAGE_UP 'u'
+#define K_PAGE_DOWN 'd'
+#define K_HOME 'h'
+#define K_END 'f'
+#define K_DELETE 's'
+#define K_ENTER 'e'
+#define K_BACKSPACE 'b'
+#define K_ESCAPE '0'
+#define K_TABULATION 't'
 
 
 /*

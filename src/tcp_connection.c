@@ -16,6 +16,7 @@
 #include <unistd.h>
 
 #include "tcp_connection.h"
+#include "lib_ansi.h"
 #include "lib_chks.h"
 
 
@@ -401,13 +402,126 @@ void tcp_connection_mainloop(TcpConnection* con,
                 } else{
                     // Raw Ansi stdin
                     CHKERRNO( bytes_read = read(STDIN_FILENO, buffer, 1), EAGAIN );
+
+                    // Escape sequence
+                    if (buffer[0] == '\r') {
+                        buffer[1] = SPECIAL_CHAR_KEYS;
+                        buffer[2] = K_ENTER;
+                    }
+                    else if(buffer[0] == '\t'){
+                        buffer[1] = SPECIAL_CHAR_KEYS;
+                        buffer[2] = K_TABULATION;
+                    }
+                    // TODO : check (https://vt100.net/docs/vt100-ug/chapter3.html#T3-6)
+                    // TODO : check (https://vt100.net/docs/vt100-ug/chapter3.html#T3-7)
+                    // To correct and add more special chars
+                    else if (buffer[0] == '\x1b') {
+                        char seq[3];
+                        bool bon = true;
+                        if (read(STDIN_FILENO, &seq[0], 1) != 1){
+                            bon = false;
+                        }
+                        if (bon && read(STDIN_FILENO, &seq[1], 1) != 1){
+                            bon = false;
+                        }
+                        if (bon && seq[0] == '[') {
+                            if (seq[1] >= '0' && seq[1] <= '9') {
+                                if (read(STDIN_FILENO, &seq[2], 1) != 1){
+                                    bon = false;
+                                }
+                                if (bon && seq[2] == '~') {
+                                    switch (seq[1]) {
+                                        case '1':
+                                            buffer[1] = SPECIAL_CHAR_KEYS;
+                                            buffer[2] = K_HOME;
+                                            break;
+                                        case '3':
+                                            buffer[1] = SPECIAL_CHAR_KEYS;
+                                            buffer[2] = K_DELETE;
+                                            break;
+                                        case '4':
+                                            buffer[1] = SPECIAL_CHAR_KEYS;
+                                            buffer[2] = K_END;
+                                            break;
+                                        case '5':
+                                            buffer[1] = SPECIAL_CHAR_KEYS;
+                                            buffer[2] = K_PAGE_UP;
+                                            break;
+                                        case '6':
+                                            buffer[1] = SPECIAL_CHAR_ARROW;
+                                            buffer[2] = K_PAGE_DOWN;
+                                            break;
+                                        case '7':
+                                            buffer[1] = SPECIAL_CHAR_KEYS;
+                                            buffer[2] = K_HOME;
+                                            break;
+                                        case '8':
+                                            buffer[1] = SPECIAL_CHAR_KEYS;
+                                            buffer[2] = K_END;
+                                            break;
+                                    }
+                                }
+                            } else {
+                                switch (seq[1]) {
+                                    // Top arrow
+                                    case 'A':
+                                        buffer[1] = SPECIAL_CHAR_ARROW;
+                                        buffer[2] = ARROW_TOP;
+                                        break;
+                                    // Bottom Arrow
+                                    case 'B':
+                                        buffer[1] = SPECIAL_CHAR_ARROW;
+                                        buffer[2] = ARROW_BOTTOM;
+                                        break;
+                                    // Left arrow
+                                    case 'C':
+                                        buffer[1] = SPECIAL_CHAR_ARROW;
+                                        buffer[2] = ARROW_LEFT;
+                                        break;
+                                    // Right arrow
+                                    case 'D':
+                                        buffer[1] = SPECIAL_CHAR_ARROW;
+                                        buffer[2] = ARROW_RIGHT;
+                                        break;
+                                    case 'H':
+                                        buffer[1] = SPECIAL_CHAR_KEYS;
+                                        buffer[2] = K_HOME;
+                                        break;
+                                    case 'F':
+                                        buffer[1] = SPECIAL_CHAR_KEYS;
+                                        buffer[2] = K_END;
+                                        break;
+
+                                    default:
+                                        break;
+                                }
+                            }
+                        } else if (seq[0] == 'O') {
+                            switch (seq[1]) {
+                                case 'H':
+                                    buffer[1] = SPECIAL_CHAR_KEYS;
+                                    buffer[2] = K_HOME;
+                                    break;
+                                case 'F':
+                                    buffer[1] = SPECIAL_CHAR_KEYS;
+                                    buffer[2] = K_END;
+                                    break;
+
+                                default:
+                                    break;
+                            }
+                        }
+                    }
+
                 }
 
                 if (on_stdin != NULL){
                     on_stdin(con, buffer, bytes_read, on_stdin_custom_args);
                 }
 
-                printf("Vous avez écrit: \"%s\"\n", buffer);
+                if(!con->ansi_stdin && bytes_read > 0 && buffer[0] != '\x1b'){
+                    printf("Vous avez écrit: \"%s\"\n", buffer);
+                }
 
             } else {
 

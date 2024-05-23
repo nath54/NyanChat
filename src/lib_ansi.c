@@ -264,10 +264,19 @@ void print_vertical_line(char c, int x, int y_start, int y_end){
 }
 
 // Clean the terminal screen
+//   (https://vt100.net/docs/vt100-ug/chapter3.html#ED)
 void clean_terminal(){
     // write(STDOUT_FILENO, "\x1b[2J", 4);
     printf("\033c");
 }
+
+
+// Erase from the active position to the end of the line, inclusive
+//   (https://vt100.net/docs/vt100-ug/chapter3.html#EL)
+void clean_line_cursor_right(){
+    printf("\x1b[K");
+}
+
 
 
 // Force the buffer of printfs to be send to stdout
