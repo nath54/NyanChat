@@ -14,7 +14,7 @@ typedef u_int32_t uint32;
 
 
 /**
- * @brief Retunr a random number between 0 and max_val-1.
+ * @brief Return a random number between 0 and max_val-1.
  */
 int randint(int max_val);
 
