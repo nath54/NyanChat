@@ -8,7 +8,7 @@
 
 
 // Encoding function
-uint16_t encode(uint16_t** g, int n, uint16_t m);
+uint16_t encode_G(uint16_t **g, uint16_t m);
 
 /**
  * @brief Calculate the Hamming distance of the polynomial code
@@ -16,7 +16,7 @@ uint16_t encode(uint16_t** g, int n, uint16_t m);
  * @param g the generator matrix representing the polynomial code
  * @return `int` the minimal distance between words 0 and any other word
  */
-int code_hamming_distance(uint16_t **g, int l);
+int code_hamming_distance(uint16_t **g);
 
 // Function to detect an error in the message
 // Returns 0 if no errors are detected,
