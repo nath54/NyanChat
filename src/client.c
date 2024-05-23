@@ -39,7 +39,7 @@ int find_next_msg_id(ClientState* cstate)
             { cstate->msg_waiting_ack[i].msg_type = MSG_NULL; }
     }
     //
-    for (size_t i=first_free; i<cstate->tot_msg_waiting_ack; i++){
+    for (size_t i=first_free; i<cstate->tot_msg_waiting_ack; i++) {
         if(cstate->msg_waiting_ack[i].msg_type == MSG_NULL)
             { return i; }
     }
@@ -365,7 +365,7 @@ int main(int argc, char* argv[])
     char* ip_proxy = argv[1];
     int port_proxy = atoi(argv[2]);
 
-    if (port_proxy < 5000 || port_proxy > 65000) {
+    if (port_proxy < 5000 || port_proxy > 65000) s{
         fprintf(stderr, "Bad value of port_proxy : %d !\n", port_proxy);
         exit(EXIT_FAILURE);
     }
