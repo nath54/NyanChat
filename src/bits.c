@@ -4,32 +4,33 @@
 
 uint16_t set_nth_bit(int n, uint16_t m)
 {
-    return m | (1 << n);
+    return m | (1 << (16-n));
 }
 
 uint16_t get_nth_bit(int n, uint16_t m)
 { 
-    return (m >> n) & 1;
+    return (m >> (16-n)) & 1;
 }
 
 uint16_t chg_nth_bit(int n, uint16_t m)
 {
-    return m ^ (1 << n);
+    return m ^ (1 << (16-n));
 }
 
 void print_word(int k, uint16_t m)
 {
-    for (int i = k - 1; i >= 0; i--)
+    for (int i = 0; i < 16; i++)
         printf("%d", get_nth_bit(i, m));
     printf("\n");
 }
 
-int weight(uint16_t m)
+// Adapted from https://en.wikipedia.org/wiki/Hamming_weight
+// Use 13 arithmetic operations for a 16-bit integer
+int weight(uint16_t x)
 {
-    int count = 0;
-    while (m > 0) {
-        count += m & 1;
-        m >>= 1;
-    }
-    return count;
+    x -= (x >> 1) & 0x5555;
+    x = (x & 0x3333) + ((x >> 2) & 0x3333);
+    x = (x + (x >> 4)) & 0x0f0f;
+    x = (x + (x >> 8)) & 0x7f;
+    return x;
 }
