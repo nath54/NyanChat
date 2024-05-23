@@ -445,6 +445,11 @@ void tcp_connection_mainloop(TcpConnection* con,
                         fprintf(stderr, "\\t read\n");
                         buffer[1] = SPECIAL_CHAR_KEYS;
                         buffer[2] = K_TABULATION;
+                    } else if(buffer[0] == '\e') {
+                        buffer[0] = '\x1b';
+                        fprintf(stderr, "\\t read\n");
+                        buffer[1] = SPECIAL_CHAR_KEYS;
+                        buffer[2] = K_ESCAPE;
                     }
                     else if(buffer[0] == 127){
                         buffer[0] = '\x1b';

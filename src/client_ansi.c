@@ -43,6 +43,16 @@ termios_t orig_termios;
     ------------------------ Client Display Functions ------------------------
 */
 
+void set_focus_color(ClientState* cstate){
+    set_bold();
+    if(cstate->hard_focus){
+        set_cl_fg(HARD_FOCUS_COLOR);
+    }
+    else{
+        set_cl_fg(FOCUS_COLOR);
+    }
+}
+
 
 void display_client_connection_window(ClientState* cstate)
 {
@@ -112,14 +122,13 @@ void display_client_main_window(ClientState* cstate)
 
     // -- logo --
     print_ascii_art_with_gradients(x_barriere_top+1, 2, cstate->logo_main,
-                                   GREEN, YELLOW, RED);
+                                   GREEN, LIGHT_GREEN, RED);
 
     // -- menus --
     print_horizontal_line('#', x_barriere_top+1, cstate->win_width-1, 4);
-    if (cstate->user_focus == FOCUS_RIGHT_TOP_PANEL) {
-        set_bold();
-        set_cl_fg(FOCUS_COLOR);
-    }
+    if (cstate->user_focus == FOCUS_RIGHT_TOP_PANEL)
+        { set_focus_color(cstate); }
+    
     print_vertical_line('|', x_barriere_top+1, 5, 7);
     print_vertical_line('|', cstate->win_width-1, 5, 7);
     if (cstate->user_focus == FOCUS_INPUT)
@@ -136,8 +145,7 @@ void display_client_main_window(ClientState* cstate)
     if(cstate->user_focus == FOCUS_RIGHT_TOP_PANEL ||
        cstate->user_focus == FOCUS_RIGHT_BOTTOM_PANEL
     ){
-        set_bold();
-        set_cl_fg(FOCUS_COLOR);
+        set_focus_color(cstate);
     }
     print_horizontal_line('-', x_barriere_top+2, cstate->win_width-2, 8);
     if(cstate->user_focus == FOCUS_RIGHT_TOP_PANEL ||
@@ -147,10 +155,9 @@ void display_client_main_window(ClientState* cstate)
     }
 
     // Right pannel
-    if(cstate->user_focus == FOCUS_RIGHT_BOTTOM_PANEL){
-        set_bold();
-        set_cl_fg(FOCUS_COLOR);
-    }
+    if(cstate->user_focus == FOCUS_RIGHT_BOTTOM_PANEL)
+        { set_focus_color(cstate); }
+
     print_horizontal_line('-', x_barriere_top+1, cstate->win_width-2, cstate->win_height-5);
     if(cstate->user_focus == FOCUS_RIGHT_BOTTOM_PANEL){
         reset_ansi();
@@ -159,10 +166,9 @@ void display_client_main_window(ClientState* cstate)
     // TODO: content of the right panel + scroll
 
     // Messages pannel
-    if(cstate->user_focus == FOCUS_LEFT_PANEL){
-        set_bold();
-        set_cl_fg(FOCUS_COLOR);
-    }
+    if(cstate->user_focus == FOCUS_LEFT_PANEL)
+        { set_focus_color(cstate); }
+    
     print_horizontal_line('-', 2, x_barriere_top-1, 2);
     print_horizontal_line('-', 2, x_barriere_top-1, cstate->win_height-5);
     if(cstate->user_focus == FOCUS_LEFT_PANEL){
@@ -175,10 +181,9 @@ void display_client_main_window(ClientState* cstate)
 
     // -- Bottom input --
     print_horizontal_line('#', 1, cstate->win_width-2, y_barriere_bottom);
-    if(cstate->user_focus == FOCUS_INPUT){
-        set_bold();
-        set_cl_fg(FOCUS_COLOR);
-    }
+    if(cstate->user_focus == FOCUS_INPUT)
+        { set_focus_color(cstate); }
+    
     print_vertical_line('|', 2, cstate->win_height-3, cstate->win_height-1);
     print_vertical_line('|', cstate->win_width-2, cstate->win_height-3, cstate->win_height-1);
     print_horizontal_line('-', 2, cstate->win_width - 2, cstate->win_height-3);
@@ -635,6 +640,8 @@ void on_msg_client(TcpConnection* con, SOCKET sock,
         else if (msg->msg_type == MSG_WELL_CONNECTED) {
             cstate->connected = true;
             cstate->waiting_pseudo_confirmation = false;
+            cstate->input_length = 0;
+            cstate->input_cursor = 0;
             display_client(cstate);
 
             // TODO: récupérer les messages des salons, etc...
