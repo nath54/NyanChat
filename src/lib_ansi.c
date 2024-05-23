@@ -332,27 +332,24 @@ void print_centered_text(char* txt, size_t len, int x_start, int x_end, int y){
 // Displaying screen 
 void set_screen_border(int width, int height){
     // Cleaning screen
-    printf("\033c");
+    clean_terminal();
 
     // Top line
     set_cursor_position(0, 0);
-    printf("#");
-    for(int i=1; i<width-1; i++){
-        printf("=");
+    for(int i=0; i<width-1; i++){
+        printf("#");
     }
     printf("#\r\n");
     // Side borders
     for(int j=2; j<height; j++){
-        printf("||");
-        set_cursor_position(width-1, j);
-        printf("||\r\n");
+        printf("#");
+        set_cursor_position(width, j);
+        printf("#\r\n");
     }
     // Bottom line
-    printf("#");
-    for(int i=1; i<width-1; i++){
-        printf("=");
+    for(int i=0; i<width; i++){
+        printf("#");
     }
-    printf("#");
 }
 
 

@@ -446,7 +446,7 @@ void tcp_connection_mainloop(TcpConnection* con,
                         buffer[1] = SPECIAL_CHAR_KEYS;
                         buffer[2] = K_TABULATION;
                     }
-                    else if(buffer[0] == '\010'){
+                    else if(buffer[0] == 127){
                         buffer[0] = '\x1b';
                         fprintf(stderr, "backspace read\n");
                         buffer[1] = SPECIAL_CHAR_KEYS;

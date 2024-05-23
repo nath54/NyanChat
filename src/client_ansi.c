@@ -54,12 +54,12 @@ void display_client_connection_window(ClientState* cstate)
     set_screen_border(cstate->win_width, cstate->win_height);
 
     int x_logo = (cstate->win_width - cstate->logo_connection->tx) / 2;
-    int y_logo = 6;
+    int y_logo = 3;
     print_ascii_art_with_gradients(x_logo, y_logo,
                                    cstate->logo_connection,
                                    CYAN, VIOLET, ORANGE);
 
-    int y_fin_logo = y_logo + cstate->logo_connection->ty;
+    int y_fin_logo = y_logo + cstate->logo_connection->ty - 3;
 
     char welcome_txt[] = "Welcome in NyanChat!";
     print_centered_text(welcome_txt, strlen(welcome_txt),
@@ -115,12 +115,13 @@ void display_client_main_window(ClientState* cstate)
                                    GREEN, YELLOW, RED);
 
     // -- menus --
+    print_horizontal_line('#', x_barriere_top+1, cstate->win_width-1, 4);
     if (cstate->user_focus == FOCUS_RIGHT_TOP_PANEL) {
         set_bold();
         set_cl_fg(FOCUS_COLOR);
     }
-    print_vertical_line('|', x_barriere_top+1, 4, 6);
-    print_vertical_line('|', cstate->win_width-2, 4, 6);
+    print_vertical_line('|', x_barriere_top+1, 5, 7);
+    print_vertical_line('|', cstate->win_width-1, 5, 7);
     if (cstate->user_focus == FOCUS_INPUT)
         { reset_ansi(); }
 
@@ -130,7 +131,7 @@ void display_client_main_window(ClientState* cstate)
     // Transition menus - right panel
     set_cursor_position(x_barriere_top+1, 8);
     printf("#");
-    set_cursor_position(cstate->win_width-2, 8);
+    set_cursor_position(cstate->win_width-1, 8);
     printf("#");
     if(cstate->user_focus == FOCUS_RIGHT_TOP_PANEL ||
        cstate->user_focus == FOCUS_RIGHT_BOTTOM_PANEL
@@ -138,7 +139,7 @@ void display_client_main_window(ClientState* cstate)
         set_bold();
         set_cl_fg(FOCUS_COLOR);
     }
-    print_horizontal_line('-', x_barriere_top+2, cstate->win_width-3, 8);
+    print_horizontal_line('-', x_barriere_top+2, cstate->win_width-2, 8);
     if(cstate->user_focus == FOCUS_RIGHT_TOP_PANEL ||
        cstate->user_focus == FOCUS_RIGHT_BOTTOM_PANEL
     ){
@@ -150,7 +151,7 @@ void display_client_main_window(ClientState* cstate)
         set_bold();
         set_cl_fg(FOCUS_COLOR);
     }
-    print_horizontal_line('-', x_barriere_top+1, cstate->win_width-2, cstate->win_height-6);
+    print_horizontal_line('-', x_barriere_top+1, cstate->win_width-2, cstate->win_height-5);
     if(cstate->user_focus == FOCUS_RIGHT_BOTTOM_PANEL){
         reset_ansi();
     }
@@ -163,7 +164,7 @@ void display_client_main_window(ClientState* cstate)
         set_cl_fg(FOCUS_COLOR);
     }
     print_horizontal_line('-', 2, x_barriere_top-1, 2);
-    print_horizontal_line('-', 2, x_barriere_top-1, cstate->win_height-6);
+    print_horizontal_line('-', 2, x_barriere_top-1, cstate->win_height-5);
     if(cstate->user_focus == FOCUS_LEFT_PANEL){
         reset_ansi();
     }
@@ -173,19 +174,19 @@ void display_client_main_window(ClientState* cstate)
 
 
     // -- Bottom input --
-    print_horizontal_line('#', y_barriere_bottom, 1, cstate->win_width-2);
+    print_horizontal_line('#', 1, cstate->win_width-2, y_barriere_bottom);
     if(cstate->user_focus == FOCUS_INPUT){
         set_bold();
         set_cl_fg(FOCUS_COLOR);
     }
-    print_vertical_line('|', 1, cstate->win_height-4, cstate->win_height-2);
-    print_vertical_line('|', cstate->win_width-2, cstate->win_height-4, cstate->win_height-2);
-    print_horizontal_line('-', 2, cstate->win_width - 3, cstate->win_height-4);
-    print_horizontal_line('-', 2, cstate->win_width - 3, cstate->win_height-2);
+    print_vertical_line('|', 2, cstate->win_height-3, cstate->win_height-1);
+    print_vertical_line('|', cstate->win_width-2, cstate->win_height-3, cstate->win_height-1);
+    print_horizontal_line('-', 2, cstate->win_width - 2, cstate->win_height-3);
+    print_horizontal_line('-', 2, cstate->win_width - 2, cstate->win_height-1);
     if (cstate->user_focus == FOCUS_INPUT)
         { reset_ansi(); }
 
-    set_cursor_position(3, cstate->win_height-3);
+    set_cursor_position(3, cstate->win_height-2);
     printf(">");
     if (cstate->input_length < cstate->win_width - 8)
         { printf(" %s", cstate->input); }
@@ -198,7 +199,7 @@ void display_client_main_window(ClientState* cstate)
             cstate->cursor_x = cstate->win_width - 6;
             // TODO
         }
-        cstate->cursor_y = cstate->win_height-3;
+        cstate->cursor_y = cstate->win_height-2;
         //
         set_cursor_position(cstate->cursor_x, cstate->cursor_y);
         show_cursor();
@@ -428,6 +429,11 @@ void on_stdin_client(TcpConnection* con,
         return;
     }
 
+    //
+    if(buffer[0] == CTRL_KEY('q')){
+        con->end_connection = true;
+    }
+
     // Input gestion
     if(cstate->user_focus == FOCUS_INPUT){
         if(buffer[0] == '\x1b'){
@@ -454,22 +460,24 @@ void on_stdin_client(TcpConnection* con,
                 else if(buffer[2] == K_BACKSPACE){
                     if(cstate->input_cursor > 0){
                         // have to shift at the left of the cursor
-                        for(int i = cstate->input_cursor; i<cstate->input_length; i++){
+                        for(int i = cstate->input_cursor - 1; i<cstate->input_length - 1; i++){
                             cstate->input[i] = cstate->input[i+1];
                         }
                         //
                         cstate->input_cursor--;
                         cstate->input_length--;
+                        cstate->input[cstate->input_length] = '\0';
                     }
                 }
                 else if(buffer[2] == K_DELETE){
-                    if(cstate->input_length > 0){
+                    if(cstate->input_length - cstate->input_cursor > 0){
                         // have to shift at the left of the cursor
-                        for(int i = cstate->input_cursor; i<cstate->input_length; i++){
+                        for(int i = cstate->input_cursor; i<cstate->input_length - 1; i++){
                             cstate->input[i] = cstate->input[i+1];
                         }
                         //
                         cstate->input_length--;
+                        cstate->input[cstate->input_length] = '\0';
                     }
                 }
                 // TODO
@@ -477,7 +485,7 @@ void on_stdin_client(TcpConnection* con,
         }
         else{
             // We write the character in the input if possible
-            if(cstate->input_length >= MAX_MSG_LENGTH){
+            if(cstate->input_length >= MAX_MSG_LENGTH - 1){
                 // Do nothing, input has reached max length!
             }
             else if(cstate->input_cursor == cstate->input_length){
@@ -485,6 +493,7 @@ void on_stdin_client(TcpConnection* con,
                 cstate->input[cstate->input_cursor] = buffer[0];
                 cstate->input_cursor++;
                 cstate->input_length++;
+                cstate->input[cstate->input_length] = '\0';
             }
             else{
                 // Shit case, have to shift at the right of the cursor
@@ -495,6 +504,7 @@ void on_stdin_client(TcpConnection* con,
                 cstate->input[cstate->input_cursor] = buffer[0];
                 cstate->input_cursor++;
                 cstate->input_length++;
+                cstate->input[cstate->input_length] = '\0';
             }
         }
     }
@@ -567,7 +577,6 @@ void on_stdin_client(TcpConnection* con,
     }
 
     //
-    printf("Test\n");
     display_client(cstate);
 }
 
@@ -602,8 +611,9 @@ void on_msg_client(TcpConnection* con, SOCKET sock,
             // and asked to enter another one.
             // The connection code files will also need to be deleted.
 
-            printf("\033[31mError, this pseudo is already taken, "
-                    "please choose another pseudo!\033[m\nPseudo : ");
+            // TODO : mettre ca dans une case d'erreru
+            // printf("\033[31mError, this pseudo is already taken, "
+            //         "please choose another pseudo!\033[m\nPseudo : ");
 
             // CONNECTION CODE FILES REMOVAL
             remove(path_code_pseudo);
@@ -625,7 +635,7 @@ void on_msg_client(TcpConnection* con, SOCKET sock,
         else if (msg->msg_type == MSG_WELL_CONNECTED) {
             cstate->connected = true;
             cstate->waiting_pseudo_confirmation = false;
-            printf("Bien connecté au serveur!\n");
+            display_client(cstate);
 
             // TODO: récupérer les messages des salons, etc...
         }
@@ -639,12 +649,14 @@ void on_msg_client(TcpConnection* con, SOCKET sock,
         switch (msg->msg_type)
         {
             case MSG_SERVER_CLIENT:
-                printf("Received message from %s : \"%s\"\n",
-                                        msg->src_pseudo, msg->msg);
+                // TODO: recevoir les messages
+                // printf("Received message from %s : \"%s\"\n",
+                //                         msg->src_pseudo, msg->msg);
                 break;
 
             case MSG_ERROR:
-                printf("\033[31mError from server: %s\033[m\n", msg->msg);
+                // TODO: recevoir les erreurs
+                // printf("\033[31mError from server: %s\033[m\n", msg->msg);
                 break;
 
             case MSG_ACK_NEG:
