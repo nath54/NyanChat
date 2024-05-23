@@ -25,6 +25,7 @@ typedef struct {
 #define FOCUS_RIGHT_TOP_PANEL 2
 #define FOCUS_RIGHT_BOTTOM_PANEL 3
 #define FOCUS_COLOR INDIGO
+#define HARD_FOCUS_COLOR ORANGE
 
 typedef struct {
     // Pseudo
@@ -61,6 +62,8 @@ typedef struct {
 
     // For knowing where the user focus is
     int user_focus;
+    // Press escape to quit hard focus mode and navigate the panels
+    bool hard_focus;
 
     // For displaying messages of a channel
     int disp_msgs_cursor;

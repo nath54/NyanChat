@@ -504,6 +504,17 @@ void tcp_connection_mainloop(TcpConnection* con,
                                 default:
                                     break;
                             }
+                        } else if (seq[0] == '?') {
+                            switch (seq[1]) {
+
+                                case 'M':
+                                    buffer[1] = SPECIAL_CHAR_KEYS;
+                                    buffer[2] = K_ENTER;
+                                    break;
+
+                                default:
+                                    break;
+                            }
                         }
                     }
 

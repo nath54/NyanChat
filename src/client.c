@@ -79,12 +79,9 @@ void client_send_message(TcpConnection* con,
 }
 
 
-void on_stdin_client(TcpConnection* con,
-                    char msg[MAX_MSG_LENGTH],
-                    size_t msg_len,
-                    void* custom_args)
-{
-    ClientState* cstate = custom_args;
+void client_process_message(TcpConnection* con, 
+                            ClientState* cstate
+){
 
     if (strlen(cstate->pseudo) == 0){
         // No nickname, not connected, so either:
@@ -99,14 +96,14 @@ void on_stdin_client(TcpConnection* con,
             //  we send a nickname request to the server
 
 
-            if (msg_len < MIN_NAME_LENGTH){
+            if (cstate->input_length < MIN_NAME_LENGTH){
                 printf("Pseudo trop court, "
                        "doit avoir une taille entre 4 et 64 !\n"
                        "\nEntrez votre pseudo > ");
             }
             else {
                 // Registration (temporary or not) of the pseudo
-                strcpy(cstate->pseudo, msg);
+                strcpy(cstate->pseudo, cstate->input);
 
                 // Creation of the directory for codes files if it doesn't exist
                 struct stat st = {0};
@@ -117,7 +114,7 @@ void on_stdin_client(TcpConnection* con,
 
                 // Code directory for given pseudo
                 char path_code_pseudo[MAX_NAME_LENGTH + 100] = PATH_CLI_CODES;
-                CHKN( strcat(path_code_pseudo, msg) );
+                CHKN( strcat(path_code_pseudo, cstate->input) );
 
                 // Login test (first login with this pseudo)
                 if (stat(path_code_pseudo, &st) == -1) {
@@ -153,7 +150,7 @@ void on_stdin_client(TcpConnection* con,
                 init_empty_message(&(cstate->msg_waiting_ack[0]));
                 cstate->msg_waiting_ack[0].msg_type = MSG_CONNECTION_CLIENT;
                 cstate->msg_waiting_ack[0].msg_id = 0;
-                strcpy(cstate->msg_waiting_ack[0].src_pseudo, msg);
+                strcpy(cstate->msg_waiting_ack[0].src_pseudo, cstate->input);
                 strcpy(cstate->msg_waiting_ack[0].msg, cstate->connection_code);
                 cstate->msg_waiting_ack[0].msg_length = CODE_LENGTH;
                 cstate->nb_msg_waiting_ack += 1;
@@ -167,8 +164,128 @@ void on_stdin_client(TcpConnection* con,
     }
     else if (cstate->connected){
         // Connected right, messages can be sended normaly
-        client_send_message(con, cstate, msg, msg_len);
+        client_send_message(con, cstate, cstate->input, cstate->input_length);
     }
+
+}
+
+
+void on_stdin_client(TcpConnection* con,
+                    char buffer[MAX_MSG_LENGTH],
+                    size_t buf_len,
+                    void* custom_args)
+{
+    ClientState* cstate = custom_args;
+
+    if(buf_len == 0){
+        return;
+    }
+
+    // Input gestion
+    if(cstate->user_focus == FOCUS_INPUT){
+        if(buffer[0] == '\x1b'){
+            if(buffer[1] == SPECIAL_CHAR_ARROW){
+                // TODO
+            } else if(buffer[1] == SPECIAL_CHAR_KEYS){
+                if(buffer[2] == K_TABULATION){
+                    cstate->user_focus = FOCUS_LEFT_PANEL;
+                    cstate->hard_focus = false;
+                }
+                // TODO
+            }
+        }
+        else{
+            // We write the character in the input if possible
+            if(cstate->input_length >= MAX_MSG_LENGTH){
+                // Do nothing, input has reached max length!
+                return;
+            }
+            else if(cstate->input_cursor == cstate->input_length){
+                // Easy case
+                cstate->input[cstate->input_cursor] = buffer[0];
+                cstate->input_cursor++;
+                cstate->input_length++;
+            }
+            else{
+                // Shit case, have to shift at the right of the cursor
+                for(size_t i = cstate->input_cursor; i<cstate->input_length; i++){
+                    cstate->input[i+1] = cstate->input[i];   
+                }
+                // After the shift, we can write the character to the buffer
+                cstate->input[cstate->input_cursor] = buffer[0];
+                cstate->input_cursor++;
+                cstate->input_length++;
+            }
+        }
+    }
+    else{
+        if(cstate->hard_focus){
+            // Hard focus
+            if(buffer[0] == '\x1b'){
+                if(buffer[1] == SPECIAL_CHAR_ARROW){
+                    if(buffer[2] == ARROW_TOP){
+
+                    }
+                    else if(buffer[2] == ARROW_BOTTOM){
+
+                    }
+
+                    // TODO
+                }
+                else if(buffer[1] == SPECIAL_CHAR_KEYS){
+                    if(buffer[2] == K_ESCAPE){
+                        cstate->hard_focus = false;
+                    }
+                    else if(buffer[2] == K_TABULATION){
+                        cstate->user_focus = FOCUS_INPUT;
+                        cstate->hard_focus = false;
+                    }
+                }
+            }
+        }
+        else{
+            // Soft Focus / Panel Navigation
+            if(buffer[0] == '\x1b'){
+                if(buffer[1] == SPECIAL_CHAR_ARROW){
+                    if(buffer[2] == ARROW_TOP){
+                        if(cstate->user_focus == FOCUS_RIGHT_BOTTOM_PANEL){
+                            cstate->user_focus = FOCUS_RIGHT_TOP_PANEL;
+                        }
+                    }
+                    else if(buffer[2] == ARROW_BOTTOM){
+                        if(cstate->user_focus == FOCUS_RIGHT_TOP_PANEL){
+                            cstate->user_focus = FOCUS_RIGHT_BOTTOM_PANEL;
+                        }
+                    }
+                    else if(buffer[2] == ARROW_LEFT){
+                        if(cstate->user_focus == FOCUS_RIGHT_BOTTOM_PANEL ||
+                        cstate->user_focus == FOCUS_RIGHT_TOP_PANEL)
+                        {
+                            cstate->user_focus = FOCUS_LEFT_PANEL;    
+                        }
+                    }
+                    else if(buffer[2] == ARROW_RIGHT){
+                        if(cstate->user_focus == FOCUS_LEFT_PANEL){
+                            cstate->user_focus = FOCUS_RIGHT_TOP_PANEL;
+                        }
+                    }
+
+                    // TODO
+                }
+                else if(buffer[1] == SPECIAL_CHAR_KEYS){
+
+                    if(buffer[2] == K_ENTER){
+                        cstate->hard_focus = true;   
+                    }
+                    else if(buffer[2] == K_TABULATION){
+                        cstate->user_focus = FOCUS_INPUT;
+                        cstate->hard_focus = false;
+                    }
+            }
+        }
+    }
+
+    //
 
 }
 
