@@ -8,6 +8,20 @@
 #define PROXY_MAX_ERROR_CREATED 4  // The maximum number of created errors
 
 
+// Calculate the Hamming distance between two words
+int words_hamming_distance(uint16_t a, uint16_t b);
+
+/**
+ * @brief Calculate the Hamming distance of the polynomial code
+ * 
+ * @param g the generator matrix representing the polynomial code
+ * @return int the minimal distance between two words
+ */
+int code_hamming_distance(uint16_t **g);
+
+// Encoding function
+uint16_t encode_G(uint16_t m);
+
 // Function to detect an error in the message
 // Returns 0 if no errors are detected,
 // otherwise a positive value that can for example indicate whether or not it is possible to

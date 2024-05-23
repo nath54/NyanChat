@@ -17,3 +17,11 @@ void print_word(int k, uint16_t m)
         printf("%d", get_nth_bit(i, m));
     printf("\n");
 }
+
+int card_word_bits(uint16_t m)
+{
+    int count = 0;
+    for (int i = 0; i < 16; i++)
+        count += get_nth_bit(i, m);
+    return count;
+}
