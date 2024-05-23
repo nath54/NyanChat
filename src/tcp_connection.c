@@ -426,19 +426,37 @@ void tcp_connection_mainloop(TcpConnection* con,
                     // Raw Ansi stdin
                     CHKERRNO( bytes_read = read(STDIN_FILENO, buffer, 1), EAGAIN );
 
+                    if (bytes_read == 0) {
+                        fprintf(stderr, "0 bytes read\n");
+                        break;
+                    } else if (bytes_read == -1) {
+                        perror("read");
+                        break;
+                    }
+
                     // Escape sequence
                     if (buffer[0] == '\r') {
+                        fprintf(stderr, "\\r read\n");
+                        buffer[0] = '\x1b';
                         buffer[1] = SPECIAL_CHAR_KEYS;
                         buffer[2] = K_ENTER;
-                    }
-                    else if(buffer[0] == '\t'){
+                    } else if(buffer[0] == '\t') {
+                        buffer[0] = '\x1b';
+                        fprintf(stderr, "\\t read\n");
                         buffer[1] = SPECIAL_CHAR_KEYS;
                         buffer[2] = K_TABULATION;
+                    }
+                    else if(buffer[0] == '\010'){
+                        buffer[0] = '\x1b';
+                        fprintf(stderr, "backspace read\n");
+                        buffer[1] = SPECIAL_CHAR_KEYS;
+                        buffer[2] = K_BACKSPACE;
                     }
                     // TODO : check (https://vt100.net/docs/vt100-ug/chapter3.html#T3-6)
                     // TODO : check (https://vt100.net/docs/vt100-ug/chapter3.html#T3-7)
                     // To correct and add more special chars
                     else if (buffer[0] == '\x1b') {
+                        fprintf(stderr, "\\x1b read\n");
                         char seq[3];
                         bool bon = true;
                         if (read(STDIN_FILENO, &seq[0], 1) != 1)
@@ -468,7 +486,7 @@ void tcp_connection_mainloop(TcpConnection* con,
                                             buffer[2] = K_PAGE_UP;
                                             break;
                                         case '6':
-                                            buffer[1] = SPECIAL_CHAR_ARROW;
+                                            buffer[1] = SPECIAL_CHAR_KEYS;
                                             buffer[2] = K_PAGE_DOWN;
                                             break;
                                         case '7':
@@ -494,12 +512,12 @@ void tcp_connection_mainloop(TcpConnection* con,
                                         buffer[2] = ARROW_BOTTOM;
                                         break;
                                     // Left arrow
-                                    case 'C':
+                                    case 'D':
                                         buffer[1] = SPECIAL_CHAR_ARROW;
                                         buffer[2] = ARROW_LEFT;
                                         break;
                                     // Right arrow
-                                    case 'D':
+                                    case 'C':
                                         buffer[1] = SPECIAL_CHAR_ARROW;
                                         buffer[2] = ARROW_RIGHT;
                                         break;

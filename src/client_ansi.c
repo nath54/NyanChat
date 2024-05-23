@@ -111,7 +111,7 @@ void display_client_main_window(ClientState* cstate)
                           cstate->win_width-2);
 
     // -- logo --
-    print_ascii_art_with_gradients(x_barriere_top+1, 1, cstate->logo_main,
+    print_ascii_art_with_gradients(x_barriere_top+1, 2, cstate->logo_main,
                                    GREEN, YELLOW, RED);
 
     // -- menus --
@@ -432,15 +432,45 @@ void on_stdin_client(TcpConnection* con,
     if(cstate->user_focus == FOCUS_INPUT){
         if(buffer[0] == '\x1b'){
             if(buffer[1] == SPECIAL_CHAR_ARROW){
-                // TODO
+                if(buffer[2] == ARROW_LEFT){
+                    if(cstate->input_cursor > 0){
+                        cstate->input_cursor--;
+                    }
+                }
+                else if(buffer[2] == ARROW_RIGHT){
+                    if(cstate->input_cursor < cstate->input_length - 1){
+                        cstate->input_cursor++;
+                    }
+                }
             } else if(buffer[1] == SPECIAL_CHAR_KEYS){
                 if(buffer[2] == K_ENTER){
                     client_process_message(con, cstate);
                     cstate->input_length = 0;
                 }
-                else if(buffer[2] == K_TABULATION){
+                else if(buffer[2] == K_TABULATION && cstate->connected){
                     cstate->user_focus = FOCUS_LEFT_PANEL;
                     cstate->hard_focus = false;
+                }
+                else if(buffer[2] == K_BACKSPACE){
+                    if(cstate->input_cursor > 0){
+                        // have to shift at the left of the cursor
+                        for(int i = cstate->input_cursor; i<cstate->input_length; i++){
+                            cstate->input[i] = cstate->input[i+1];
+                        }
+                        //
+                        cstate->input_cursor--;
+                        cstate->input_length--;
+                    }
+                }
+                else if(buffer[2] == K_DELETE){
+                    if(cstate->input_length > 0){
+                        // have to shift at the left of the cursor
+                        for(int i = cstate->input_cursor; i<cstate->input_length; i++){
+                            cstate->input[i] = cstate->input[i+1];
+                        }
+                        //
+                        cstate->input_length--;
+                    }
                 }
                 // TODO
             }
@@ -745,6 +775,8 @@ void free_cstate(ClientState* cstate)
 
 int main(int argc, char* argv[]) {
     
+    fprintf(stderr, "test\n");
+
     ClientState cstate;
     TcpConnection con;
 
@@ -768,6 +800,7 @@ int main(int argc, char* argv[]) {
 
     init_cstate(&cstate);
     tcp_connection_client_init(&con, ip_proxy, port_proxy, -1);
+    con.ansi_stdin = true;
 
     display_client(&cstate);
 

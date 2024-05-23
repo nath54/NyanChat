@@ -36,3 +36,4 @@ doc/*/
 *vgcore*
 pseudo_code_*/*
 tmp_key
+log.txt
