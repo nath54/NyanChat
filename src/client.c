@@ -187,7 +187,11 @@ void on_stdin_client(TcpConnection* con,
             if(buffer[1] == SPECIAL_CHAR_ARROW){
                 // TODO
             } else if(buffer[1] == SPECIAL_CHAR_KEYS){
-                if(buffer[2] == K_TABULATION){
+                if(buffer[2] == K_ENTER){
+                    client_process_message(con, cstate);
+                    cstate->input_length = 0;
+                }
+                else if(buffer[2] == K_TABULATION){
                     cstate->user_focus = FOCUS_LEFT_PANEL;
                     cstate->hard_focus = false;
                 }
@@ -208,7 +212,7 @@ void on_stdin_client(TcpConnection* con,
             }
             else{
                 // Shit case, have to shift at the right of the cursor
-                for(size_t i = cstate->input_cursor; i<cstate->input_length; i++){
+                for(int i = cstate->input_cursor; i<cstate->input_length; i++){
                     cstate->input[i+1] = cstate->input[i];   
                 }
                 // After the shift, we can write the character to the buffer
@@ -281,6 +285,7 @@ void on_stdin_client(TcpConnection* con,
                         cstate->user_focus = FOCUS_INPUT;
                         cstate->hard_focus = false;
                     }
+                }
             }
         }
     }
