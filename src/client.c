@@ -365,7 +365,7 @@ int main(int argc, char* argv[])
     char* ip_proxy = argv[1];
     int port_proxy = atoi(argv[2]);
 
-    if (port_proxy < 5000 || port_proxy > 65000) s{
+    if (port_proxy < 5000 || port_proxy > 65000) {
         fprintf(stderr, "Bad value of port_proxy : %d !\n", port_proxy);
         exit(EXIT_FAILURE);
     }
