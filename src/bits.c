@@ -3,13 +3,19 @@
 #include "bits.h"
 
 uint16_t set_nth_bit(int n, uint16_t m)
-    { return m | (1 << n); }
+{
+    return m | (1 << n);
+}
 
 uint16_t get_nth_bit(int n, uint16_t m)
-    { return (m >> n) & 1; }
+{ 
+    return (m >> n) & 1;
+}
 
 uint16_t chg_nth_bit(int n, uint16_t m)
-    { return (get_nth_bit(n, m) == 1) ? m & ~(1 << n) : set_nth_bit(n, m); }
+{
+    return m ^ (1 << n);
+}
 
 void print_word(int k, uint16_t m)
 {
@@ -18,7 +24,7 @@ void print_word(int k, uint16_t m)
     printf("\n");
 }
 
-int card_word_bits(uint16_t m)
+int weight(uint16_t m)
 {
     int count = 0;
     while (m > 0) {

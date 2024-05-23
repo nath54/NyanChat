@@ -3,6 +3,7 @@
 #include "useful_lib.h"
 #include "bits.h"
 
+int K = 8;  // Nombre d'informations
 
 /*
 Renvoie un mot du code sur 8 + c bits (c étant le degré de votre polynôme),
@@ -11,31 +12,30 @@ Le mot à encoder (sur 8 bits) sera placé sur les premiers bits de la variable 
 par 8 bits de padding avant d’être fourni en argument à la fonction.
 Vous privilégierez des opérateurs bit à bit en évitant les opérations arithmétiques.
 */
-uint16_t encode_G(uint16_t **g, int l, uint16_t m)
+uint16_t encode(uint16_t** g, int n, uint16_t m)
 {
-    // TODO: compléter cette fonction
-    uint16_t coef, res = 0;
-    for (int i = 0; i < l; i++) {
-        coef = 0;
-        for (int j = 0; j < 8; j++)
-            { coef += g[j][i] * get_nth_bit(l-j-1, m); }
-        coef %= 2;
-        res += (coef << (l-i-1));
+    uint16_t m_encode = m << (n-K);
+    for (int i = K; i < n; i++) {
+        uint16_t parity_bit = 0;
+        for (int j = 0; j < K; j++)
+            parity_bit ^= g[j][i] & get_nth_bit(n-j-1, m);
+
+        set_nth_bit(n-i-1, m_encode);
     }
-    return res;
+    return m_encode;
 }
 
-int code_hamming_distance(uint16_t **g, int l)
+int code_hamming_distance(uint16_t **g, int n)
 {
-    uint16_t test;
-    int min_weight = 8, nb_bits = 0;
-    for (int i = 0; i < 256; i++) {
-        test = encode_G(g, l, i);
-        nb_bits = card_word_bits(test);
-        if (nb_bits < min_weight)
-            { min_weight = nb_bits; }
+    int distance = K;
+    int N = 1 << K;  // numbers of words
+    for (int i = 0; i < N; i++) {
+        uint16_t word = encode(g, n, i);
+        int w = weight(word);
+        if (w < distance)
+            distance = w;
     }
-    return min_weight;
+    return distance;
 }
 
 // Function to detect an error in the message
@@ -73,7 +73,7 @@ void code_add_errors_to_msg(Message* msg, int nb_errors)
         // Choose a random word to change
         word_to_change = randint(msg->msg_length);
         // Add an error to the message
-        erroned_word = chg_nth_bit(randint(8), (uint16_t)(msg->msg[word_to_change]));
+        erroned_word = chg_nth_bit(randint(K), (uint16_t)(msg->msg[word_to_change]));
         msg->msg[word_to_change] = erroned_word;
     }
 }
