@@ -5,21 +5,20 @@
 
 
 // Return random number between 0 and max_val-1
-int randint(int max_val) {
-    return rand() % max_val;
-}
+int randint(int max_val)
+    { return rand() % max_val; }
 
 
 
 // Generate a random code
-char* generate_random_code(uint32 code_length){
+char* generate_random_code(uint32 code_length)
+{
     //
     char* code;
     CHKN( code = calloc(code_length, sizeof(char)) );
     //
-    for(uint32 i=0; i<code_length - 1; i++){
-        code[i] = 32 + rand() % 82;
-    }
+    for(uint32 i=0; i<code_length - 1; i++)
+        { code[i] = 32 + rand() % 82; }
     //
     code[code_length - 1] = '\0';
     //
@@ -98,46 +97,44 @@ cleanup:
 
 
 // Get the number of lines of a file and get the max line length of a file
-void get_file_stats(FILE *f, int *num_lines, int *max_length) {
-  int current_length;
-  char buffer[BUFSIZ];
+void get_file_stats(FILE *f, int *num_lines, int *max_length)
+{
+    int current_length;
+    char buffer[BUFSIZ];
 
-  *num_lines = 0;
-  *max_length = 0;
+    *num_lines = 0;
+    *max_length = 0;
 
-  // Read the file line by line
-  while (fgets(buffer, sizeof(buffer), f) != NULL) {
-    (*num_lines)++;  // Increment line count
+    // Read the file line by line
+    while (fgets(buffer, sizeof(buffer), f) != NULL) {
+        (*num_lines)++;  // Increment line count
 
-    // Remove trailing newline (if present)
-    current_length = strlen(buffer);
-    if (buffer[current_length - 1] == '\n') {
-      current_length--;
+        // Remove trailing newline (if present)
+        current_length = strlen(buffer);
+        if (buffer[current_length - 1] == '\n')
+            { current_length--; }
+
+        // Update max length if necessary
+        if (current_length > *max_length)
+            { *max_length = current_length; }
     }
 
-    // Update max length if necessary
-    if (current_length > *max_length) {
-      *max_length = current_length;
-    }
-  }
-
-  // Reset the file pointer to the beginning
-  rewind(f);
+    // Reset the file pointer to the beginning
+    rewind(f);
 }
 
 
 // Read a line of a file, and getting it in the pre-allocated line char array
-int read_file_line(FILE *f, char *line, int max_length) {
+int read_file_line(FILE *f, char *line, int max_length)
+{
     // Read a line from the file
-    if (fgets(line, max_length + 1, f) == NULL) {
-        return -1;  // Indicate end of file or error
-    }
+    if (fgets(line, max_length + 1, f) == NULL)
+        { return -1; }  // Indicate end of file or error
 
     // Remove trailing newline (if present)
     int length = strlen(line);
-    if (line[length - 1] == '\n') {
-        line[length - 1] = '\0';  // Replace newline with null terminator
-    }
+    if (line[length - 1] == '\n')
+        { line[length - 1] = '\0'; }  // Replace newline with null terminator
 
     return 0;  // Success
 }

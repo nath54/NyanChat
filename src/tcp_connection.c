@@ -27,7 +27,8 @@
  * 
  * @param msg The message to initialize (passed by reference)
  */
-void init_empty_message(Message* msg){
+void init_empty_message(Message* msg)
+{
     msg->msg_type = MSG_NULL;
     msg->msg_id = -1;
     msg->proxy_client_socket = -1;
@@ -213,7 +214,6 @@ void new_clients_acceptation(TcpConnection* con) {
     while (new_sock != -1);
 
     printf("End of acceptance\n");
-
 }
 
 
@@ -286,12 +286,10 @@ void read_poll_socket(TcpConnection* con, int id_poll,
         // Received a message
         size_t msg_len = rc;
         
-        if(msg_len > 0){
-            printf("Msg received : %s\n", con->msg.msg);
-        }
-        else{
-            printf("Received empty msg\n");
-        }
+        if(msg_len > 0)
+            { printf("Msg received : %s\n", con->msg.msg); }
+        else
+            { printf("Received empty msg\n"); }
         printf("Message type : %d\n", con->msg.msg_type);
         printf("Message dst flag : %d\n", con->msg.dst_flag);
 
@@ -306,7 +304,7 @@ void read_poll_socket(TcpConnection* con, int id_poll,
 
     } while (true);
 
-    if (close_conn){
+    if (close_conn) {
         if(con->type_connection == TCP_CON_CLIENT ||
            con->type_connection == TCP_CON_PROXY_SERVER_SIDE)
         {
@@ -326,13 +324,13 @@ void tcp_connection_mainloop(TcpConnection* con,
                              fn_on_stdin on_stdin, void* on_stdin_custom_args)
 {
 
-    if (on_msg == NULL){
+    if (on_msg == NULL) {
         fprintf(stderr, "Error, on_msg is NULL!\n");
         exit(EXIT_FAILURE);
     }
 
     // While server is running
-    do{
+    do {
 
         printf("Waiting for poll\n");
 
@@ -348,15 +346,14 @@ void tcp_connection_mainloop(TcpConnection* con,
         int current_nb_poll_socks = con->nb_poll_fds;
 
         // Looping through all sockets
-        for (int i = 0; i < current_nb_poll_socks; i++){
+        for (int i = 0; i < current_nb_poll_socks; i++) {
 
             // Inactive socket
-            if (con->poll_fds[i].revents == 0){
+            if (con->poll_fds[i].revents == 0)
                 continue;
-            }
 
             // Error
-            if (con->poll_fds[i].revents != POLLIN){
+            if (con->poll_fds[i].revents != POLLIN) {
                 fprintf(stderr, "  Error! revents = %d\n",
                                     con->poll_fds[i].revents);
                 con->end_connection = true;
@@ -418,17 +415,14 @@ void tcp_connection_mainloop(TcpConnection* con,
                     else if (buffer[0] == '\x1b') {
                         char seq[3];
                         bool bon = true;
-                        if (read(STDIN_FILENO, &seq[0], 1) != 1){
-                            bon = false;
-                        }
-                        if (bon && read(STDIN_FILENO, &seq[1], 1) != 1){
-                            bon = false;
-                        }
+                        if (read(STDIN_FILENO, &seq[0], 1) != 1)
+                            { bon = false; }
+                        if (bon && read(STDIN_FILENO, &seq[1], 1) != 1)
+                            { bon = false; }
                         if (bon && seq[0] == '[') {
                             if (seq[1] >= '0' && seq[1] <= '9') {
-                                if (read(STDIN_FILENO, &seq[2], 1) != 1){
-                                    bon = false;
-                                }
+                                if (read(STDIN_FILENO, &seq[2], 1) != 1)
+                                    { bon = false; }
                                 if (bon && seq[2] == '~') {
                                     switch (seq[1]) {
                                         case '1':
@@ -515,13 +509,11 @@ void tcp_connection_mainloop(TcpConnection* con,
 
                 }
 
-                if (on_stdin != NULL){
-                    on_stdin(con, buffer, bytes_read, on_stdin_custom_args);
-                }
+                if (on_stdin != NULL)
+                    { on_stdin(con, buffer, bytes_read, on_stdin_custom_args); }
 
-                if(!con->ansi_stdin && bytes_read > 0 && buffer[0] != '\x1b'){
-                    printf("Vous avez écrit: \"%s\"\n", buffer);
-                }
+                if(!con->ansi_stdin && bytes_read > 0 && buffer[0] != '\x1b')
+                    { printf("Vous avez écrit: \"%s\"\n", buffer); }
 
             } else {
 
@@ -540,13 +532,10 @@ void tcp_connection_mainloop(TcpConnection* con,
         //  we put all the sockets back together side by side
         //  we don't need to touch the revent attributes,
         //  they are normally all set to POLLIN
-        if (con->need_compress_poll_arr){
-
+        if (con->need_compress_poll_arr) {
             printf("Compress polls sockets array.\n");
             con->need_compress_poll_arr = false;
-
             compress_poll_socket_array(con, current_nb_poll_socks);
-
         }
 
     } while (con->end_connection == false);
@@ -555,19 +544,19 @@ void tcp_connection_mainloop(TcpConnection* con,
 
 
 // Closing a tcp connection
-void tcp_connection_close(TcpConnection* con){
-
+void tcp_connection_close(TcpConnection* con)
+{
     // Closing the main primary socket
     CHK( close(con->sockfd) );
 
     // Closing all the other opened sockets
-    for (unsigned long i=0; i<con->nb_poll_fds; i++){
+    for (unsigned long i=0; i<con->nb_poll_fds; i++) {
+        
         if (con->poll_fds[i].fd >= 0
             && con->poll_fds[i].fd != con->sockfd
-            && con->poll_fds[i].fd != stdin_fd
-        ){
-            CHK( close(con->poll_fds[i].fd) );
-        }
+            && con->poll_fds[i].fd != stdin_fd)
+            
+            { CHK( close(con->poll_fds[i].fd) ); }
     }
 }
 
@@ -617,5 +606,5 @@ void copy_message(Message* dest, Message* src){
     dest->msg_length = src->msg_length;
     CHKN( strcpy(dest->msg, src->msg) );
     //
-    // TODO: copier les variables qui gèrent les codes correcteurs
+    // ! TODO: copier les variables qui gèrent les codes correcteurs
 }
