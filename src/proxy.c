@@ -141,6 +141,7 @@ void* gestion_server(void* arg)
 void* gestion_clients(void* arg)
 {
     (void)arg;
+
     // Initialization of the connection that will listen to the clients
     tcp_connection_server_init(&con_clients, "127.0.0.1", port_clients, 20, -1);
     con_clients.type_connection = TCP_CON_PROXY_CLIENTS_SIDE;

@@ -1,8 +1,3 @@
-
-/*
-    ------------------------ Includes ------------------------
-*/
-
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <unistd.h>
@@ -49,7 +44,8 @@ termios_t orig_termios;
 */
 
 
-void display_client_connection_window(ClientState* cstate){
+void display_client_connection_window(ClientState* cstate)
+{
     //
     hide_cursor();
     clean_terminal();
@@ -59,11 +55,9 @@ void display_client_connection_window(ClientState* cstate){
 
     int x_logo = (cstate->win_width - cstate->logo_connection->tx) / 2;
     int y_logo = 6;
-    print_ascii_art_with_gradients(
-        x_logo, y_logo,
-        cstate->logo_connection,
-        CYAN, VIOLET, ORANGE
-    );
+    print_ascii_art_with_gradients(x_logo, y_logo,
+                                   cstate->logo_connection,
+                                   CYAN, VIOLET, ORANGE);
 
     int y_fin_logo = y_logo + cstate->logo_connection->ty;
 
@@ -86,9 +80,8 @@ void display_client_connection_window(ClientState* cstate){
     printf("|");
 
     set_cursor_position(x_inp + 2, y_fin_logo + 9);
-    if(cstate->input_length > 0){
-        printf("%s", cstate->input);
-    }
+    if(cstate->input_length > 0)
+        { printf("%s", cstate->input); }
 
     cstate->cursor_x = x_inp + 2 + cstate->input_cursor;
     cstate->cursor_y = y_fin_logo + 9;
@@ -100,7 +93,8 @@ void display_client_connection_window(ClientState* cstate){
 }
 
 
-void display_client_main_window(ClientState* cstate){
+void display_client_main_window(ClientState* cstate)
+{
     //
     hide_cursor();
     clean_terminal();
@@ -113,21 +107,22 @@ void display_client_main_window(ClientState* cstate){
     // Main architecture
     set_screen_border(cstate->win_width, cstate->win_height);
     print_vertical_line('#', x_barriere_top, 1, y_barriere_bottom-1);
-    print_horizontal_line('#', y_barriere_logo_right, x_barriere_top+1, cstate->win_width-2);
+    print_horizontal_line('#', y_barriere_logo_right, x_barriere_top+1,
+                          cstate->win_width-2);
 
     // -- logo --
-    print_ascii_art_with_gradients(x_barriere_top+1, 1, cstate->logo_main, GREEN, YELLOW, RED);
+    print_ascii_art_with_gradients(x_barriere_top+1, 1, cstate->logo_main,
+                                   GREEN, YELLOW, RED);
 
     // -- menus --
-    if(cstate->user_focus == FOCUS_RIGHT_TOP_PANEL){
+    if (cstate->user_focus == FOCUS_RIGHT_TOP_PANEL) {
         set_bold();
         set_cl_fg(FOCUS_COLOR);
     }
     print_vertical_line('|', x_barriere_top+1, 4, 6);
     print_vertical_line('|', cstate->win_width-2, 4, 6);
-    if(cstate->user_focus == FOCUS_INPUT){
-        reset_ansi();
-    }
+    if (cstate->user_focus == FOCUS_INPUT)
+        { reset_ansi(); }
 
     // TODO: display left / right arrow
     // TODO: display menu name
@@ -187,22 +182,19 @@ void display_client_main_window(ClientState* cstate){
     print_vertical_line('|', cstate->win_width-2, cstate->win_height-4, cstate->win_height-2);
     print_horizontal_line('-', 2, cstate->win_width - 3, cstate->win_height-4);
     print_horizontal_line('-', 2, cstate->win_width - 3, cstate->win_height-2);
-    if(cstate->user_focus == FOCUS_INPUT){
-        reset_ansi();
-    }
+    if (cstate->user_focus == FOCUS_INPUT)
+        { reset_ansi(); }
 
     set_cursor_position(3, cstate->win_height-3);
     printf(">");
-    if(cstate->input_length < cstate->win_width - 8){
-        printf(" %s", cstate->input);
-    }
+    if (cstate->input_length < cstate->win_width - 8)
+        { printf(" %s", cstate->input); }
 
     // at the end, we set the cursor at the good input position, if input focus
-    if(cstate->user_focus == FOCUS_INPUT){
-        if(cstate->input_length < cstate->win_width - 8){
-            cstate->cursor_x = 6+cstate->input_cursor;
-        }
-        else{
+    if (cstate->user_focus == FOCUS_INPUT) {
+        if (cstate->input_length < cstate->win_width - 8)
+            { cstate->cursor_x = 6+cstate->input_cursor; }
+        else {
             cstate->cursor_x = cstate->win_width - 6;
             // TODO
         }
@@ -216,7 +208,8 @@ void display_client_main_window(ClientState* cstate){
 }
 
 
-void display_client_error_win_size(ClientState* cstate){
+void display_client_error_win_size(ClientState* cstate)
+{
     clean_terminal();
     set_cursor_position(0, 0);
     printf("Terminal windows too small : (%d, %d)\n"
@@ -229,21 +222,18 @@ void display_client_error_win_size(ClientState* cstate){
 
 
 
-void display_client(ClientState* cstate){
+void display_client(ClientState* cstate)
+{
     get_terminal_size(&(cstate->win_width), &(cstate->win_height));
     //
     if(cstate->win_width < MIN_TERMINAL_WIDTH ||
-       cstate->win_height < MIN_TERMINAL_HEIGHT
-    ){
-        display_client_error_win_size(cstate);
-    }
+       cstate->win_height < MIN_TERMINAL_HEIGHT)
+        { display_client_error_win_size(cstate); }
     //
-    if(cstate->connected){
-        display_client_main_window(cstate);
-    }
-    else{
-        display_client_connection_window(cstate);
-    }
+    if (cstate->connected)
+        { display_client_main_window(cstate); }
+    else
+        { display_client_connection_window(cstate); }
 }
 
 
@@ -255,29 +245,26 @@ void display_client(ClientState* cstate){
 
 
 // Find the next free slots of the msg_waiting_ack
-int find_next_msg_id(ClientState* cstate){
+int find_next_msg_id(ClientState* cstate)
+{
     size_t first_free = 0;
-    if (cstate->nb_msg_waiting_ack == cstate->tot_msg_waiting_ack){
+    if (cstate->nb_msg_waiting_ack == cstate->tot_msg_waiting_ack) {
         first_free = cstate->tot_msg_waiting_ack;
         cstate->tot_msg_waiting_ack *= 2;
-        cstate->msg_waiting_ack = realloc(
-                cstate->msg_waiting_ack,
-                sizeof(Message)*cstate->tot_msg_waiting_ack
-        );
-        if (cstate->msg_waiting_ack == NULL){
+        cstate->msg_waiting_ack = realloc(cstate->msg_waiting_ack,
+                                  sizeof(Message)*cstate->tot_msg_waiting_ack);
+        if (cstate->msg_waiting_ack == NULL) {
             fprintf(stderr, "Erreur Realloc!\n");
             exit(EXIT_FAILURE);
         }
         //
-        for (size_t i = first_free; i<cstate->tot_msg_waiting_ack; i++){
-            cstate->msg_waiting_ack[i].msg_type = MSG_NULL;
-        }
+        for (size_t i = first_free; i<cstate->tot_msg_waiting_ack; i++)
+            { cstate->msg_waiting_ack[i].msg_type = MSG_NULL; }
     }
     //
     for (size_t i=first_free; i<cstate->tot_msg_waiting_ack; i++){
-        if(cstate->msg_waiting_ack[i].msg_type == MSG_NULL){
-            return i;
-        }
+        if(cstate->msg_waiting_ack[i].msg_type == MSG_NULL)
+            { return i; }
     }
     //
     fprintf(stderr, "Erreur programme, panic!\n");
@@ -295,12 +282,9 @@ void client_send_message(TcpConnection* con,
 
     cstate->msg_waiting_ack[id_new_msg].msg_type = MSG_STD_CLIENT_SERVER;
     cstate->msg_waiting_ack[id_new_msg].msg_id = id_new_msg;
-    strcpy(cstate->msg_waiting_ack[id_new_msg].src_pseudo,
-                                                cstate->pseudo);
-    cstate->msg_waiting_ack[id_new_msg].dst_flag = 
-                                                cstate->type_current_dest;
-    strcpy(cstate->msg_waiting_ack[id_new_msg].dst,
-                                                cstate->destination);
+    strcpy(cstate->msg_waiting_ack[id_new_msg].src_pseudo, cstate->pseudo);
+    cstate->msg_waiting_ack[id_new_msg].dst_flag = cstate->type_current_dest;
+    strcpy(cstate->msg_waiting_ack[id_new_msg].dst, cstate->destination);
     cstate->msg_waiting_ack[id_new_msg].proxy_client_socket = MSG_NULL;
     strcpy(cstate->msg_waiting_ack[id_new_msg].msg, msg);
     cstate->msg_waiting_ack[id_new_msg].msg_length = msg_len;
@@ -349,12 +333,10 @@ void on_stdin_client(TcpConnection* con,
 {
     ClientState* cstate = custom_args;
 
-    if(cstate->connected){
-        on_client_input_main_window(con, cstate, msg, msg_len);
-    }
-    else{
-        on_client_input_connection_window(con, cstate, msg, msg_len);
-    }
+    if(cstate->connected)
+        { on_client_input_main_window(con, cstate, msg, msg_len); }
+    else
+        { on_client_input_connection_window(con, cstate, msg, msg_len); }
 }
 
 
@@ -369,7 +351,7 @@ void on_msg_client(TcpConnection* con, SOCKET sock,
     
     // printf("Message received: %s\n", msg->msg);
 
-    if(cstate->waiting_pseudo_confirmation){
+    if (cstate->waiting_pseudo_confirmation) {
         // We check that we have either:
         //   - an error -> unusable pseudo
         //   - an encoded message from the server
@@ -383,7 +365,7 @@ void on_msg_client(TcpConnection* con, SOCKET sock,
         CHKN( strcat(path_code_pseudo, cstate->pseudo) );
 
         // Error gestion
-        if(msg->msg_type == MSG_ERROR){
+        if (msg->msg_type == MSG_ERROR) {
             // This pseudonym is not usable, so the user must be informed
             // and asked to enter another one.
             // The connection code files will also need to be deleted.
@@ -402,26 +384,24 @@ void on_msg_client(TcpConnection* con, SOCKET sock,
             //   this message must also be cleaned up
 
             // Test bad ACK
-            if(msg->msg_id >= 0 &&
-               (size_t)msg->msg_id < cstate->nb_msg_waiting_ack &&
-               cstate->msg_waiting_ack[msg->msg_id].msg_type != MSG_NULL
-            ){
+            if (msg->msg_id >= 0 &&
+                (size_t)msg->msg_id < cstate->nb_msg_waiting_ack &&
+                cstate->msg_waiting_ack[msg->msg_id].msg_type != MSG_NULL)
                 // We clean the waiting message
-                init_empty_message(&(cstate->msg_waiting_ack[msg->msg_id]));
-            }
+                { init_empty_message(&(cstate->msg_waiting_ack[msg->msg_id])); }
         }
-        else if(msg->msg_type == MSG_WELL_CONNECTED){
+        else if (msg->msg_type == MSG_WELL_CONNECTED) {
             cstate->connected = true;
             cstate->waiting_pseudo_confirmation = false;
             printf("Bien connecté au serveur!\n");
 
             // TODO: récupérer les messages des salons, etc...
         }
-        else{
+        else {
             // We do nothing, we are not supposed to get here
         }
     }
-    else if(cstate->connected){
+    else if (cstate->connected) {
         // We are well connected, so we can receive normally the messages
 
         switch (msg->msg_type)
@@ -452,10 +432,10 @@ void on_msg_client(TcpConnection* con, SOCKET sock,
             
             case MSG_ACK_POS:
                 // Test bad ACK
-                if(msg->msg_id < 0 ||
-                   (size_t)msg->msg_id > cstate->nb_msg_waiting_ack ||
-                   cstate->msg_waiting_ack[msg->msg_id].msg_type == MSG_NULL
-                ){
+                if (msg->msg_id < 0 ||
+                    (size_t)msg->msg_id > cstate->nb_msg_waiting_ack ||
+                    cstate->msg_waiting_ack[msg->msg_id].msg_type == MSG_NULL)
+                {
                     fprintf(stderr, "\033[31mError, "
                             "bad negative ack from server\033[m\n");
                     return;
@@ -467,7 +447,6 @@ void on_msg_client(TcpConnection* con, SOCKET sock,
             default:
                 break;
         }
-
     }
 }
 
@@ -479,8 +458,8 @@ void on_msg_client(TcpConnection* con, SOCKET sock,
 
 
 // Initialising the client_state
-void init_cstate(ClientState* cstate){
-
+void init_cstate(ClientState* cstate)
+{
     // Init pseudo
     CHKN( memset(cstate->pseudo, '\0', MAX_NAME_LENGTH) );
 
@@ -498,13 +477,11 @@ void init_cstate(ClientState* cstate){
     // Init msg_waiting_ack
     cstate->tot_msg_waiting_ack = 10;
     cstate->nb_msg_waiting_ack = 0;
-    CHKN( cstate->msg_waiting_ack = calloc(
-                    cstate->tot_msg_waiting_ack,
-                    sizeof(Message)) );
+    CHKN( cstate->msg_waiting_ack = calloc(cstate->tot_msg_waiting_ack,
+                                           sizeof(Message)) );
     //
-    for (size_t i=0; i<cstate->tot_msg_waiting_ack; i++){
-        cstate->msg_waiting_ack[i].msg_type = -1;
-    }
+    for (size_t i=0; i<cstate->tot_msg_waiting_ack; i++)
+        { cstate->msg_waiting_ack[i].msg_type = -1; }
 
     
     // Init connected_clients
@@ -514,20 +491,18 @@ void init_cstate(ClientState* cstate){
                 cstate->tot_connected_clients,
                 sizeof(ConClient)) );
     //
-    for (size_t i=0; i<cstate->tot_connected_clients; i++){
-        CHKN( memset(cstate->connected_clients[i].pseudo, '\0', MAX_NAME_LENGTH) );
+    for (size_t i=0; i<cstate->tot_connected_clients; i++) {
+        CHKN( memset(cstate->connected_clients[i].pseudo, '\0',
+                     MAX_NAME_LENGTH) );
     }
 
     // Init channels
     cstate->tot_channels = 10;
     cstate->nb_channels = 0;
-    CHKN( cstate->channels = calloc(
-                cstate->tot_channels,
-                sizeof(Channel)) );
+    CHKN( cstate->channels = calloc(cstate->tot_channels, sizeof(Channel)) );
     //
-    for (size_t i=0; i<cstate->tot_channels; i++){
-        CHKN( memset(cstate->channels[i].name, '\0', MAX_NAME_LENGTH) );
-    }
+    for (size_t i=0; i<cstate->tot_channels; i++)
+        { CHKN( memset(cstate->channels[i].name, '\0', MAX_NAME_LENGTH) ); }
 
     //
     cstate->user_focus = FOCUS_INPUT;
@@ -553,7 +528,8 @@ void init_cstate(ClientState* cstate){
 
 
 // Cleaning the client state
-void free_cstate(ClientState* cstate){
+void free_cstate(ClientState* cstate)
+{
     free(cstate->msg_waiting_ack);
     free_ascii_art(cstate->logo_connection);
     free_ascii_art(cstate->logo_main);
@@ -571,7 +547,7 @@ int main(int argc, char* argv[]) {
     TcpConnection con;
 
     // Check arguments
-    if (argc != 3){
+    if (argc != 3) {
         printf("Usage: %s ip_proxy port_proxy\n", argv[0]);
         exit(EXIT_FAILURE);
     }
@@ -579,7 +555,7 @@ int main(int argc, char* argv[]) {
     char* ip_proxy = argv[1];
     int port_proxy = atoi(argv[2]);
 
-    if (port_proxy < 5000 || port_proxy > 65000){
+    if (port_proxy < 5000 || port_proxy > 65000) {
         fprintf(stderr, "Bad value of port_proxy : %d !\n", port_proxy);
         exit(EXIT_FAILURE);
     }
@@ -587,8 +563,7 @@ int main(int argc, char* argv[]) {
     init_cstate(&cstate);
     tcp_connection_client_init(&con, ip_proxy, port_proxy, -1);
 
-    tcp_connection_mainloop(&con,
-                            on_msg_client, &cstate,
+    tcp_connection_mainloop(&con, on_msg_client, &cstate,
                             on_stdin_client, &cstate);
 
     tcp_connection_close(&con);

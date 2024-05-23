@@ -22,14 +22,10 @@ static uint jenkins_one_at_a_time_hash(char* key, size_t length)
 }
 
 static uint hash(char* key, uint size)
-{
-    return jenkins_one_at_a_time_hash(key, strlen(key)) % size;
-}
+    { return jenkins_one_at_a_time_hash(key, strlen(key)) % size; }
 
 static uint jump(uint i)
-{
-    return (i * (i+1)) / 2;
-}
+    { return (i * (i+1)) / 2; }
 
 Hashmap* hashmap_create(uint size)
 {
@@ -58,7 +54,7 @@ void hashmap_resize(Hashmap* h, uint new_size)
     for (uint i = 0; i < old_size; i++) {
         char* k = old_items[i].key;
         if (k != NULL && strncmp(k, TOMBSTONE, KEY_MAXLEN) != 0)
-            hashmap_insert(h, k, old_items[i].value);
+            { hashmap_insert(h, k, old_items[i].value); }
     }
     free(old_items);
 }
@@ -107,11 +103,11 @@ int hashmap_insert(Hashmap* h, char* key, uint value)
     int id_tombstone = -1;
 
     if ((double)h->count / (double)h->size >= LOAD) // the load is too high
-        hashmap_resize(h, 2 * h->size);
+        { hashmap_resize(h, 2 * h->size); }
 
     while (current_key != NULL && strncmp(current_key, key, KEY_MAXLEN) != 0) {
         if (strncmp(current_key, TOMBSTONE, KEY_MAXLEN) == 0 && id_tombstone < 0)
-            id_tombstone = current_pos;
+            { id_tombstone = current_pos; }
         current_pos = (index + jump(++i)) % h->size;
         current_key = h->items[current_pos].key;
     }

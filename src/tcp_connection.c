@@ -605,6 +605,6 @@ void copy_message(Message* dest, Message* src){
     CHKN( strcpy(dest->dst, src->dst) );
     dest->msg_length = src->msg_length;
     CHKN( strcpy(dest->msg, src->msg) );
-    //
-    // ! TODO: copier les variables qui gèrent les codes correcteurs
+
+    // TODO: copier les variables qui gèrent les codes correcteurs
 }
