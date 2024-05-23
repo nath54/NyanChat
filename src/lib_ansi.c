@@ -456,6 +456,7 @@ void print_ascii_art_with_colors(int x, int y, ColoredAsciiArt* art,
             printf("%c", art->art[l][c]);
         }
     }
+    reset_ansi();
 }
 
 
@@ -483,4 +484,5 @@ void print_ascii_art_with_gradients(int x, int y,
             cl = cl_add(cl, cl_delta_x);
         }
     }
+    reset_ansi();
 }
