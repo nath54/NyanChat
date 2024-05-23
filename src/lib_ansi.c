@@ -340,12 +340,12 @@ void set_screen_border(int width, int height){
     for(int i=1; i<width-1; i++){
         printf("=");
     }
-    printf("#\n");
+    printf("#\r\n");
     // Side borders
     for(int j=2; j<height; j++){
         printf("||");
         set_cursor_position(width-1, j);
-        printf("||\n");
+        printf("||\r\n");
     }
     // Bottom line
     printf("#");

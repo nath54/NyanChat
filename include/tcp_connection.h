@@ -141,6 +141,7 @@ typedef struct TcpConnection {
                             */
 
     //
+    bool enable_debug_print;
     bool ansi_stdin;
 
     int timeout;    // Maximum inactivity time before a closure of the connection.

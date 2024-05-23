@@ -47,6 +47,7 @@ void tcp_connection_server_init(TcpConnection* con,
 {
     con->type_connection = TCP_CON_SERVER;
     con->ansi_stdin = false;
+    con->enable_debug_print = true;
 
     // Create socket
     CHK( con->sockfd = socket(AF_INET, SOCK_STREAM | SOCK_NONBLOCK, 0) );
@@ -70,7 +71,8 @@ void tcp_connection_server_init(TcpConnection* con,
     }
 
     // Preparation to listen to new connections
-    printf("Listen\n");
+    if(con->enable_debug_print)
+        { printf("Listen\n"); }
     CHK( listen(con->sockfd, nb_max_connections_server) );
 
     // Polling initialization
@@ -107,6 +109,7 @@ void tcp_connection_client_init(TcpConnection* con,
 {
     con->type_connection = TCP_CON_CLIENT;
     con->ansi_stdin = false;
+    con->enable_debug_print = false;
 
     // Create socket
     CHK( con->sockfd = socket(AF_INET, SOCK_STREAM, 0) );
@@ -176,7 +179,9 @@ void new_clients_acceptation(TcpConnection* con) {
             SOCKADDR_IN connected_addr;
             socklen_t con_addr_len;
 
-            printf("On accepte.\n");
+            if(con->enable_debug_print)
+                { printf("On accepte.\n"); }
+
             // Acceptance of the new connection
             new_sock = accept(con->sockfd, (SOCKADDR*)&connected_addr,
                               &con_addr_len);
@@ -193,9 +198,11 @@ void new_clients_acceptation(TcpConnection* con) {
 
                 continue;
             }
-
-            printf("  New incoming connection - %d - %d\n",
-                        new_sock, connected_addr.sin_addr.s_addr);
+            
+            if(con->enable_debug_print) { 
+                printf("  New incoming connection - %d - %d\n",
+                            new_sock, connected_addr.sin_addr.s_addr);
+            }
 
             // Registering the new connection
             con->poll_fds[con->nb_poll_fds].fd = new_sock;
@@ -203,17 +210,24 @@ void new_clients_acceptation(TcpConnection* con) {
             con->poll_addrs[con->nb_poll_fds] = connected_addr;
             con->poll_ad_len[con->nb_poll_fds] = con_addr_len;
             con->nb_poll_fds++;
-            printf("Nb poll file descriptors : %ld\n", con->nb_poll_fds);
+
+            if(con->enable_debug_print) {
+                printf("Nb poll file descriptors : %ld\n", con->nb_poll_fds);
+            }
             
         } else {
-            printf("  New incoming connection refused:"
-                    " maximum connection reached.\n");
+            if(con->enable_debug_print) {
+                printf("  New incoming connection refused:"
+                        " maximum connection reached.\n");
+            }
         }
 
     }
     while (new_sock != -1);
 
-    printf("End of acceptance\n");
+    if(con->enable_debug_print) {
+        printf("End of acceptance\n");
+    }
 }
 
 
@@ -278,7 +292,9 @@ void read_poll_socket(TcpConnection* con, int id_poll,
 
         // Connection closed by client
         if (rc == 0){
-            printf("  Connection closed\n");
+            if(con->enable_debug_print) {
+                printf("  Connection closed\n");
+            }
             close_conn = true;
             break;
         }
@@ -286,17 +302,22 @@ void read_poll_socket(TcpConnection* con, int id_poll,
         // Received a message
         size_t msg_len = rc;
         
-        if(msg_len > 0)
-            { printf("Msg received : %s\n", con->msg.msg); }
-        else
-            { printf("Received empty msg\n"); }
-        printf("Message type : %d\n", con->msg.msg_type);
-        printf("Message dst flag : %d\n", con->msg.dst_flag);
+        if(con->enable_debug_print) {
+            if(msg_len > 0)
+                { printf("Msg received : %s\n", con->msg.msg); }
+            else
+                { printf("Received empty msg\n"); }
+            printf("Message type : %d\n", con->msg.msg_type);
+            printf("Message dst flag : %d\n", con->msg.dst_flag);
+        }
 
         if (con->type_connection == TCP_CON_PROXY_CLIENTS_SIDE){
             con->msg.proxy_client_socket = id_poll;
-            printf("Le message de %s a bien recu son id de poll proxy : %d\n",
-                                                 con->msg.src_pseudo, id_poll);
+
+            if(con->enable_debug_print) {
+                printf("Le message de %s a bien recu son id de poll proxy : %d\n",
+                                                    con->msg.src_pseudo, id_poll);
+            }
         }
 
         on_msg(con, con->poll_fds[id_poll].fd, &(con->msg), msg_len,
@@ -332,13 +353,14 @@ void tcp_connection_mainloop(TcpConnection* con,
     // While server is running
     do {
 
-        printf("Waiting for poll\n");
+        if(con->enable_debug_print) {
+            printf("Waiting for poll\n");
+        }
 
         // We listen the sockets with poll
         // rc for Return Code
         int rc = poll(con->poll_fds, con->nb_poll_fds, con->timeout);
 
-        printf("test, rc=%d\n", rc);
         if (test_poll_errors(rc))
             break;
 
@@ -387,7 +409,11 @@ void tcp_connection_mainloop(TcpConnection* con,
                     // Standard stdin
                     bytes_read = read(stdin_fd, buffer, MAX_MSG_LENGTH);
                     if (bytes_read == 0) {
-                        printf("User closed input\n");
+
+                        if(con->enable_debug_print) {
+                            printf("User closed input\n");
+                        }
+
                         break;
                     } else if (bytes_read == -1) {
                         perror("read");
@@ -523,12 +549,15 @@ void tcp_connection_mainloop(TcpConnection* con,
                 if (on_stdin != NULL)
                     { on_stdin(con, buffer, bytes_read, on_stdin_custom_args); }
 
-                if(!con->ansi_stdin && bytes_read > 0 && buffer[0] != '\x1b')
+                if(con->enable_debug_print && !con->ansi_stdin && bytes_read > 0 && buffer[0] != '\x1b')
                     { printf("Vous avez écrit: \"%s\"\n", buffer); }
 
             } else {
 
-                printf("Readable socket : %d\n", con->poll_fds[i].fd);
+
+                if(con->enable_debug_print) {
+                    printf("Readable socket : %d\n", con->poll_fds[i].fd);
+                }
 
                 // readable SOCKET
                 // We read as much data as we can
@@ -544,7 +573,11 @@ void tcp_connection_mainloop(TcpConnection* con,
         //  we don't need to touch the revent attributes,
         //  they are normally all set to POLLIN
         if (con->need_compress_poll_arr) {
-            printf("Compress polls sockets array.\n");
+
+            if(con->enable_debug_print) {
+                printf("Compress polls sockets array.\n");
+            }
+
             con->need_compress_poll_arr = false;
             compress_poll_socket_array(con, current_nb_poll_socks);
         }
@@ -598,7 +631,11 @@ void tcp_connection_message_send(TcpConnection* con, SOCKET sock,
                                  Message* msg)
 {
     int bytes_sent = send(sock, msg, sizeof(*msg), 0);
-    printf("%d bytes sent!\n", bytes_sent);
+
+    if(con->enable_debug_print) {
+        printf("%d bytes sent!\n", bytes_sent);
+    }
+    
     if (bytes_sent == -1) {
         perror("send");
         con->end_connection = true;
