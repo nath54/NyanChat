@@ -22,29 +22,26 @@
 
 
 // Find the next free slots of the msg_waiting_ack
-int find_next_msg_id(ClientState* cstate){
+int find_next_msg_id(ClientState* cstate)
+{
     size_t first_free = 0;
-    if (cstate->nb_msg_waiting_ack == cstate->tot_msg_waiting_ack){
+    if (cstate->nb_msg_waiting_ack == cstate->tot_msg_waiting_ack) {
         first_free = cstate->tot_msg_waiting_ack;
         cstate->tot_msg_waiting_ack *= 2;
-        cstate->msg_waiting_ack = realloc(
-                cstate->msg_waiting_ack,
-                sizeof(Message)*cstate->tot_msg_waiting_ack
-        );
-        if (cstate->msg_waiting_ack == NULL){
+        cstate->msg_waiting_ack = realloc(cstate->msg_waiting_ack,
+                                  sizeof(Message)*cstate->tot_msg_waiting_ack);
+        if (cstate->msg_waiting_ack == NULL) {
             fprintf(stderr, "Erreur Realloc!\n");
             exit(EXIT_FAILURE);
         }
         //
-        for (size_t i = first_free; i<cstate->tot_msg_waiting_ack; i++){
-            cstate->msg_waiting_ack[i].msg_type = MSG_NULL;
-        }
+        for (size_t i = first_free; i<cstate->tot_msg_waiting_ack; i++)
+            { cstate->msg_waiting_ack[i].msg_type = MSG_NULL; }
     }
     //
     for (size_t i=first_free; i<cstate->tot_msg_waiting_ack; i++){
-        if(cstate->msg_waiting_ack[i].msg_type == MSG_NULL){
-            return i;
-        }
+        if(cstate->msg_waiting_ack[i].msg_type == MSG_NULL)
+            { return i; }
     }
     //
     fprintf(stderr, "Erreur programme, panic!\n");
@@ -62,12 +59,9 @@ void client_send_message(TcpConnection* con,
 
     cstate->msg_waiting_ack[id_new_msg].msg_type = MSG_STD_CLIENT_SERVER;
     cstate->msg_waiting_ack[id_new_msg].msg_id = id_new_msg;
-    strcpy(cstate->msg_waiting_ack[id_new_msg].src_pseudo,
-                                                cstate->pseudo);
-    cstate->msg_waiting_ack[id_new_msg].dst_flag = 
-                                                cstate->type_current_dest;
-    strcpy(cstate->msg_waiting_ack[id_new_msg].dst,
-                                                cstate->destination);
+    strcpy(cstate->msg_waiting_ack[id_new_msg].src_pseudo, cstate->pseudo);
+    cstate->msg_waiting_ack[id_new_msg].dst_flag = cstate->type_current_dest;
+    strcpy(cstate->msg_waiting_ack[id_new_msg].dst, cstate->destination);
     cstate->msg_waiting_ack[id_new_msg].proxy_client_socket = MSG_NULL;
     strcpy(cstate->msg_waiting_ack[id_new_msg].msg, msg);
     cstate->msg_waiting_ack[id_new_msg].msg_length = msg_len;
@@ -85,7 +79,8 @@ void client_send_message(TcpConnection* con,
 
 void on_msg_client(TcpConnection* con, SOCKET sock, 
                    Message* msg, size_t msg_len,
-                   void* custom_args){
+                   void* custom_args)
+{
     (void)con;
     (void)sock;
     (void)msg_len;
@@ -94,7 +89,7 @@ void on_msg_client(TcpConnection* con, SOCKET sock,
     
     // printf("Message received: %s\n", msg->msg);
 
-    if(cstate->waiting_pseudo_confirmation){
+    if (cstate->waiting_pseudo_confirmation) {
         // We check that we have either:
         //   - an error -> unusable pseudo
         //   - an encoded message from the server
@@ -108,7 +103,7 @@ void on_msg_client(TcpConnection* con, SOCKET sock,
         CHKN( strcat(path_code_pseudo, cstate->pseudo) );
 
         // Error gestion
-        if(msg->msg_type == MSG_ERROR){
+        if (msg->msg_type == MSG_ERROR) {
             // This pseudonym is not usable, so the user must be informed
             // and asked to enter another one.
             // The connection code files will also need to be deleted.
@@ -129,11 +124,9 @@ void on_msg_client(TcpConnection* con, SOCKET sock,
             // Test bad ACK
             if(msg->msg_id >= 0 &&
                (size_t)msg->msg_id < cstate->nb_msg_waiting_ack &&
-               cstate->msg_waiting_ack[msg->msg_id].msg_type != MSG_NULL
-            ){
+               cstate->msg_waiting_ack[msg->msg_id].msg_type != MSG_NULL)
                 // We clean the waiting message
-                init_empty_message(&(cstate->msg_waiting_ack[msg->msg_id]));
-            }
+                { init_empty_message(&(cstate->msg_waiting_ack[msg->msg_id])); }
         }
         else if(msg->msg_type == MSG_WELL_CONNECTED){
             cstate->connected = true;
@@ -141,12 +134,10 @@ void on_msg_client(TcpConnection* con, SOCKET sock,
             printf("Bien connecté au serveur!\n");
 
             // TODO: récupérer les messages des salons, etc...
-        }
-        else{
+        } else {
             // We do nothing, we are not supposed to get here
         }
-    }
-    else if(cstate->connected){
+    } else if(cstate->connected) {
         // We are well connected, so we can receive normally the messages
 
         switch (msg->msg_type)
@@ -164,8 +155,8 @@ void on_msg_client(TcpConnection* con, SOCKET sock,
                 // Test bad ACK
                 if(msg->msg_id < 0 ||
                    (size_t)msg->msg_id > cstate->nb_msg_waiting_ack ||
-                   cstate->msg_waiting_ack[msg->msg_id].msg_type == MSG_NULL
-                ){
+                   cstate->msg_waiting_ack[msg->msg_id].msg_type == MSG_NULL)
+                {
                     fprintf(stderr, "\033[31mError, "
                             "bad negative ack from server\033[m\n");
                     return;
@@ -179,8 +170,8 @@ void on_msg_client(TcpConnection* con, SOCKET sock,
                 // Test bad ACK
                 if(msg->msg_id < 0 ||
                    (size_t)msg->msg_id > cstate->nb_msg_waiting_ack ||
-                   cstate->msg_waiting_ack[msg->msg_id].msg_type == MSG_NULL
-                ){
+                   cstate->msg_waiting_ack[msg->msg_id].msg_type == MSG_NULL)
+                {
                     fprintf(stderr, "\033[31mError, "
                             "bad negative ack from server\033[m\n");
                     return;
@@ -204,12 +195,12 @@ void on_stdin_client(TcpConnection* con,
 {
     ClientState* cstate = custom_args;
 
-    if (strlen(cstate->pseudo) == 0){
+    if (strlen(cstate->pseudo) == 0) {
         // No nickname, not connected, so either:
         //  - waiting for user input for the nickname
         //  - waiting for the server to confirm the nickname (nothing to do)
 
-        if (!cstate->waiting_pseudo_confirmation){
+        if (!cstate->waiting_pseudo_confirmation) {
             // We do not wait for the server, we wait for user input
             // msg is supposed to contain the nickname requested by the client
 
@@ -217,12 +208,11 @@ void on_stdin_client(TcpConnection* con,
             //  we send a nickname request to the server
 
 
-            if (msg_len < MIN_NAME_LENGTH){
+            if (msg_len < MIN_NAME_LENGTH) {
                 printf("Pseudo trop court, "
                        "doit avoir une taille entre 4 et 64 !\n"
                        "\nEntrez votre pseudo > ");
-            }
-            else {
+            } else {
                 // Registration (temporary or not) of the pseudo
                 strcpy(cstate->pseudo, msg);
 
@@ -251,15 +241,14 @@ void on_stdin_client(TcpConnection* con,
                     fwrite(cstate->connection_code,
                            sizeof(char), CODE_LENGTH, fcode);
                     CHK( fclose(fcode) );
-                }
-                else{
+                } else {
                     // Need to load the code
                     size_t code_length;
                     CHK( read_file(path_code_pseudo,
                                    &(cstate->connection_code),
                                    &code_length) );
                     //
-                    if(code_length != CODE_LENGTH){
+                    if (code_length != CODE_LENGTH) {
                         fprintf(stderr,
                                 "Error: code length error : %ld != %d!\n",
                                 code_length, CODE_LENGTH);
@@ -283,11 +272,9 @@ void on_stdin_client(TcpConnection* con,
             }
         }
     }
-    else if (cstate->connected){
+    else if (cstate->connected)
         // Connected right, messages can be sended normaly
-        client_send_message(con, cstate, msg, msg_len);
-    }
-
+        { client_send_message(con, cstate, msg, msg_len); }
 }
 
 
@@ -315,9 +302,8 @@ void init_client_state(ClientState* cstate){
                     cstate->tot_msg_waiting_ack,
                     sizeof(Message)) );
     //
-    for (size_t i=0; i<cstate->tot_msg_waiting_ack; i++){
-        cstate->msg_waiting_ack[i].msg_type = -1;
-    }
+    for (size_t i=0; i<cstate->tot_msg_waiting_ack; i++)
+        { cstate->msg_waiting_ack[i].msg_type = -1; }
 
     
     // Init connected_clients
@@ -327,9 +313,8 @@ void init_client_state(ClientState* cstate){
                 cstate->tot_connected_clients,
                 sizeof(ConClient)) );
     //
-    for (size_t i=0; i<cstate->tot_connected_clients; i++){
-        CHKN( memset(cstate->connected_clients[i].pseudo, '\0', MAX_NAME_LENGTH) );
-    }
+    for (size_t i=0; i<cstate->tot_connected_clients; i++)
+        { CHKN( memset(cstate->connected_clients[i].pseudo, '\0', MAX_NAME_LENGTH) ); }
 
     // Init channels
     cstate->tot_channels = 10;
@@ -338,9 +323,8 @@ void init_client_state(ClientState* cstate){
                 cstate->tot_channels,
                 sizeof(Channel)) );
     //
-    for (size_t i=0; i<cstate->tot_channels; i++){
-        CHKN( memset(cstate->channels[i].name, '\0', MAX_NAME_LENGTH) );
-    }
+    for (size_t i=0; i<cstate->tot_channels; i++)
+        { CHKN( memset(cstate->channels[i].name, '\0', MAX_NAME_LENGTH) ); }
 
     //
     cstate->user_focus = FOCUS_INPUT;
@@ -363,18 +347,17 @@ void init_client_state(ClientState* cstate){
 }
 
 
-void free_client_state(ClientState* client_state){
-    free(client_state->msg_waiting_ack);
-}
+void free_client_state(ClientState* client_state)
+    { free(client_state->msg_waiting_ack); }
 
 
-int main(int argc, char* argv[]) {
-    
+int main(int argc, char* argv[])
+{
     ClientState client_state;
     TcpConnection con;
 
     // Check arguments
-    if (argc != 3){
+    if (argc != 3) {
         printf("Usage: %s ip_proxy port_proxy\n", argv[0]);
         exit(EXIT_FAILURE);
     }
@@ -382,7 +365,7 @@ int main(int argc, char* argv[]) {
     char* ip_proxy = argv[1];
     int port_proxy = atoi(argv[2]);
 
-    if (port_proxy < 5000 || port_proxy > 65000){
+    if (port_proxy < 5000 || port_proxy > 65000) {
         fprintf(stderr, "Bad value of port_proxy : %d !\n", port_proxy);
         exit(EXIT_FAILURE);
     }

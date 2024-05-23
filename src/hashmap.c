@@ -116,8 +116,7 @@ int hashmap_insert(Hashmap* h, char* key, uint value)
         if (id_tombstone >= 0) { // Replace the tombstone.
             h->items[id_tombstone].key = key;
             h->items[id_tombstone].value = value;
-        }
-        else { // Full the empty case.
+        } else { // Full the empty case.
             h->items[current_pos].key = key;
             h->items[current_pos].value = value;
         }
@@ -157,7 +156,7 @@ Hashmap *read_hashmap_from_file(FILE *file)
     Hashmap *h = (Hashmap*) malloc(sizeof(Hashmap));
     if (!fread(&h->size, sizeof(h->size), 1, file)
         || !fread(&h->count, sizeof(h->count), 1, file))
-        goto read_error;
+        { goto read_error; }
         
     h->items = (Item*)calloc(h->size, sizeof(Item));
     if (!fread(h->items, sizeof(Item), h->size, file)) {

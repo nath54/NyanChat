@@ -158,7 +158,6 @@ void* gestion_clients(void* arg)
 }
 
 
-
 // TODO: résoudre le problème de nb_poll_fds qui ne s'incrémente pas
 
 int main(int argc, char* argv[])
