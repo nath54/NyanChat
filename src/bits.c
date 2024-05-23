@@ -21,7 +21,9 @@ void print_word(int k, uint16_t m)
 int card_word_bits(uint16_t m)
 {
     int count = 0;
-    for (int i = 0; i < 16; i++)
-        count += get_nth_bit(i, m);
+    while (m > 0) {
+        count += m & 1;
+        m >>= 1;
+    }
     return count;
 }

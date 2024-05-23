@@ -3,25 +3,6 @@
 #include "useful_lib.h"
 #include "bits.h"
 
-int words_hamming_distance(uint16_t a, uint16_t b)
-{
-    int dist = 0;
-    for (int i = 0; i < 16; i++) {
-        if (get_nth_bit(i, a) != get_nth_bit(i, b))
-            dist++;
-    }
-    return dist;
-}
-
-int code_hamming_distance(uint16_t **g)
-{
-    (void)g;
-
-    int dist = 0;
-    // TODO Calculate the minimal distance between two words
-    // using words_hamming_distance
-    return dist;
-}
 
 /*
 Renvoie un mot du code sur 8 + c bits (c étant le degré de votre polynôme),
@@ -30,10 +11,31 @@ Le mot à encoder (sur 8 bits) sera placé sur les premiers bits de la variable 
 par 8 bits de padding avant d’être fourni en argument à la fonction.
 Vous privilégierez des opérateurs bit à bit en évitant les opérations arithmétiques.
 */
-uint16_t encode_G(uint16_t m)
+uint16_t encode_G(uint16_t **g, int l, uint16_t m)
 {
     // TODO: compléter cette fonction
-    return m;
+    uint16_t coef, res = 0;
+    for (int i = 0; i < l; i++) {
+        coef = 0;
+        for (int j = 0; j < 8; j++)
+            { coef += g[j][i] * get_nth_bit(l-j-1, m); }
+        coef %= 2;
+        res += (coef << (l-i-1));
+    }
+    return res;
+}
+
+int code_hamming_distance(uint16_t **g, int l)
+{
+    uint16_t test;
+    int min_weight = 8, nb_bits = 0;
+    for (int i = 0; i < 256; i++) {
+        test = encode_G(g, l, i);
+        nb_bits = card_word_bits(test);
+        if (nb_bits < min_weight)
+            { min_weight = nb_bits; }
+    }
+    return min_weight;
 }
 
 // Function to detect an error in the message
