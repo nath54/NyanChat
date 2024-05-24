@@ -12,7 +12,7 @@ Le mot à encoder (sur 8 bits) sera placé sur les premiers bits de la variable 
 par 8 bits de padding avant d’être fourni en argument à la fonction.
 Vous privilégierez des opérateurs bit à bit en évitant les opérations arithmétiques.
 */
-uint16_t encode(uint16_t** g, uint16_t m)
+uint16_t encode_G(uint16_t** g, uint16_t m)
 {
     for (int j = 8; j < 16; j++) {
         uint16_t parity_bit = 0;
@@ -29,7 +29,7 @@ int code_hamming_distance(uint16_t **g)
 {
     int distance = 8;
     for (int i = 1; i < 256; i++) {
-        uint16_t word = encode(g, n, i << 8);
+        uint16_t word = encode_G(g, i << 8);
         int w = weight(word);
         if (w < distance)
             distance = w;
