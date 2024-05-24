@@ -4,6 +4,9 @@
 #include "bits.h"
 
 int c = 8;  // Nombre de bits de parité
+int n = 16; // Taille du mot de code
+int k = 8;  // Taille du mot d'information
+
 // Matrice génératrice de X^8 + X^7 + X^5 + X^4 + X^3 + 1
 uint16_t G[8][16] = {
     {1,0,0,0,0,0,0,0,0,1,1,1,0,1,1,0},
@@ -86,11 +89,13 @@ uint16_t shift_register(uint16_t p, uint16_t x)
 void create_generator_matrix(uint16_t G[8][16], uint16_t p)
 {
     uint16_t remainder;
-    for (int i = 0; i < 8; i++) {
-        remainder = shift_register(p, 1 << (15-i));
-        for (int j = 0; j < 8; j++) {
+    for (int i = 0; i < k; i++) {
+        remainder = shift_register(p, 1 << (n-1-i));
+        for (int j = 0; j < k; j++) {
             G[i][j] = (i == j) ? 1 : 0; // Identity matrix
-            G[i][j+8] = get_nth_bit(j, remainder);
+        }
+        for (int j = 0; j < c; j++) {
+            G[i][j+k] = get_nth_bit(j, remainder);
         }
     }
 }
