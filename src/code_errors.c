@@ -86,11 +86,11 @@ uint16_t shift_register(uint16_t p, uint16_t m)
 void create_generator_matrix(uint16_t **g, uint16_t p)
 {
     uint16_t remainder;
-    for (int i = 8; i < 16; i++) {
-        remainder = shift_register(p, i << 8);
-        g[i-8][i-8] = 1; // Identity matrix
-        for (int j = 8; j < 16; j++)
-            { g[i-8][j] = get_nth_bit(j-8, remainder); }
+    for (int i = 0; i < 8; i++) {
+        g[i][i] = 1; // Identity matrix
+        remainder = shift_register(p, (i+8) << 8);
+        for (int j = 0; j < 8; j++)
+            { g[i][j+8] = get_nth_bit(j, remainder); }
     }
 }
 
