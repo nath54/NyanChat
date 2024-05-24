@@ -15,6 +15,7 @@ void test_code_insert_error(void)
     BIT_ERROR_RATE = 0.01;
     code_insert_error(&msg);
     TEST_ASSERT_EQUAL_STRING("ThiS is a test.", msg.msg);
+    TEST_ASSERT_EQUAL_STRING("ThiS is a test.", msg.msg);
     // test BER 5%
     BIT_ERROR_RATE = 0.1;
     code_insert_error(&msg);
@@ -50,10 +51,20 @@ void test_code_hamming_distance(void)
     TEST_ASSERT_EQUAL_INT(4, d);
 }
 
+
+void test_lfsr(void)
+{
+    uint16_t P = 11;
+    uint16_t x = 229;
+    uint16_t encoded = rem_lfsr(P, x);
+    TEST_ASSERT_EQUAL(1, encoded);
+}
+
 int main(void)
 {
     UNITY_BEGIN();
     RUN_TEST(test_code_insert_error);
+    RUN_TEST(test_lfsr);
     RUN_TEST(test_code_hamming_distance);
     RUN_TEST(test_encode);
     return UNITY_END();

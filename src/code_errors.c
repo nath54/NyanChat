@@ -80,13 +80,30 @@ uint16_t encode(uint16_t G[K][N], uint16_t m)
     return m;
 }
 
+uint16_t reverse_word(uint16_t word)
+{
+    uint16_t reversed = 0;
+    for (int i = 0; i < 16; i++) {
+        reversed = reversed << 1;
+        reversed |= word & 1;
+        word = word >> 1;
+    }
+    while ((reversed & 1) ^ 1)
+        reversed = reversed >> 1;
+    return reversed;
+}
+
 uint16_t rem_lfsr(uint16_t P, uint16_t x)
 {
+    x = x >> 1;
+    x = reverse_word(x);
+    x = x >> 1;
+    P = reverse_word(P);
     for (int i = 0; i < K; i++) {
-        x = x >> 1;
         x ^= P;
+        x = x >> 1;
     }
-    return x;
+    return reverse_word(x);
 }
 
 uint16_t encode_lfsr(uint16_t P, char m)
