@@ -71,7 +71,7 @@ uint16_t encode(uint16_t G[K][N], uint16_t m)
 {
     for (int j = K; j < N; j++) {
         uint16_t parity_bit = 0;
-        for (int i = 0; i < C; i++)
+        for (int i = 0; i < K; i++)
             parity_bit ^= G[i][j] & get_nth_bit(i, m);
 
         if (parity_bit)
@@ -96,9 +96,10 @@ uint16_t encode_lfsr(uint16_t P, char m)
 
 int code_hamming_distance(uint16_t P)
 {
+    (void)P;
     int distance = K;
     for (int i = 1; i < Nk; i++) {
-        uint16_t word = encode_lfsr(P, i);
+        uint16_t word = encode(G, i << C);
         int w = weight(word);
         if (w < distance)
             distance = w;
@@ -137,14 +138,14 @@ int code_correct_error(Message* msg)
 
 void code_insert_error(Message* msg)
 {
-    uint16_t byte;
+    uint16_t word;
     for (uint32_t i = 0; i < msg->msg_length; i++) {
-        // Cast the byte to (possibly) add errors to it
-        byte = (uint16_t)msg->msg[i] << C;
+        // Cast the word to (possibly) add errors to it
+        word = (uint16_t)msg->msg[i] << C;
         for (int b = 0; b < N; b++) {
             if (((double)rand() / RAND_MAX) < BIT_ERROR_RATE)
-                byte = chg_nth_bit(b, byte);  // Add an error to the message
+                word = chg_nth_bit(b, word);  // Add an error to the message
         }
-        msg->msg[i] = byte >> C;
+        msg->msg[i] = word >> C;
     }
 }

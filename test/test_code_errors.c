@@ -14,16 +14,47 @@ void test_code_insert_error(void)
     // test BER 1%
     BIT_ERROR_RATE = 0.01;
     code_insert_error(&msg);
-    TEST_ASSERT_EQUAL_STRING("Thi3 is a test.", msg.msg);
+    TEST_ASSERT_EQUAL_STRING("ThiS is a test.", msg.msg);
     // test BER 5%
     BIT_ERROR_RATE = 0.1;
     code_insert_error(&msg);
-    TEST_ASSERT_EQUAL_STRING("th\xC9# \xC9s a dert\x0F", msg.msg);
+    TEST_ASSERT_EQUAL_STRING("Dh9[ 9s a |es\xF4>", msg.msg);
+}
+
+void test_add_control_bits(void)
+{
+
+}
+
+void test_encode(void)
+{
+    // Matrice génératrice de P
+    uint16_t G[K][N] = {
+        {1,0,0,0,0,0,0,0,0,1,1,1,0,1,1,0},
+        {0,1,0,0,0,0,0,0,0,0,1,1,1,0,1,1},
+        {0,0,1,0,0,0,0,0,1,1,0,0,0,0,0,1},
+        {0,0,0,1,0,0,0,0,1,0,1,1,1,1,0,0},
+        {0,0,0,0,1,0,0,0,0,1,0,1,1,1,1,0},
+        {0,0,0,0,0,1,0,0,0,0,1,0,1,1,1,1},
+        {0,0,0,0,0,0,1,0,1,1,0,0,1,0,1,1},
+        {0,0,0,0,0,0,0,1,1,0,1,1,1,0,0,1}
+    };
+    uint16_t word = encode(G, 0b0000000100000000);
+    TEST_ASSERT_EQUAL_INT16(0b0000000110111001, word);
+}
+
+void test_code_hamming_distance(void)
+{
+    uint16_t P = 0b110111001;
+    int d = code_hamming_distance(P);
+    TEST_ASSERT_EQUAL_INT(4, d);
 }
 
 int main(void)
 {
     UNITY_BEGIN();
     RUN_TEST(test_code_insert_error);
+    RUN_TEST(test_code_hamming_distance);
+    RUN_TEST(test_encode);
     return UNITY_END();
 }
