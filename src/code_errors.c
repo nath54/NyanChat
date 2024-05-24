@@ -3,11 +3,11 @@
 #include "useful_lib.h"
 #include "bits.h"
 
-int c = 8;  // Number of parity bits
-int n = 16; // Length of a code word
-int k = 8;  // Length of a message word
+#define n 16 // Taille du mot de code
+#define k 8  // Taille du mot d'information
+#define c 8  // Nombre de bits de parité
 
-// Generator matrix of X^8 + X^7 + X^5 + X^4 + X^3 + 1
+// Matrice génératrice de X^8 + X^7 + X^5 + X^4 + X^3 + 1
 uint16_t G[8][16] = {
     {1,0,0,0,0,0,0,0,0,1,1,1,0,1,1,0},
     {0,1,0,0,0,0,0,0,0,0,1,1,1,0,1,1},
@@ -18,9 +18,8 @@ uint16_t G[8][16] = {
     {0,0,0,0,0,0,1,0,1,1,0,0,1,0,1,1},
     {0,0,0,0,0,0,0,1,1,0,1,1,1,0,0,1}
 };
-
-// Test matrix
-uint16_t H[8][16] = {
+// Matrice de test
+uint16_t H[k][n] = {
     {0,0,1,1,0,0,1,1,1,0,0,0,0,0,0,0},
     {1,0,1,0,1,0,1,0,0,1,0,0,0,0,0,0},
     {1,1,0,1,0,1,0,1,0,0,1,0,0,0,0,0},
@@ -31,9 +30,8 @@ uint16_t H[8][16] = {
     {0,1,1,0,0,1,1,1,0,0,0,0,0,0,0,1}
 };
 
-// Matrix associating syndromes to errors
-uint16_t S[256] = { 0b11111111 };
-
+// Matrice associant les syndromes aux erreurs
+uint16_t S[1 << c] = { 0b11111111 };
 
 /*
 Renvoie un mot du code sur 8 + c bits (c étant le degré de votre polynôme),
@@ -42,11 +40,11 @@ Le mot à encoder (sur 8 bits) sera placé sur les premiers bits de la variable 
 par 8 bits de padding avant d’être fourni en argument à la fonction.
 Vous privilégierez des opérateurs bit à bit en évitant les opérations arithmétiques.
 */
-uint16_t encode(uint16_t G[8][16], uint16_t m)
+uint16_t encode(uint16_t G[k][n], uint16_t m)
 {
-    for (int j = 8; j < 16; j++) {
+    for (int j = k; j < n; j++) {
         uint16_t parity_bit = 0;
-        for (int i = 0; i < 8; i++)
+        for (int i = 0; i < c; i++)
             parity_bit ^= G[i][j] & get_nth_bit(i, m);
 
         if (parity_bit)
@@ -56,12 +54,12 @@ uint16_t encode(uint16_t G[8][16], uint16_t m)
 }
 
 
-int code_hamming_distance(uint16_t G[8][16])
+int code_hamming_distance(uint16_t G[k][n])
 {
-    int distance = 8;
-    int N = 1 << 8;
+    int distance = k;
+    int N = 1 << k;
     for (int i = 1; i < N; i++) {
-        uint16_t word = encode(G, i << 8);
+        uint16_t word = encode(G, i << k);
         int w = weight(word);
         if (w < distance)
             distance = w;
@@ -69,6 +67,15 @@ int code_hamming_distance(uint16_t G[8][16])
     return distance;
 }
 
+void create_check_matrix(uint16_t G[k][n], uint16_t H[k][n])
+{
+    for (int i = 0; i < 8; i++) {
+        for (int j = 0; j < 8; j++) {
+            H[i][j] = G[j][i+8];  // A transpose matrix
+            H[i][j+8] = (i == j) ? 1 : 0;  // Identity matrix
+        }
+    }
+}
 
 uint16_t shift_register(uint16_t p, uint16_t x)
 {
@@ -94,19 +101,14 @@ void create_generator_matrix(uint16_t G[8][16], uint16_t p)
     }
 }
 
-
-void create_check_matrix(uint16_t G[8][16], uint16_t H[8][16])
+void create_syndrome_array(uint16_t p, uint16_t S[256])
 {
-    for (int i = 0; i < 8; i++) {
-        for (int j = 0; j < 8; j++) {
-            // A transpose matrix
-            H[i][j] = G[j][i+8];
-            // Identity matrix
-            H[i][j+8] = (i == j) ? 1 : 0;
-        }
+    int N = 1 << 16;
+    for (int e = 0; e < N; e++) {
+        uint8_t syndrome = shift_register(p, e);
+        S[syndrome] &= e;
     }
 }
-
 
 // Function to detect an error in the message
 // Returns 0 if no errors are detected,
@@ -137,7 +139,7 @@ int code_correct_error(Message* msg, uint16_t err)
 void code_insert_error(Message* msg)
 {
     uint16_t word;
-    for (uint32_t c = 0; c < msg->msg_length; c++) {
+    for (uint32_t i = 0; i < msg->msg_length; i++) {
         // Cast the word to (possibly) add errors to it
         word = (uint16_t)(msg->msg[c]) << 8;
         for (int b = 0; b < 8; b++) {
@@ -145,7 +147,7 @@ void code_insert_error(Message* msg)
                 // Add an error to the message
                 word = chg_nth_bit(b, word);
         }
-        msg->msg[c] = (char)(word >> 8);
+        msg->msg[i] = (char)(word >> 8);
     }
 }
 

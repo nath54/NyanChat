@@ -27,8 +27,7 @@ uint16_t shift_register(uint16_t p, uint16_t x);
 // Fill the generator matrix `G` from the polynomial `p`.
 void create_generator_matrix(uint16_t G[8][16], uint16_t p);
 
-// Fill the check matrix `H` from the generator matrix `G`.
-void create_check_matrix(uint16_t G[8][16], uint16_t H[8][16]);
+void create_syndrome_array(uint16_t p, uint16_t S[256]);
 
 // Function to detect an error in the message
 // Returns 0 if no errors are detected,
