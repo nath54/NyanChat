@@ -26,6 +26,10 @@ int code_hamming_distance(uint16_t **g);
  */
 void create_check_matrix(uint16_t **g, uint16_t **h);
 
+uint16_t shift_register(uint16_t p, uint16_t m);
+
+void create_generator_matrix(uint16_t **g, uint16_t p);
+
 // Function to detect an error in the message
 // Returns 0 if no errors are detected,
 // otherwise a positive value that can for example indicate whether or not it is possible to
