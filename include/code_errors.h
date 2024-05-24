@@ -49,5 +49,5 @@ int code_correct_error(Message* msg);
  * 
  * @param msg The message to add noise to.
  */
-void code_add_errors_to_msg(Message* msg);
+void code_insert_error(Message* msg);
 
