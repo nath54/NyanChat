@@ -137,7 +137,6 @@ int code_correct_error(Message* msg)
 
 void code_insert_error(Message* msg)
 {
-    srand(msg->msg_length);
     uint16_t byte;
     for (uint32_t i = 0; i < msg->msg_length; i++) {
         // Cast the byte to (possibly) add errors to it
