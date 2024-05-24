@@ -80,10 +80,11 @@ void create_check_matrix(uint16_t G[8][16], uint16_t H[8][16])
 
 uint16_t shift_register(uint16_t p, uint16_t x)
 {
-    uint16_t remainder = 0;
-    (void)p;
-    (void)x;
-    return remainder;
+    for (int i = 0; i < c; i++) {
+        x = x >> 1;
+        x ^= p;
+    }
+    return x;
 }
 
 void create_generator_matrix(uint16_t G[8][16], uint16_t p)
