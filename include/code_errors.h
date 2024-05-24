@@ -4,31 +4,30 @@
 #include "tcp_connection.h"
 
 
-#define BIT_ERROR_RATE 10    // In /1000, the rate of creating errors
+#define BIT_ERROR_RATE 10    // In per thousand, the rate of creating errors
 
 
 // Encoding function
 uint16_t encode(uint16_t G[8][16], uint16_t m);
 
 /**
- * @brief Calculate the Hamming distance of the polynomial code
+ * @brief Calculate the Hamming distance of the polynomial code.
  * 
  * @param g the generator matrix representing the polynomial code
- * @return `int` the minimal distance between words 0 and any other word
+ * @return `int` the minimal distance between word 0 and any other word.
  */
 int code_hamming_distance(uint16_t G[8][16]);
 
-/**
- * @brief Fill the check matrix from the generator matrix
- * 
- * @param g the generator matrix
- * @param h the check matrix
- */
-void create_check_matrix(uint16_t G[8][16], uint16_t H[8][16]);
-
+/*
+Calculate the remainder of the division of the word `x`
+by the polynomial `p` using the shift register method.
+*/
 uint16_t shift_register(uint16_t p, uint16_t x);
 
+// Fill the generator matrix `G` from the polynomial `p`.
 void create_generator_matrix(uint16_t G[8][16], uint16_t p);
+
+void create_syndrome_array(uint16_t p, uint16_t S[256]);
 
 // Function to detect an error in the message
 // Returns 0 if no errors are detected,
@@ -44,10 +43,10 @@ int code_correct_error(Message* msg, uint16_t err);
 
 
 /**
- * @brief Add noises to a message.
+ * @brief Add errors to a message.
  * @note This function is called by the proxy.
  * 
- * @param msg The message to add noise to.
+ * @param msg The message to add noise into.
  */
 void code_insert_error(Message* msg);
 
