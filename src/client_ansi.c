@@ -62,8 +62,213 @@ void on_received_message_default_channel(ClientState* cstate, Message* msg){
     ------------------------ Side Display Functions ------------------------
 */
 
+#define MSG_HOVER_COLOR GREEN_YELLOW
+
+// Prints a message, visible only on a certain boundary limit,
+//   and returns the y coordinate of the last message printed line
+int print_message(ClientState* cstate, Message* msg,
+                   int x, int y,
+                   int max_x, int min_y_show, int max_y_show,
+                   bool hover
+){
+    //
+    int tot_width = max_x - x;
+
+    //
+    set_cursor_position(x, y);
+
+    // Display the header Message borders
+    if(hover){
+        set_cl_fg(MSG_HOVER_COLOR);
+        set_bold();
+    }
+    if( y >= min_y_show && y <= max_y_show )
+        { print_horizontal_line('-', x, x+5, y); }
+    
+    if( y+1 >= min_y_show && y+1 <= max_y_show ){ 
+        set_cursor_position(x, y+1);
+        printf("|");
+    }
+
+    if( y+2 >= min_y_show && y+2 <= max_y_show )
+        { print_horizontal_line('-', x, x+3, y+2); }
+    
+    if(hover)
+        { reset_ansi(); }
+    
+    // Display the header Message
+    if( y+1 >= min_y_show && y+1 <= max_y_show ){
+        int pseudo_len = strlen(msg->src_pseudo);
+        if(msg->msg_type == MSG_SERVER_CLIENT && pseudo_len > 0){
+            if(strcmp(cstate->pseudo, msg->src_pseudo) == 0){
+                // -- its a message that this client has sent --
+
+                set_cursor_position(x+2, y+1);
+                set_cl_fg(DARK_BLUE);
+                set_bold();
+                printf("You");
+                reset_ansi();
+
+            }
+            else{
+                // -- its a message from another client --
+
+                set_cursor_position(x+2, y+1);
+
+                int xplus = strlen("| From ");
+                
+                // Truncate the pseudo if too long
+                if(pseudo_len > tot_width - xplus){
+                    char tmp = msg->src_pseudo[tot_width - xplus - 2];
+                    msg->src_pseudo[tot_width - xplus - 2] = '\0';
+                    printf("From %s..", msg->src_pseudo);
+                    msg->src_pseudo[tot_width - xplus - 2] = tmp;
+                }
+                else{
+                    printf("From %s", msg->src_pseudo);
+                }
+            }
+
+            // TODO: display message date & time
+        }
+    }
+
+    // Display the message content
+    int cy = y + 3;
+    int i = 0;
+    while((int)msg->msg_length - i > tot_width - 3){
+
+        if( cy >= min_y_show && cy <= max_y_show ){ 
+            int p_end = i+tot_width-3;
+            set_cursor_position(x, cy);
+
+            // Print the msg border decoration
+            if(hover){
+                set_cl_fg(MSG_HOVER_COLOR);
+                set_bold();
+            }
+            printf(">");
+            if(hover)
+                { reset_ansi(); }
+            
+            // Print the current line of the message
+            char tmp = msg->msg[p_end];
+            msg->msg[p_end] = '\0';
+            printf("%s", msg->msg + i);
+            msg->msg[p_end] = tmp;
+        }
+
+        i += tot_width;
+        cy += 1;
+    }
+    
+    // Print the last line of the message
+    if(msg->msg_length - i > 0){
+        set_cursor_position(x, cy);
+
+        // Print the msg border decoration
+        if(hover){
+            set_cl_fg(MSG_HOVER_COLOR);
+            set_bold();
+        }
+        printf(">");
+        if(hover)
+            { reset_ansi(); }
+        
+        // Print the current line of the message
+        printf("%s", msg->msg + i);
+    }
+
+    return cy - 1;
+}
 
 
+// Display the left panel: the messages of the current channel
+void display_left_panel(ClientState* cstate){
+    if(cstate->type_current_dest == MSG_FLAG_DEFAULT_CHANNEL){
+
+    }
+    else{
+        // TODO
+    }
+}
+
+
+// Display the top right panel: The current menu
+void display_top_right_panel(ClientState* cstate){
+
+    (void)cstate;
+
+    // TODO: display left / right arrow
+    // TODO: display menu name
+
+    // TODO
+}
+
+
+// Display the bottom right panel: The options of the current menu
+void display_bottom_right_panel(ClientState* cstate){
+
+    (void)cstate;
+
+    // TODO
+}
+
+
+// Display the input text with the cursor
+void display_input_text(ClientState* cstate, int x, int y, int max_x){
+
+    int ctx = max_x - x;
+
+    // Easy case: the input length is smaller than the input container
+    if (cstate->input_length <= ctx){
+        set_cursor_position(x, y);
+        printf(" %s", cstate->input);
+        cstate->cursor_x = x + cstate->input_cursor;
+        cstate->cursor_y = y;
+    }
+    // 
+    else{
+        int p_start;
+        int p_end;
+        int p_curs;
+
+        //
+        if(cstate->input_cursor <= ctx / 2){
+            p_start = 0;
+            p_end = ctx;
+            p_curs =cstate->input_cursor;
+        }
+        else if(cstate->input_cursor >= cstate->input_length - ctx/2){
+            p_start = cstate->input_length - ctx;
+            p_end = cstate->input_length;
+            p_curs = cstate->input_cursor - p_start;
+        }
+        else{
+            p_start = cstate->input_cursor - ctx/2;
+            p_end = cstate->input_length + ctx/2;
+            p_curs = cstate->input_cursor - p_start;
+        }
+
+        //
+        set_cursor_position(x, y);
+        char tmp = cstate->input[p_end];
+        cstate->input[p_end] = '\0';
+        printf("%s", cstate->input + p_start);
+        cstate->input[p_end] = tmp;
+
+        cstate->cursor_x = x + p_curs;
+        cstate->cursor_y = y;
+    }
+
+    // Display cursor
+    if (cstate->user_focus == FOCUS_INPUT) {
+        //
+        set_cursor_position(cstate->cursor_x, cstate->cursor_y);
+        show_cursor();
+    }
+
+}
 
 
 /*
@@ -164,8 +369,8 @@ void display_client_main_window(ClientState* cstate)
     if (cstate->user_focus == FOCUS_INPUT)
         { reset_ansi(); }
 
-    // TODO: display left / right arrow
-    // TODO: display menu name
+    //
+    display_top_right_panel(cstate);
 
     // Transition menus - right panel
     set_cursor_position(x_barriere_top+1, 8);
@@ -193,7 +398,8 @@ void display_client_main_window(ClientState* cstate)
         reset_ansi();
     }
 
-    // TODO: content of the right panel + scroll
+    //
+    display_bottom_right_panel(cstate);
 
     // Messages pannel
     if(cstate->user_focus == FOCUS_LEFT_PANEL)
@@ -205,9 +411,8 @@ void display_client_main_window(ClientState* cstate)
         reset_ansi();
     }
 
-
-    // TODO: content of the message panel + scroll
-
+    //
+    display_left_panel(cstate);
 
     // -- Bottom input --
     print_horizontal_line('#', 1, cstate->win_width-2, y_barriere_bottom);
@@ -223,23 +428,10 @@ void display_client_main_window(ClientState* cstate)
 
     set_cursor_position(3, cstate->win_height-2);
     printf(">");
-    if (cstate->input_length < cstate->win_width - 8)
-        { printf(" %s", cstate->input); }
 
-    // at the end, we set the cursor at the good input position, if input focus
-    if (cstate->user_focus == FOCUS_INPUT) {
-        if (cstate->input_length < cstate->win_width - 8)
-            { cstate->cursor_x = 6+cstate->input_cursor; }
-        else {
-            cstate->cursor_x = cstate->win_width - 6;
-            // TODO
-        }
-        cstate->cursor_y = cstate->win_height-2;
-        //
-        set_cursor_position(cstate->cursor_x, cstate->cursor_y);
-        show_cursor();
-    }
-
+    // at the end, we print the input and set the cursor at the good input position, if input focus
+    display_input_text(cstate, 5, cstate->win_height-2, cstate->win_width - 4);
+    
     force_buffer_prints();
 }
 
@@ -518,7 +710,6 @@ void on_stdin_client(TcpConnection* con,
                         cstate->input[cstate->input_length] = '\0';
                     }
                 }
-                // TODO
             }
         }
         else{
