@@ -29,13 +29,7 @@ uint16_t H[K][N] = {
 // Matrice associant les syndromes aux erreurs
 uint16_t S[Nc] = { 0b11111111 };
 
-/*
-Renvoie un mot du code sur 8 + c bits (c étant le degré de votre polynôme),
-rajoutant au mot m les bits de parité décrit par la matrice G dérivée de votre code polynomial.
-Le mot à encoder (sur 8 bits) sera placé sur les premiers bits de la variable m et complété
-par 8 bits de padding avant d’être fourni en argument à la fonction.
-Vous privilégierez des opérateurs bit à bit en évitant les opérations arithmétiques.
-*/
+
 uint16_t encode(uint16_t G[K][N], uint16_t m)
 {
     for (int j = K; j < N; j++) {
@@ -64,10 +58,11 @@ int code_hamming_distance(uint16_t G[K][N])
 
 void create_check_matrix(uint16_t G[K][N], uint16_t H[K][N])
 {
-    for (int i = 0; i < 8; i++) {
-        for (int j = 0; j < 8; j++) {
-            H[i][j] = G[j][i+8];  // A transpose matrix
-            H[i][j+8] = (i == j) ? 1 : 0;  // Identity matrix
+    for (int i = 0; i < C; i++) {
+        for (int j = 0; j < K; j++) {
+            H[i][j] = G[j][i+K];  // A transpose matrix
+            if (j < C)
+                H[i][j+K] = (i == j) ? 1 : 0;  // Identity matrix
         }
     }
 }
