@@ -298,27 +298,10 @@ void on_msg_received(TcpConnection* con, SOCKET sock,
             }
         }
 
-        // Error detection test
-        bool msg_bon = true;
-        uint16_t err = 0;
-        switch (code_detect_error(msg, &err))
-        {
-            case 0:  // No detected error
-                break;
-            
-            case 1:
-                if(code_correct_error(msg, err) != 0)
-                    msg_bon = false;
-                break;
-
-            default:
-                msg_bon = false;
-                break;
-        }
-
         // Acknowledgment sending
         Message ack;
-        if (msg_bon){
+        // Correct or detect errors 
+        if (code_correct_error(msg) == 0){
             // Positive acknowledgment: we received the message correctly
             gen_positive_ack_from_msg(msg, &ack);
 
@@ -358,9 +341,6 @@ void on_msg_received(TcpConnection* con, SOCKET sock,
                 // Error here
                 break;
         }
-
-    }
-    else{
 
     }
 }
