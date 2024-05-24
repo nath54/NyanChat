@@ -18,6 +18,14 @@ uint16_t encode_G(uint16_t **g, uint16_t m);
  */
 int code_hamming_distance(uint16_t **g);
 
+/**
+ * @brief Fill the check matrix from the generator matrix
+ * 
+ * @param g the generator matrix
+ * @param h the check matrix
+ */
+void create_check_matrix(uint16_t **g, uint16_t **h);
+
 // Function to detect an error in the message
 // Returns 0 if no errors are detected,
 // otherwise a positive value that can for example indicate whether or not it is possible to

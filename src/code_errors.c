@@ -37,6 +37,18 @@ int code_hamming_distance(uint16_t **g)
     return distance;
 }
 
+void create_check_matrix(uint16_t **g, uint16_t **h)
+{
+    for (int i = 0; i < 8; i++) {
+        for (int j = 0; j < 8; j++) {
+            // A transpose matrix
+            h[i][j] = g[j][i+8];
+            // Identity matrix
+            h[i][j+8] = (i == j) ? 1 : 0;
+        }
+    }
+}
+
 // Function to detect an error in the message
 // Returns 0 if no errors are detected,
 // otherwise a positive value that can for example indicate whether or not it is possible to
