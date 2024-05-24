@@ -4,8 +4,7 @@
 #include "tcp_connection.h"
 
 
-#define PROXY_ERROR_RATE 10   // In %, the rate of creating errors
-#define PROXY_MAX_ERROR_CREATED 4  // The maximum number of created errors
+#define BIT_ERROR_RATE 0.1    // In %, the rate of creating errors
 
 
 // Encoding function
@@ -37,7 +36,6 @@ int code_correct_error(Message* msg);
  * @note This function is called by the proxy.
  * 
  * @param msg The message to add noise to.
- * @param nb_errors The number of errors to add.
  */
-void code_add_errors_to_msg(Message* msg, int nb_errors);
+void code_add_errors_to_msg(Message* msg);
 

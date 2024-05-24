@@ -63,13 +63,18 @@ int code_correct_error(Message* msg)
 }
 
 
-void code_add_errors_to_msg(Message* msg, int nb_errors)
+void code_add_errors_to_msg(Message* msg)
 {
-    for (int i = 0; i < nb_errors; i++) {
-        // Choose a random word to change
-        int word = randint(msg->msg_length);
-        // Add an error to the message
-        msg->msg[word] = chg_nth_bit(randint(8), (uint16_t)(msg->msg[word] << 8));
+    uint16_t word;
+    for (uint32_t c = 0; c < msg->msg_length; c++) {
+        // Cast the word to (possibly) add errors to it
+        word = (uint16_t)(msg->msg[c]) << 8;
+        for (int b = 0; b < 8; b++) {
+            if (randint(100) < BIT_ERROR_RATE * 100)
+                // Add an error to the message
+                word = chg_nth_bit(b, word);
+        }
+        msg->msg[c] = (char)(word >> 8);
     }
 }
 

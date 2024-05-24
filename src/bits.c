@@ -3,19 +3,13 @@
 #include "bits.h"
 
 uint16_t set_nth_bit(int n, uint16_t m)
-{
-    return m | (1 << (16-n));
-}
+    { return m | (1 << (16-n)); }
 
 uint16_t get_nth_bit(int n, uint16_t m)
-{ 
-    return (m >> (16-n)) & 1;
-}
+    { return (m >> (16-n)) & 1; }
 
 uint16_t chg_nth_bit(int n, uint16_t m)
-{
-    return m ^ (1 << (16-n));
-}
+    { return m ^ (1 << (16-n)); }
 
 void print_word(int k, uint16_t m)
 {
