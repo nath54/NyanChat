@@ -4,7 +4,7 @@
 #include "tcp_connection.h"
 
 
-#define BIT_ERROR_RATE 0.1    // In %, the rate of creating errors
+#define BIT_ERROR_RATE 10    // In /1000, the rate of creating errors
 
 
 // Encoding function

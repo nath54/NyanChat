@@ -359,13 +359,26 @@ void display_left_panel(ClientState* cstate){
 
 // Display the top right panel: The current menu
 void display_top_right_panel(ClientState* cstate){
+    // Requirements
+    int x_barriere_top = cstate->win_width - cstate->logo_main->tx - 1;
+    //
+    int panel_x_start = x_barriere_top + 2;
+    int panel_x_end = cstate->win_width - 2;
+    int panel_y_start = 5;
+    // int panel_y_end = y_barriere_bottom - 7;
+    // int panel_width = panel_x_end - panel_x_start;
+    // int panel_height = panel_y_end - panel_y_start;
+    //
 
-    (void)cstate;
+    char titre_col[] = "Infos";
+    print_centered_text(
+        titre_col, strlen(titre_col), 
+        panel_x_start + 1,
+        panel_x_end - 1,
+        panel_y_start + 1
+    );
 
-    // TODO: display left / right arrow
-    // TODO: display menu name
 
-    // TODO
 }
 
 

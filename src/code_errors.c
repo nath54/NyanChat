@@ -133,7 +133,7 @@ void code_insert_error(Message* msg)
         // Cast the word to (possibly) add errors to it
         word = (uint16_t)(msg->msg[c]) << 8;
         for (int b = 0; b < 8; b++) {
-            if (randint(100) < BIT_ERROR_RATE * 100)
+            if (randint(1000) < BIT_ERROR_RATE)
                 // Add an error to the message
                 word = chg_nth_bit(b, word);
         }
