@@ -37,7 +37,7 @@ Le mot à encoder (sur 8 bits) sera placé sur les premiers bits de la variable 
 par 8 bits de padding avant d’être fourni en argument à la fonction.
 Vous privilégierez des opérateurs bit à bit en évitant les opérations arithmétiques.
 */
-uint16_t encode(uint16_t** G, uint16_t m)
+uint16_t encode(uint16_t G[8][16], uint16_t m)
 {
     for (int j = 8; j < 16; j++) {
         uint16_t parity_bit = 0;
@@ -50,7 +50,7 @@ uint16_t encode(uint16_t** G, uint16_t m)
     return m;
 }
 
-int code_hamming_distance(uint16_t **G)
+int code_hamming_distance(uint16_t G[8][16])
 {
     int distance = 8;
     int N = 1 << 8;
@@ -63,14 +63,14 @@ int code_hamming_distance(uint16_t **G)
     return distance;
 }
 
-void create_check_matrix(uint16_t **g, uint16_t **h)
+void create_check_matrix(uint16_t G[8][16], uint16_t H[8][16])
 {
     for (int i = 0; i < 8; i++) {
         for (int j = 0; j < 8; j++) {
             // A transpose matrix
-            h[i][j] = g[j][i+8];
+            H[i][j] = G[j][i+8];
             // Identity matrix
-            h[i][j+8] = (i == j) ? 1 : 0;
+            H[i][j+8] = (i == j) ? 1 : 0;
         }
     }
 }
@@ -83,7 +83,7 @@ uint16_t shift_register(uint16_t p, uint16_t x)
     return remainder;
 }
 
-void create_generator_matrix(uint16_t **g, uint16_t p)
+void create_generator_matrix(uint16_t G[8][16], uint16_t p)
 {
     uint16_t remainder;
     for (int i = 0; i < 8; i++) {
@@ -100,14 +100,7 @@ void create_generator_matrix(uint16_t **g, uint16_t p)
 //         2 if errors are detected but cannot be corrected
 int code_detect_error(Message* msg, uint16_t *err)
 {
-    uint16_t word;
-    for (uint32_t c = 0; c < msg->msg_length; c++) {
-        // Cast the word to (possibly) add errors to it
-        word = (uint16_t)(msg->msg[c]) << 8;
-        uint16_t syndrome = encode(H, word);
-        if (S[syndrome] != 0)
-            return -1;
-    }
+    // TODO
     return 0;
 }
 
