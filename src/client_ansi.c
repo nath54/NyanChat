@@ -97,7 +97,7 @@ void calc_msgs_tot_height(ClientState* cstate,
     for(size_t j=0; j<cstate->nb_msgs_default_channel; j++){
         cstate->heights_msgs_default_channel[j]
             = calc_one_msg_tot_height(&(cstate->msgs_default_channel[j]),
-                                        max_text_line_length);
+                                      max_text_line_length);
     }
 }
 
@@ -1153,6 +1153,8 @@ void init_cstate(ClientState* cstate)
     cstate->nb_msgs_default_channel = 0;
     CHKN( cstate->msgs_default_channel
                 = calloc(cstate->tot_msgs_default_channel, sizeof(Message)) );
+    CHKN( cstate->heights_msgs_default_channel
+                = calloc(cstate->tot_msgs_default_channel, sizeof(int)) );
     //
     for (size_t i=0; i<cstate->tot_msgs_default_channel; i++)
         { init_empty_message(&(cstate->msgs_default_channel[i])); }

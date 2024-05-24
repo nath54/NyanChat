@@ -63,7 +63,7 @@ void on_client_received(TcpConnection* con, SOCKET sock,
 
     if (msg->msg_type == MSG_STD_CLIENT_SERVER && msg->msg_length >= 10)
         // Potential additions of errors
-        { code_add_errors_to_msg(msg); }
+        { code_insert_error(msg); }
 
     tcp_connection_message_send(&con_server, con_server.poll_fds[0].fd, msg);
 
