@@ -19,6 +19,7 @@ uint16_t chg_nth_bit(int n, uint16_t m)
 
 void print_word(int k, uint16_t m)
 {
+    (void)k;
     for (int i = 0; i < 16; i++)
         printf("%d", get_nth_bit(i, m));
     printf("\n");

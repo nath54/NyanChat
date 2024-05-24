@@ -372,6 +372,7 @@ int main(int argc, char* argv[])
 
     init_client_state(&client_state);
     tcp_connection_client_init(&con, ip_proxy, port_proxy, -1);
+    con.enable_debug_print = true;
 
     tcp_connection_mainloop(&con,
                             on_msg_client, &client_state,

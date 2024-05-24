@@ -60,6 +60,11 @@ typedef struct {
     size_t tot_channels;
     size_t nb_channels;
 
+    // DynArray of messages received from default channel
+    Message* msgs_default_channel;
+    size_t tot_msgs_default_channel;
+    size_t nb_msgs_default_channel;
+
     // For knowing where the user focus is
     int user_focus;
     // Press escape to quit hard focus mode and navigate the panels
@@ -88,4 +93,4 @@ typedef struct {
 
 
 #define MIN_TERMINAL_WIDTH 95
-#define MIN_TERMINAL_HEIGHT 25
+#define MIN_TERMINAL_HEIGHT 55

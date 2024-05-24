@@ -31,6 +31,33 @@
 termios_t orig_termios;
 
 
+
+/*
+    ------------------------ Side Libs Functions ------------------------
+*/
+
+
+// Add a message to the dynamic array of Message from the default channel
+void on_received_message_default_channel(ClientState* cstate, Message* msg){
+    while(cstate->nb_msgs_default_channel >= cstate->tot_msgs_default_channel){
+        size_t tmp = cstate->tot_msgs_default_channel;
+        cstate->tot_msgs_default_channel *= 2;
+        CHKN( cstate->msgs_default_channel
+                = realloc(cstate->msgs_default_channel,
+                          sizeof(Message) * cstate->tot_msgs_default_channel) );
+        //
+        for(size_t i=tmp; i<cstate->tot_msgs_default_channel; i++){
+            init_empty_message(&(cstate->msgs_default_channel[i]));
+        }
+    }
+    //
+    copy_message(&(cstate->msgs_default_channel[cstate->nb_msgs_default_channel]),
+                 msg);
+    // 
+    cstate->nb_msgs_default_channel++;
+}
+
+
 /*
     ------------------------ Side Display Functions ------------------------
 */
@@ -43,9 +70,10 @@ termios_t orig_termios;
     ------------------------ Client Display Functions ------------------------
 */
 
+// Set the focus color, considerating if hard focus or not
 void set_focus_color(ClientState* cstate){
     set_bold();
-    if(cstate->hard_focus){
+    if(cstate->user_focus != FOCUS_INPUT && cstate->hard_focus){
         set_cl_fg(HARD_FOCUS_COLOR);
     }
     else{
@@ -54,6 +82,7 @@ void set_focus_color(ClientState* cstate){
 }
 
 
+// Display the Connection Window
 void display_client_connection_window(ClientState* cstate)
 {
     //
@@ -103,6 +132,7 @@ void display_client_connection_window(ClientState* cstate)
 }
 
 
+// Display the Main Interface Window (when the client is connected)
 void display_client_main_window(ClientState* cstate)
 {
     //
@@ -214,6 +244,7 @@ void display_client_main_window(ClientState* cstate)
 }
 
 
+// If the terminal windows is too small, display an error
 void display_client_error_win_size(ClientState* cstate)
 {
     clean_terminal();
@@ -226,8 +257,7 @@ void display_client_error_win_size(ClientState* cstate)
 }
 
 
-
-
+// Main function to display the client
 void display_client(ClientState* cstate)
 {
     get_terminal_size(&(cstate->win_width), &(cstate->win_height));
@@ -241,7 +271,6 @@ void display_client(ClientState* cstate)
     else
         { display_client_connection_window(cstate); }
 }
-
 
 
 
@@ -308,8 +337,9 @@ void client_send_message(TcpConnection* con,
 */
 
 
-void client_process_message(TcpConnection* con, 
-                            ClientState* cstate
+// Function that process a message that the client wants to send
+void client_process_input_message(TcpConnection* con, 
+                                  ClientState* cstate
 ){
 
     if (strlen(cstate->pseudo) == 0){
@@ -423,6 +453,7 @@ void on_client_input_main_window(TcpConnection* con,
 }
 
 
+// Main entry point for all stdin key events (raw mode)
 void on_stdin_client(TcpConnection* con,
                     char buffer[MAX_MSG_LENGTH],
                     size_t buf_len,
@@ -455,8 +486,10 @@ void on_stdin_client(TcpConnection* con,
                 }
             } else if(buffer[1] == SPECIAL_CHAR_KEYS){
                 if(buffer[2] == K_ENTER){
-                    client_process_message(con, cstate);
+                    client_process_input_message(con, cstate);
                     cstate->input_length = 0;
+                    cstate->input_cursor = 0;
+                    cstate->input[9] = '\0';
                 }
                 else if(buffer[2] == K_TABULATION && cstate->connected){
                     cstate->user_focus = FOCUS_LEFT_PANEL;
@@ -586,6 +619,7 @@ void on_stdin_client(TcpConnection* con,
 }
 
 
+// Main Entry point for all the messages received from the buffer
 void on_msg_client(TcpConnection* con, SOCKET sock, 
                    Message* msg, size_t msg_len,
                    void* custom_args){
@@ -616,7 +650,7 @@ void on_msg_client(TcpConnection* con, SOCKET sock,
             // and asked to enter another one.
             // The connection code files will also need to be deleted.
 
-            // TODO : mettre ca dans une case d'erreru
+            // TODO : mettre ca dans une case d'erreur
             // printf("\033[31mError, this pseudo is already taken, "
             //         "please choose another pseudo!\033[m\nPseudo : ");
 
@@ -642,6 +676,7 @@ void on_msg_client(TcpConnection* con, SOCKET sock,
             cstate->waiting_pseudo_confirmation = false;
             cstate->input_length = 0;
             cstate->input_cursor = 0;
+            cstate->input[0] = '\0';
             display_client(cstate);
 
             // TODO: récupérer les messages des salons, etc...
@@ -755,24 +790,34 @@ void init_cstate(ClientState* cstate)
     for (size_t i=0; i<cstate->tot_channels; i++)
         { CHKN( memset(cstate->channels[i].name, '\0', MAX_NAME_LENGTH) ); }
 
+    // Init default channel messages received
+    cstate->tot_msgs_default_channel = 10;
+    cstate->nb_msgs_default_channel = 0;
+    CHKN( cstate->msgs_default_channel
+                = calloc(cstate->tot_msgs_default_channel, sizeof(Message)) );
     //
+    for (size_t i=0; i<cstate->tot_msgs_default_channel; i++)
+        { init_empty_message(&(cstate->msgs_default_channel[i])); }
+
+
+    // Init user focus
     cstate->user_focus = FOCUS_INPUT;
 
-    //
+    // Init cursor for the message windows display
     cstate->disp_msgs_cursor = 0;
 
-    //
+    // Init the Input
     CHKN( memset(cstate->input, '\0', MAX_MSG_LENGTH) );
     cstate->input_length = 0;
     cstate->input_cursor = 0;
     cstate->cursor_x = 0;
     cstate->cursor_y = 0;
 
-    //
+    // Init win size
     cstate->win_height = 0;
     cstate->win_height = 0;
 
-    //
+    // Init logos
     cstate->logo_connection = load_ascii_art("res/logo_connection.txt");
     cstate->logo_main = load_ascii_art("res/logo_main.txt");
 }
@@ -792,10 +837,10 @@ void free_cstate(ClientState* cstate)
 */
 
 
+// Main entry point of the client
 int main(int argc, char* argv[]) {
     
-    fprintf(stderr, "test\n");
-
+    // Base variables, containers for ClientState and TcpConnection
     ClientState cstate;
     TcpConnection con;
 
@@ -805,9 +850,11 @@ int main(int argc, char* argv[]) {
         exit(EXIT_FAILURE);
     }
 
+    // Get arguments
     char* ip_proxy = argv[1];
     int port_proxy = atoi(argv[2]);
 
+    // Check arguments
     if (port_proxy < 5000 || port_proxy > 65000) {
         fprintf(stderr, "Bad value of port_proxy : %d !\n", port_proxy);
         exit(EXIT_FAILURE);
@@ -817,15 +864,20 @@ int main(int argc, char* argv[]) {
     // Enabling raw terminal mode to get individually each characters
     enableRawMode(&orig_termios);
 
+    // Launching the client and the connection
     init_cstate(&cstate);
     tcp_connection_client_init(&con, ip_proxy, port_proxy, -1);
     con.ansi_stdin = true;
 
+    // First display of the client
     display_client(&cstate);
 
+    // Client mainloop (with polling)
     tcp_connection_mainloop(&con, on_msg_client, &cstate,
                             on_stdin_client, &cstate);
 
+    // Closing the connection and the client
+    //   and freeing all allocated variables
     tcp_connection_close(&con);
     free_cstate(&cstate);
 
