@@ -59,11 +59,10 @@ int code_hamming_distance(uint16_t G[K][N])
 void create_check_matrix(uint16_t G[K][N], uint16_t H[K][N])
 {
     for (int i = 0; i < C; i++) {
-        for (int j = 0; j < K; j++) {
+        for (int j = 0; j < K; j++)
             H[i][j] = G[j][i+K];  // A transpose matrix
-            if (j < C)
-                H[i][j+K] = (i == j) ? 1 : 0;  // Identity matrix
-        }
+        for (int j = 0; j < C; j++)
+            H[i][j+K] = (i == j) ? 1 : 0;  // Identity matrix
     }
 }
 
