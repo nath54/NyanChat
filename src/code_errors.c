@@ -1,9 +1,11 @@
 #include "code_errors.h"
 #include "lib_chks.h"
-#include "useful_lib.h"
 #include "bits.h"
 
 uint16_t P = 0b110111001;  // X^8 + X^7 + X^5 + X^4 + X^3 + 1
+const int HD = 4; // Hamming distance of P
+const int CORRECTION = 1;
+const int DETECTION = 3;
 
 // Matrice génératrice de P
 uint16_t G[K][N] = {
@@ -45,19 +47,19 @@ void create_generator_matrix(uint16_t G[K][N], uint16_t P)
     }
 }
 
-void create_check_matrix(uint16_t G[K][N], uint16_t H[K][N])
+void create_check_matrix(uint16_t G[K][N], uint16_t H[C][N])
 {
-    for (int i = 0; i < 8; i++) {
-        for (int j = 0; j < 8; j++) {
-            H[i][j] = G[j][i+8];  // A transpose matrix
-            H[i][j+8] = (i == j) ? 1 : 0;  // Identity matrix
-        }
+    for (int i = 0; i < C; i++) {
+        for (int j = 0; j < K; j++)
+            H[i][j] = G[j][i+K];  // A transpose matrix
+        for (int j = 0; j < C; j++)
+            H[i][j+K] = (i == j) ? 1 : 0;  // Identity matrix
     }
 }
 
 void create_syndrome_array(uint16_t P, uint16_t S[Nc])
 {
-    for (int e = 0; e < Nn; e++) {
+    for (int e = 0; e < Nk; e++) {
         uint8_t syndrome = rem_lfsr(P, e);
         S[syndrome] &= e;
     }
@@ -78,7 +80,7 @@ uint16_t encode(uint16_t G[K][N], uint16_t m)
 
 uint16_t rem_lfsr(uint16_t P, uint16_t x)
 {
-    for (int i = 0; i < C; i++) {
+    for (int i = 0; i < K; i++) {
         x = x >> 1;
         x ^= P;
     }
@@ -112,25 +114,35 @@ void add_control_bits(Message *msg)
     }
 }
 
-
 int code_correct_error(Message* msg)
 {
-    (void)msg;
-    return 0;
+    int rc = 0;
+
+    for (uint32_t i = 0; i < msg->msg_length; i++) {
+        uint16_t syndrome = rem_lfsr(P, msg->msg[i]);
+        uint16_t err = S[syndrome];
+
+        if (weight(syndrome) <= CORRECTION)
+            msg->error[i] = false;
+        else {
+            msg->error[i] = true;
+            rc = -1;
+        }
+        msg->msg[i] ^= err;  // correct errors
+    }
+    return rc;
 }
 
 void code_insert_error(Message* msg)
 {
-    uint16_t word;
+    uint16_t byte;
     for (uint32_t i = 0; i < msg->msg_length; i++) {
-        // Cast the word to (possibly) add errors to it
-        word = (uint16_t)(msg->msg[i]) << 8;
-        for (int b = 0; b < 8; b++) {
-            if (randint(1000) < BIT_ERROR_RATE)
-                // Add an error to the message
-                word = chg_nth_bit(b, word);
+        // Cast the byte to (possibly) add errors to it
+        byte = (uint16_t)msg->msg[i] << C;
+        for (int b = 0; b < N; b++) {
+            if ((rand() / RAND_MAX) < BIT_ERROR_RATE)
+                byte = chg_nth_bit(b, byte);  // Add an error to the message
         }
-        msg->msg[i] = (char)(word >> 8);
+        msg->msg[i] = byte >> C;
     }
 }
-

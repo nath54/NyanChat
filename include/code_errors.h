@@ -1,17 +1,14 @@
 #pragma once
 
-// To include the Message struct
 #include "tcp_connection.h"
 
-
-#define BIT_ERROR_RATE 0.1    // In %, the rate of creating errors
+#define BIT_ERROR_RATE 0.01  // In %
 #define N 16 // Taille du mot de code
 #define K 8  // Taille du mot d'information
 #define C 8  // Nombre de bits de parité
 
 #define Nc 256
 #define Nk 256
-#define Nn 65536
 
 /**
  * Renvoie un mot du code sur 8 + c bits (c étant le degré de votre polynôme),
@@ -20,7 +17,7 @@
  * par 8 bits de padding avant d’être fourni en argument à la fonction.
  * Vous privilégierez des opérateurs bit à bit en évitant les opérations arithmétiques.
 */
-uint16_t encode(uint16_t G[8][16], uint16_t m);
+uint16_t encode(uint16_t G[K][N], uint16_t m);
 
 void add_control_bits(Message *msg);
 
@@ -38,10 +35,15 @@ by the polynomial `p` using the shift register method.
 */
 uint16_t rem_lfsr(uint16_t p, uint16_t x);
 
-// Fill the generator matrix `G` from the polynomial `p`.
-void create_generator_matrix(uint16_t G[8][16], uint16_t p);
+/**
+ * Encode a 8-bit word with polynomial generator P using LFSR
+*/
+uint16_t encode_lfsr(uint16_t P, char m);
 
-void create_syndrome_array(uint16_t p, uint16_t S[256]);
+// Fill the generator matrix `G` from the polynomial `p`.
+void create_generator_matrix(uint16_t G[K][N], uint16_t p);
+
+void create_syndrome_array(uint16_t p, uint16_t S[Nc]);
 
 // Function to detect an error in the message
 // Returns 0 : No errors, or errors corrected
@@ -55,4 +57,3 @@ int code_correct_error(Message* msg);
  * @param msg The message to add noise into.
  */
 void code_insert_error(Message* msg);
-
