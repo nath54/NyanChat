@@ -4,8 +4,14 @@
 #include "tcp_connection.h"
 
 
-#define BIT_ERROR_RATE 10    // In per thousand, the rate of creating errors
+#define BIT_ERROR_RATE 0.1    // In %, the rate of creating errors
+#define N 16 // Taille du mot de code
+#define K 8  // Taille du mot d'information
+#define C 8  // Nombre de bits de parité
 
+#define Nc 256
+#define Nk 256
+#define Nn 65536
 
 // Encoding function
 uint16_t encode(uint16_t G[8][16], uint16_t m);
