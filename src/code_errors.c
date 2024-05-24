@@ -122,7 +122,7 @@ int code_correct_error(Message* msg)
     int rc = 0;
 
     for (uint32_t i = 0; i < msg->msg_length; i++) {
-        uint16_t syndrome = rem_lfsr(P, msg->msg[i]);
+        uint16_t syndrome = encode_lfsr(P, msg->msg[i]) & (Nc - 1);
         uint16_t err = S[syndrome];
 
         if (weight(syndrome) <= CORRECTION)
