@@ -55,9 +55,9 @@ void test_code_hamming_distance(void)
 void test_rem_lfsr(void)
 {
     uint16_t P = 0b110111001;
-    uint16_t x = 0b100000000;
-    uint16_t syndrome = rem_lfsr(P, x);
-    TEST_ASSERT_EQUAL_UINT16(0b10111001, syndrome);
+    uint16_t x = 0b1110010;
+    uint16_t encoded = rem_lfsr(P, x);
+    TEST_ASSERT_EQUAL_UINT16(0b11101001, encoded);
 }
 
 int main(void)
