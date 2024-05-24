@@ -306,11 +306,6 @@ void on_msg_received(TcpConnection* con, SOCKET sock,
             case 0:  // No detected error
                 break;
             
-            case 1:
-                if(code_correct_error(msg, err) != 0)
-                    msg_bon = false;
-                break;
-
             default:
                 msg_bon = false;
                 break;

@@ -461,7 +461,7 @@ void tcp_connection_mainloop(TcpConnection* con,
                     // TODO : check (https://vt100.net/docs/vt100-ug/chapter3.html#T3-6)
                     // TODO : check (https://vt100.net/docs/vt100-ug/chapter3.html#T3-7)
                     // To correct and add more special chars
-                    else if (buffer[0] == '\x1b') {
+                    if (buffer[0] == '\x1b') {
                         fprintf(stderr, "\\x1b read\n");
                         char seq[3];
                         bool bon = true;
@@ -654,7 +654,11 @@ void tcp_connection_message_update(Message *msg, char buffer[MAX_MSG_LENGTH],
 void tcp_connection_message_send(TcpConnection* con, SOCKET sock,
                                  Message* msg)
 {
-    int bytes_sent = send(sock, msg, sizeof(*msg), 0);
+    if(msg == NULL){
+        return;
+    }
+
+    int bytes_sent = send(sock, msg, sizeof(Message), 0);
 
     if(con->enable_debug_print) {
         printf("%d bytes sent!\n", bytes_sent);
@@ -677,6 +681,5 @@ void copy_message(Message* dest, Message* src){
     CHKN( strcpy(dest->dst, src->dst) );
     dest->msg_length = src->msg_length;
     CHKN( strcpy(dest->msg, src->msg) );
-
-    // TODO: copier les variables qui gèrent les codes correcteurs
+    CHKN( strcpy(dest->control, src->control) );
 }

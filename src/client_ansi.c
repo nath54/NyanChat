@@ -142,7 +142,7 @@ int print_message(ClientState* cstate, Message* msg,
                 // -- its a message that this client has sent --
 
                 set_cursor_position(x+2, y+1);
-                set_cl_fg(DARK_BLUE);
+                set_cl_fg(LIGHT_SALMON);
                 set_bold();
                 printf("You");
                 reset_ansi();
@@ -167,7 +167,6 @@ int print_message(ClientState* cstate, Message* msg,
                 }
             }
 
-            // TODO: display message date & time
         }
     }
 
@@ -202,7 +201,7 @@ int print_message(ClientState* cstate, Message* msg,
     }
     
     // Print the last line of the message
-    if(msg->msg_length - i > 0){
+    if(msg->msg_length - i > 0 && cy >= min_y_show && cy <= max_y_show){
         set_cursor_position(x, cy);
 
         // Print the msg border decoration
@@ -231,7 +230,7 @@ void display_left_panel(ClientState* cstate){
     int panel_x_start = 3;
     int panel_x_end = x_barriere_top-1;
     int panel_y_start = 3;
-    int panel_y_end = y_barriere_bottom - 1;
+    int panel_y_end = y_barriere_bottom - 2;
     int panel_width = panel_x_end - panel_x_start;
     int panel_height = panel_y_end - panel_y_start;
     //
@@ -263,6 +262,7 @@ void display_left_panel(ClientState* cstate){
         
         // Differents messages positions cases
         if(sum_pre + cmh < panel_height / 2){
+
             y_0 = 0;
             id_first_msg_disp = 0;
             int cy = 0;
@@ -283,6 +283,7 @@ void display_left_panel(ClientState* cstate){
             }
         }
         else if(sum_post + cmh < panel_height / 2){
+
             id_last_msg_disp = cstate->nb_msgs_default_channel - 1;
             id_first_msg_disp = -1;
             int cy = 0;
@@ -303,6 +304,7 @@ void display_left_panel(ClientState* cstate){
             y_0 = panel_height - cy;
         }
         else{
+
             int cy = panel_height / 2 - cmh / 2;
             // Top part
             y_0 = cy;
@@ -336,10 +338,10 @@ void display_left_panel(ClientState* cstate){
         }
 
         // We now have theses three variables initialised:
-        //   y_0 - id_first_msg_dispo - id_last_msg_dispo
+        //   y_0 - id_first_msg_disp - id_last_msg_disp
 
         // We can now FINALLY DISPLAYS THE MESSAGES
-        int cy = y_0;
+        int cy = panel_y_start + y_0;
         for(int i=id_first_msg_disp; i<=id_last_msg_disp; i++){
             print_message(cstate,
                           &(cstate->msgs_default_channel[i]),
@@ -348,6 +350,8 @@ void display_left_panel(ClientState* cstate){
                           panel_y_start,
                           panel_y_end,
                           i == cstate->disp_msgs_cursor);
+            cy += cstate->heights_msgs_default_channel[i];
+            cy += spaces_between_msgs;
         }
         //
     }
@@ -387,7 +391,34 @@ void display_bottom_right_panel(ClientState* cstate){
 
     (void)cstate;
 
-    // TODO
+    // Requirements
+    int x_barriere_top = cstate->win_width - cstate->logo_main->tx - 1;
+    // int y_barriere_bottom = cstate->win_height - 4;
+    //
+    int panel_x_start = x_barriere_top + 1;
+    int panel_x_end = cstate->win_width - 1;
+    int panel_y_start = 9;
+    // int panel_y_end = y_barriere_bottom - 2;
+    // int panel_width = panel_x_end - panel_x_start;
+    // int panel_height = panel_y_end - panel_y_start;
+    //
+
+    set_bold();
+    set_cl_fg(LIGHT_SALMON);
+    char Titre_Pseudo[] = "Pseudo:";
+    print_centered_text(Titre_Pseudo, strlen(Titre_Pseudo), panel_x_start+1, panel_x_end-1, panel_y_start + 2);
+    reset_ansi();
+
+    print_centered_text(cstate->pseudo, strlen(cstate->pseudo), panel_x_start+1, panel_x_end-1, panel_y_start + 4);
+
+    set_bold();
+    set_cl_fg(LIGHT_SALMON);
+    char Titre_Channel[] = "Current Channel:";
+    print_centered_text(Titre_Channel, strlen(Titre_Channel), panel_x_start+1, panel_x_end-1, panel_y_start + 8);
+    reset_ansi();   
+
+    char channel[] = "Default Channel";
+    print_centered_text(channel, strlen(channel), panel_x_start+1, panel_x_end-1, panel_y_start + 10);
 }
 
 
@@ -399,7 +430,7 @@ void display_input_text(ClientState* cstate, int x, int y, int max_x){
     // Easy case: the input length is smaller than the input container
     if (cstate->input_length <= ctx){
         set_cursor_position(x, y);
-        printf(" %s", cstate->input);
+        printf("%s", cstate->input);
         cstate->cursor_x = x + cstate->input_cursor;
         cstate->cursor_y = y;
     }
@@ -848,7 +879,7 @@ void on_stdin_client(TcpConnection* con,
                     }
                 }
                 else if(buffer[2] == ARROW_RIGHT){
-                    if(cstate->input_cursor < cstate->input_length - 1){
+                    if(cstate->input_cursor < cstate->input_length){
                         cstate->input_cursor++;
                     }
                 }
@@ -857,7 +888,7 @@ void on_stdin_client(TcpConnection* con,
                     client_process_input_message(con, cstate);
                     cstate->input_length = 0;
                     cstate->input_cursor = 0;
-                    cstate->input[9] = '\0';
+                    cstate->input[0] = '\0';
                 }
                 else if(buffer[2] == K_TABULATION && cstate->connected){
                     cstate->user_focus = FOCUS_LEFT_PANEL;
@@ -919,10 +950,18 @@ void on_stdin_client(TcpConnection* con,
             if(buffer[0] == '\x1b'){
                 if(buffer[1] == SPECIAL_CHAR_ARROW){
                     if(buffer[2] == ARROW_TOP){
-
+                        if(cstate->user_focus == FOCUS_LEFT_PANEL &&
+                           cstate->disp_msgs_cursor > 0     
+                        ){
+                            cstate->disp_msgs_cursor--;
+                        }
                     }
                     else if(buffer[2] == ARROW_BOTTOM){
-
+                        if(cstate->user_focus == FOCUS_LEFT_PANEL &&
+                           (size_t)cstate->disp_msgs_cursor < cstate->nb_msgs_default_channel - 1   
+                        ){
+                            cstate->disp_msgs_cursor++;
+                        }
                     }
 
                     // TODO
