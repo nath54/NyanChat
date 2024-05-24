@@ -383,6 +383,9 @@ int main(int argc, char **argv)
     init_server_state(&server_state);
     tcp_connection_server_init(&con, "127.0.0.1", port, 20, -1);
 
+    // Creation of the syndrome array for the error correction
+    // create_syndrome_array();
+
     // Main loop of the tcp connection
     tcp_connection_mainloop(&con,
                             on_msg_received, &server_state,

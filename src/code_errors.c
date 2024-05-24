@@ -33,7 +33,7 @@ uint16_t H[K][N] = {
 };
 
 // Matrice associant les syndromes aux erreurs
-uint16_t S[Nc] = { 0b11111111 };
+uint16_t S[Nc];
 
 void create_generator_matrix(uint16_t G[K][N], uint16_t P)
 {
@@ -59,10 +59,13 @@ void create_check_matrix(uint16_t G[K][N], uint16_t H[C][N])
     }
 }
 
-void create_syndrome_array(uint16_t P, uint16_t S[Nc])
+void create_syndrome_array()
 {
-    for (int e = 0; e < Nk; e++) {
-        uint8_t syndrome = rem_lfsr(P, e);
+    for (uint16_t i = 0; i < Nc; i++)
+        S[i] = Nc-1;
+
+    for (uint16_t e = 0; e < Nc; e++) {
+        uint8_t syndrome = encode(G, e << C);
         S[syndrome] &= e;
     }
 }
@@ -83,13 +86,13 @@ uint16_t encode(uint16_t G[K][N], uint16_t m)
 uint16_t rem_lfsr(uint16_t P, uint16_t x)
 {
     for (int i = 0; i < K; i++) {
-        x = x >> 1;
         x ^= P;
+        x = x >> 1;
     }
     return x;
 }
 
-uint16_t encode_lfsr(uint16_t P, char m)
+uint16_t encode_lfsr(uint16_t P, uint16_t m)
 {
     return ((uint16_t)m << C) + rem_lfsr(P, m);
 }
@@ -112,8 +115,8 @@ int code_hamming_distance(uint16_t P)
 void add_control_bits(Message *msg)
 {
     for (uint32_t i = 0; i < msg->msg_length; i++) {
-        uint16_t encoded = encode_lfsr(P, msg->msg[i]);
-        msg->control[i] = encoded & (Nc - 1);
+        uint16_t control = encode(G, i << C) & (Nc - 1);
+        msg->control[i] = control;
     }
 }
 
@@ -122,7 +125,7 @@ int code_correct_error(Message* msg)
     int rc = 0;
 
     for (uint32_t i = 0; i < msg->msg_length; i++) {
-        uint16_t syndrome = rem_lfsr(P, msg->msg[i]);
+        uint16_t syndrome = encode(G, i << C);
         uint16_t err = S[syndrome];
 
         if (weight(syndrome) <= CORRECTION)

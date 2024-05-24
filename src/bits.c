@@ -35,3 +35,4 @@ int weight(uint16_t x)
     x = (x + (x >> 8)) & 0x7f;
     return x;
 }
+

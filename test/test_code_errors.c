@@ -15,6 +15,7 @@ void test_code_insert_error(void)
     BIT_ERROR_RATE = 0.01;
     code_insert_error(&msg);
     TEST_ASSERT_EQUAL_STRING("ThiS is a test.", msg.msg);
+    TEST_ASSERT_EQUAL_STRING("ThiS is a test.", msg.msg);
     // test BER 5%
     BIT_ERROR_RATE = 0.1;
     code_insert_error(&msg);
@@ -40,7 +41,7 @@ void test_encode(void)
         {0,0,0,0,0,0,0,1,1,0,1,1,1,0,0,1}
     };
     uint16_t word = encode(G, 0b0000000100000000);
-    TEST_ASSERT_EQUAL_INT16(0b0000000110111001, word);
+    TEST_ASSERT_EQUAL_UINT16(0b0000000110111001, word);
 }
 
 void test_code_hamming_distance(void)
@@ -50,10 +51,22 @@ void test_code_hamming_distance(void)
     TEST_ASSERT_EQUAL_INT(4, d);
 }
 
+
+void test_rem_lfsr(void)
+{
+    uint16_t P = 0b110111001;
+    uint16_t x = 0b1110010;
+    uint16_t encoded = rem_lfsr(P, x);
+    TEST_ASSERT_EQUAL_UINT16(0b11101001, encoded);
+}
+
 int main(void)
 {
     UNITY_BEGIN();
+    create_syndrome_array();
+
     RUN_TEST(test_code_insert_error);
+    RUN_TEST(test_rem_lfsr);
     RUN_TEST(test_code_hamming_distance);
     RUN_TEST(test_encode);
     return UNITY_END();
