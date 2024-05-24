@@ -3,11 +3,11 @@
 #include "useful_lib.h"
 #include "bits.h"
 
-int c = 8;  // Nombre de bits de parité
-int n = 16; // Taille du mot de code
-int k = 8;  // Taille du mot d'information
+int c = 8;  // Number of parity bits
+int n = 16; // Length of a code word
+int k = 8;  // Length of a message word
 
-// Matrice génératrice de X^8 + X^7 + X^5 + X^4 + X^3 + 1
+// Generator matrix of X^8 + X^7 + X^5 + X^4 + X^3 + 1
 uint16_t G[8][16] = {
     {1,0,0,0,0,0,0,0,0,1,1,1,0,1,1,0},
     {0,1,0,0,0,0,0,0,0,0,1,1,1,0,1,1},
@@ -18,7 +18,8 @@ uint16_t G[8][16] = {
     {0,0,0,0,0,0,1,0,1,1,0,0,1,0,1,1},
     {0,0,0,0,0,0,0,1,1,0,1,1,1,0,0,1}
 };
-// Matrice de test
+
+// Test matrix
 uint16_t H[8][16] = {
     {0,0,1,1,0,0,1,1,1,0,0,0,0,0,0,0},
     {1,0,1,0,1,0,1,0,0,1,0,0,0,0,0,0},
@@ -30,8 +31,9 @@ uint16_t H[8][16] = {
     {0,1,1,0,0,1,1,1,0,0,0,0,0,0,0,1}
 };
 
-// Matrice associant les syndromes aux erreurs
+// Matrix associating syndromes to errors
 uint16_t S[256] = { 0b11111111 };
+
 
 /*
 Renvoie un mot du code sur 8 + c bits (c étant le degré de votre polynôme),
@@ -53,6 +55,7 @@ uint16_t encode(uint16_t G[8][16], uint16_t m)
     return m;
 }
 
+
 int code_hamming_distance(uint16_t G[8][16])
 {
     int distance = 8;
@@ -66,17 +69,6 @@ int code_hamming_distance(uint16_t G[8][16])
     return distance;
 }
 
-void create_check_matrix(uint16_t G[8][16], uint16_t H[8][16])
-{
-    for (int i = 0; i < 8; i++) {
-        for (int j = 0; j < 8; j++) {
-            // A transpose matrix
-            H[i][j] = G[j][i+8];
-            // Identity matrix
-            H[i][j+8] = (i == j) ? 1 : 0;
-        }
-    }
-}
 
 uint16_t shift_register(uint16_t p, uint16_t x)
 {
@@ -86,6 +78,7 @@ uint16_t shift_register(uint16_t p, uint16_t x)
     }
     return x;
 }
+
 
 void create_generator_matrix(uint16_t G[8][16], uint16_t p)
 {
@@ -100,6 +93,20 @@ void create_generator_matrix(uint16_t G[8][16], uint16_t p)
         }
     }
 }
+
+
+void create_check_matrix(uint16_t G[8][16], uint16_t H[8][16])
+{
+    for (int i = 0; i < 8; i++) {
+        for (int j = 0; j < 8; j++) {
+            // A transpose matrix
+            H[i][j] = G[j][i+8];
+            // Identity matrix
+            H[i][j+8] = (i == j) ? 1 : 0;
+        }
+    }
+}
+
 
 // Function to detect an error in the message
 // Returns 0 if no errors are detected,
