@@ -115,8 +115,7 @@ typedef struct __attribute__((packed, aligned(4))) Message {
 	char msg[MAX_MSG_LENGTH];
     
     // (for detection & correction)
-    // TODO: ajouter ici les ressources nécessaires pour les codes polynomiaux
-	// ???	code;
+    char control[MAX_MSG_LENGTH];
 
 } Message;
 
