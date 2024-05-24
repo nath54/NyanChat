@@ -58,6 +58,9 @@ void on_received_message_default_channel(ClientState* cstate, Message* msg){
     copy_message(&(cstate->msgs_default_channel[cstate->nb_msgs_default_channel]),
                  msg);
     // 
+    if((size_t)cstate->disp_msgs_cursor == cstate->nb_msgs_default_channel-1){
+        cstate->disp_msgs_cursor++;
+    }
     cstate->nb_msgs_default_channel++;
 }
 
@@ -286,22 +289,21 @@ void display_left_panel(ClientState* cstate){
 
             id_last_msg_disp = cstate->nb_msgs_default_channel - 1;
             id_first_msg_disp = -1;
-            int cy = 0;
+            y_0 = panel_height;
             //
             for(int i = id_last_msg_disp; i>=0; i--){
                 //
-                cy += cstate->heights_msgs_default_channel[i];
-                cy += spaces_between_msgs;
+                y_0 -= cstate->heights_msgs_default_channel[i];
+                y_0 -= spaces_between_msgs;
                 //
-                if(cy > panel_width){
+                if(y_0 <= 0){
                     id_first_msg_disp = i;
                     break;
                 }
             }
             if(id_first_msg_disp == -1){
-                id_last_msg_disp = 0;
+                id_first_msg_disp = 0;
             }
-            y_0 = panel_height - cy;
         }
         else{
 
@@ -870,6 +872,9 @@ void on_stdin_client(TcpConnection* con,
     }
 
     // Input gestion
+    // Okay, after simplification, user_focus is always in FOCUS_INPUT
+    // But I will still keep this condition
+    // to remembert if I want to change that leater
     if(cstate->user_focus == FOCUS_INPUT){
         if(buffer[0] == '\x1b'){
             if(buffer[1] == SPECIAL_CHAR_ARROW){
@@ -883,6 +888,16 @@ void on_stdin_client(TcpConnection* con,
                         cstate->input_cursor++;
                     }
                 }
+                else if(buffer[2] == ARROW_BOTTOM){
+                    if((size_t)cstate->disp_msgs_cursor < cstate->nb_msgs_default_channel-1){
+                        cstate->disp_msgs_cursor++;
+                    }
+                }
+                else if(buffer[2] == ARROW_TOP){
+                    if(cstate->disp_msgs_cursor > 0){
+                        cstate->disp_msgs_cursor--;
+                    }
+                }
             } else if(buffer[1] == SPECIAL_CHAR_KEYS){
                 if(buffer[2] == K_ENTER){
                     client_process_input_message(con, cstate);
@@ -891,8 +906,8 @@ void on_stdin_client(TcpConnection* con,
                     cstate->input[0] = '\0';
                 }
                 else if(buffer[2] == K_TABULATION && cstate->connected){
-                    cstate->user_focus = FOCUS_LEFT_PANEL;
-                    cstate->hard_focus = false;
+                    // cstate->user_focus = FOCUS_LEFT_PANEL;
+                    // cstate->hard_focus = false;
                 }
                 else if(buffer[2] == K_BACKSPACE){
                     if(cstate->input_cursor > 0){
@@ -941,81 +956,6 @@ void on_stdin_client(TcpConnection* con,
                 cstate->input_cursor++;
                 cstate->input_length++;
                 cstate->input[cstate->input_length] = '\0';
-            }
-        }
-    }
-    else{
-        if(cstate->hard_focus){
-            // Hard focus
-            if(buffer[0] == '\x1b'){
-                if(buffer[1] == SPECIAL_CHAR_ARROW){
-                    if(buffer[2] == ARROW_TOP){
-                        if(cstate->user_focus == FOCUS_LEFT_PANEL &&
-                           cstate->disp_msgs_cursor > 0     
-                        ){
-                            cstate->disp_msgs_cursor--;
-                        }
-                    }
-                    else if(buffer[2] == ARROW_BOTTOM){
-                        if(cstate->user_focus == FOCUS_LEFT_PANEL &&
-                           (size_t)cstate->disp_msgs_cursor < cstate->nb_msgs_default_channel - 1   
-                        ){
-                            cstate->disp_msgs_cursor++;
-                        }
-                    }
-
-                    // TODO
-                }
-                else if(buffer[1] == SPECIAL_CHAR_KEYS){
-                    if(buffer[2] == K_ESCAPE){
-                        cstate->hard_focus = false;
-                    }
-                    else if(buffer[2] == K_TABULATION){
-                        cstate->user_focus = FOCUS_INPUT;
-                        cstate->hard_focus = false;
-                    }
-                }
-            }
-        }
-        else{
-            // Soft Focus / Panel Navigation
-            if(buffer[0] == '\x1b'){
-                if(buffer[1] == SPECIAL_CHAR_ARROW){
-                    if(buffer[2] == ARROW_TOP){
-                        if(cstate->user_focus == FOCUS_RIGHT_BOTTOM_PANEL){
-                            cstate->user_focus = FOCUS_RIGHT_TOP_PANEL;
-                        }
-                    }
-                    else if(buffer[2] == ARROW_BOTTOM){
-                        if(cstate->user_focus == FOCUS_RIGHT_TOP_PANEL){
-                            cstate->user_focus = FOCUS_RIGHT_BOTTOM_PANEL;
-                        }
-                    }
-                    else if(buffer[2] == ARROW_LEFT){
-                        if(cstate->user_focus == FOCUS_RIGHT_BOTTOM_PANEL ||
-                        cstate->user_focus == FOCUS_RIGHT_TOP_PANEL)
-                        {
-                            cstate->user_focus = FOCUS_LEFT_PANEL;    
-                        }
-                    }
-                    else if(buffer[2] == ARROW_RIGHT){
-                        if(cstate->user_focus == FOCUS_LEFT_PANEL){
-                            cstate->user_focus = FOCUS_RIGHT_TOP_PANEL;
-                        }
-                    }
-
-                    // TODO
-                }
-                else if(buffer[1] == SPECIAL_CHAR_KEYS){
-
-                    if(buffer[2] == K_ENTER){
-                        cstate->hard_focus = true;   
-                    }
-                    else if(buffer[2] == K_TABULATION){
-                        cstate->user_focus = FOCUS_INPUT;
-                        cstate->hard_focus = false;
-                    }
-                }
             }
         }
     }
@@ -1150,6 +1090,19 @@ void on_msg_client(TcpConnection* con, SOCKET sock,
     }
 }
 
+
+
+void send_disconnection_message(TcpConnection* con, ClientState* cstate){
+    // Send connection request to the server
+    init_empty_message(&(cstate->msg_waiting_ack[0]));
+    cstate->msg_waiting_ack[0].msg_type = MSG_CLIENT_DISCONNECT;
+    cstate->msg_waiting_ack[0].msg_id = 0;
+    strcpy(cstate->msg_waiting_ack[0].src_pseudo, cstate->pseudo);
+    cstate->nb_msg_waiting_ack += 1;
+    //
+    tcp_connection_message_send(con, con->sockfd,
+                                &(cstate->msg_waiting_ack[0]));
+}
 
 
 /*
@@ -1293,6 +1246,7 @@ int main(int argc, char* argv[]) {
     // Client mainloop (with polling)
     tcp_connection_mainloop(&con, on_msg_client, &cstate,
                             on_stdin_client, &cstate);
+
 
     // Closing the connection and the client
     //   and freeing all allocated variables

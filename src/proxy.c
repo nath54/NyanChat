@@ -64,6 +64,24 @@ void on_client_received(TcpConnection* con, SOCKET sock,
     if (msg->msg_type == MSG_STD_CLIENT_SERVER && msg->msg_length >= 10)
         // Potential additions of errors
         { code_insert_error(msg); }
+    
+    if(msg->msg_length == 0){
+        switch (msg->msg_type)
+        {
+            // Normal cases where message is null
+            case MSG_ACK_NEG:
+            case MSG_ACK_POS:
+            case MSG_CLIENT_CONNECTED:
+            case MSG_CLIENT_DISCONNECTED:
+            case MSG_CONNECTION_CLIENT:
+            case MSG_WELL_CONNECTED:
+                break;
+            
+            // Elsewhere, issues
+            default:
+                return;
+        }
+    }
 
     tcp_connection_message_send(&con_server, con_server.poll_fds[0].fd, msg);
 
@@ -94,6 +112,23 @@ void on_server_received(TcpConnection* con, SOCKET sock,
                 "Error: Bad value of client socket on msg  from serv %d / %ld!\n",
                 msg->proxy_client_socket, con->nb_poll_fds);
         return;
+    }
+    if(msg->msg_length == 0){
+        switch (msg->msg_type)
+        {
+            // Normal cases where message is null
+            case MSG_ACK_NEG:
+            case MSG_ACK_POS:
+            case MSG_CLIENT_CONNECTED:
+            case MSG_CLIENT_DISCONNECTED:
+            case MSG_CONNECTION_CLIENT:
+            case MSG_WELL_CONNECTED:
+                break;
+            
+            // Elsewhere, issues
+            default:
+                return;
+        }
     }
 
     // The socket seems to be good, transmission of the message

@@ -51,13 +51,14 @@ typedef u_int32_t uint32;
 #define MSG_NULL -1
 #define MSG_STD_CLIENT_SERVER 0
 #define MSG_SERVER_CLIENT 1
-#define MSG_CONNECTION_CLIENT 2
+#define MSG_CONNECTION_CLIENT 2 // Sent when a client try to connect, contain pseudo & connection code
 #define MSG_ERROR 4
 #define MSG_ACK_POS 5
 #define MSG_ACK_NEG 6
-#define MSG_WELL_CONNECTED 8  // Indique que ce client est bien connecté
-#define MSG_CLIENT_CONNECTED 9  // Indique qu'un autre client s'est connecté
-#define MSG_CLIENT_DISCONNECTED 10  // Indique qu'un autre client s'est déconnecté
+#define MSG_WELL_CONNECTED 8  // Indicate a successful connection
+#define MSG_CLIENT_CONNECTED 9  // Sent when another connects, contain the pseudo of that client
+#define MSG_CLIENT_DISCONNECTED 10  // Sent when another desconnects, contain the pseudo of that client
+#define MSG_CLIENT_DISCONNECT 11  // Sent when a client disconnects and quit the app 
 
 #define ERROR_MSG_CON_DIFF_KEYS "Error: this pseudo already has another connection code"
 #define ERROR_MSG_BAD_DECODED "Error: misdecoded the connection code"
@@ -68,20 +69,13 @@ typedef u_int32_t uint32;
 #define MSG_FLAG_PRIVATE_CHANNEL 1
 #define MSG_FLAG_PRIVATE_MESSAGE 2
 
-/* Structure used for messages and acknowledgments
-    transmitted by the connection
+/* Structure used for messages, errors, acknowledgments,
+    and connection information.
+    Transmitted by the connection
 */
 typedef struct __attribute__((packed, aligned(4))) Message {	
     /*
-    Type of message:
-        -1 = msg NULL,
-        0 = normal msg client->server,
-        1 = msg server->client,
-        2 = client connection
-        3 = end of connection,
-        4 = error,
-        5 = positive acknowledgment
-        6 = negative acknowledgment
+    Type of message: see MSG_.....
     */
 	int msg_type;
 
