@@ -79,7 +79,7 @@ uint16_t shift_register(uint16_t p, uint16_t x)
 {
     uint16_t remainder = 0;
     (void)p;
-    (void)m;
+    (void)x;
     return remainder;
 }
 
@@ -87,7 +87,7 @@ void create_generator_matrix(uint16_t G[8][16], uint16_t p)
 {
     uint16_t remainder;
     for (int i = 0; i < 8; i++) {
-        g[i][i] = 1; // Identity matrix
+        G[i][i] = 1; // Identity matrix
         remainder = shift_register(p, 1 << (15-i));
         for (int j = 0; j < 8; j++)
             { g[i][j+8] = get_nth_bit(j, remainder); }
@@ -101,6 +101,8 @@ void create_generator_matrix(uint16_t G[8][16], uint16_t p)
 int code_detect_error(Message* msg, uint16_t *err)
 {
     // TODO
+    (void)msg;
+    (void)err;
     return 0;
 }
 
@@ -111,7 +113,7 @@ int code_detect_error(Message* msg, uint16_t *err)
 int code_correct_error(Message* msg, uint16_t err)
 {
     (void)msg;
-
+    (void)err;
     // TODO: compléter cette fonction
 
     return 0;
