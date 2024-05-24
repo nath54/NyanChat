@@ -51,13 +51,27 @@ void test_code_hamming_distance(void)
     TEST_ASSERT_EQUAL_INT(4, d);
 }
 
-
 void test_rem_lfsr(void)
 {
     uint16_t P = 0b110111001;
     uint16_t x = 0b1110010;
     uint16_t encoded = rem_lfsr(P, x);
     TEST_ASSERT_EQUAL_UINT16(0b11101001, encoded);
+}
+
+void test_code_correct_error(void)
+{
+    Message msg = { 0 };
+    strncpy(msg.msg, "This is a test.", MAX_MSG_LENGTH);
+    msg.msg_length = strlen(msg.msg);
+    srand(msg.msg_length);
+    add_control_bits(&msg);
+    // test BER 1%
+    BIT_ERROR_RATE = 0.01;
+    code_insert_error(&msg);
+    int rc = code_correct_error(&msg);
+    TEST_ASSERT_EQUAL_INT(0, rc);
+    TEST_ASSERT_EQUAL_STRING("This is a test.", msg.msg);
 }
 
 int main(void)
@@ -69,5 +83,7 @@ int main(void)
     RUN_TEST(test_rem_lfsr);
     RUN_TEST(test_code_hamming_distance);
     RUN_TEST(test_encode);
+    RUN_TEST(test_code_correct_error);
+
     return UNITY_END();
 }

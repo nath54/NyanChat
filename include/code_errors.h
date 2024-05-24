@@ -21,6 +21,8 @@ extern double BIT_ERROR_RATE; // in %
 */
 uint16_t encode(uint16_t G[K][N], uint16_t m);
 
+uint8_t decode(uint16_t H[C][N], uint16_t m);
+
 void add_control_bits(Message *msg);
 
 /**
