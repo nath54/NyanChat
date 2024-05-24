@@ -36,6 +36,7 @@ void init_empty_message(Message* msg)
     msg->dst_flag = 0;
     CHKN( strcpy(msg->dst, "") );
     CHKN( strcpy(msg->src_pseudo, "") );
+    msg->nb_retransmission = 0;
 }
 
 

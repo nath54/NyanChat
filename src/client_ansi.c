@@ -1121,6 +1121,10 @@ void on_msg_client(TcpConnection* con, SOCKET sock,
                             "bad negative ack from server\033[m\n");
                     return;
                 }
+                // Update the number of times it has been retransmissed
+                cstate->msg_waiting_ack[msg->msg_id].nb_retransmission
+                                                    = msg->nb_retransmission;
+
                 // Have to resend the message
                 tcp_connection_message_send(con, con->sockfd,
                                     &(cstate->msg_waiting_ack[msg->msg_id]));

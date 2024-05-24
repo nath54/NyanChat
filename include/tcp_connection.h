@@ -117,6 +117,9 @@ typedef struct __attribute__((packed, aligned(4))) Message {
     // (for detection & correction)
     char control[MAX_MSG_LENGTH];
 
+    // Number of retransmissions due to NEGATIVE ACK
+    int nb_retransmission;
+
 } Message;
 
 

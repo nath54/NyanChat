@@ -90,6 +90,7 @@ void gen_positive_ack_from_msg(Message* msg, Message* ack){
     ack->msg_type = MSG_ACK_POS;
     ack->msg_id = msg->msg_id;
     ack->proxy_client_socket = msg->proxy_client_socket;
+    ack->nb_retransmission = msg->nb_retransmission;
 }
 
 
@@ -99,6 +100,7 @@ void gen_negative_ack_from_msg(Message* msg, Message* ack){
     ack->msg_type = MSG_ACK_NEG;
     ack->msg_id = msg->msg_id;
     ack->proxy_client_socket = msg->proxy_client_socket;
+    ack->nb_retransmission = msg->nb_retransmission + 1;
 }
 
 
@@ -298,33 +300,18 @@ void on_msg_received(TcpConnection* con, SOCKET sock,
             }
         }
 
-        // Error detection test
-        bool msg_bon = true;
-        switch (code_correct_error(msg))
-        {
-            case 0:  // No detected error
-                break;
-            
-            default:
-                msg_bon = false;
-                break;
-        }
-
         // Acknowledgment sending
         Message ack;
         // Correct or detect errors 
-        if (code_correct_error(msg) == 0){
+        if (code_correct_error(msg) == 0 || msg->nb_retransmission > 5){
             // Positive acknowledgment: we received the message correctly
             gen_positive_ack_from_msg(msg, &ack);
-
             tcp_connection_message_send(con, sock, &ack);
         }
         else {
             // Negative acknowledgment: we did not receive the message correctly
             // So, we ask to resend it and we stop here
-            
             gen_negative_ack_from_msg(msg, &ack);
-
             tcp_connection_message_send(con, sock, &ack);
             
             return;
