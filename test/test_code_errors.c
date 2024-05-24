@@ -51,12 +51,14 @@ void test_code_hamming_distance(void)
     TEST_ASSERT_EQUAL_INT(4, d);
 }
 
-void test_rem_lfsr(void)
+void test_encode_lfsr(void)
 {
     uint16_t P = 0b110111001;
-    uint16_t x = 0b1110010;
-    uint16_t encoded = rem_lfsr(P, x);
-    TEST_ASSERT_EQUAL_UINT16(0b10001101, encoded);
+    uint16_t x8 = 0x0100;
+    TEST_ASSERT_EQUAL_UINT8(0b10111001, (uint8_t)encode_lfsr(P, x8));
+
+    uint16_t x9 = 0x0200;
+    TEST_ASSERT_EQUAL_UINT8(0b11001011, (uint8_t)encode_lfsr(P, x9));
 }
 
 void test_code_correct_error(void)
@@ -80,7 +82,7 @@ int main(void)
     create_syndrome_array();
 
     RUN_TEST(test_code_insert_error);
-    RUN_TEST(test_rem_lfsr);
+    RUN_TEST(test_encode_lfsr);
     RUN_TEST(test_code_hamming_distance);
     RUN_TEST(test_encode);
     RUN_TEST(test_code_correct_error);

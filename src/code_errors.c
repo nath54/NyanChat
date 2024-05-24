@@ -39,7 +39,7 @@ void create_generator_matrix(uint16_t G[K][N], uint16_t P)
 {
     uint16_t remainder;
     for (int i = 0; i < K; i++) {
-        remainder = rem_lfsr(P, 1 << (N-1-i));
+        remainder = encode_lfsr(P, 1 << (N-1-i));
         for (int j = 0; j < K; j++) {
             G[i][j] = (i == j) ? 1 : 0; // Identity matrix
         }
@@ -65,7 +65,7 @@ void create_syndrome_array()
         S[i] = Nc-1;
 
     for (uint16_t e = 0; e < Nc; e++) {
-        uint8_t syndrome = decode(H, e << C);
+        uint8_t syndrome = encode_lfsr(P, e << C);
         S[syndrome] &= e;
     }
 }
@@ -97,28 +97,23 @@ uint8_t decode(uint16_t H[C][N], uint16_t m)
     return syndrome;
 }
 
-uint8_t rem_lfsr(uint16_t P, uint16_t x)
-{
-    x = x << C;
-    P = P << (K-1);
-    for (int e = 0; e < C; e++) {
-        x ^= P;
-        P = P >> 1;
-    }
-    return (uint8_t)x;
-}
-
 uint16_t encode_lfsr(uint16_t P, uint16_t m)
 {
-    return ((uint16_t)m << C) + rem_lfsr(P, m);
+    uint16_t r = m;
+    P = P << (K-1);
+    for (int i = 0; i < C; i++) {
+        if (get_nth_bit(i, r))
+            r ^= P;
+        P = P >> 1;
+    }
+    return m + (uint8_t)r;
 }
 
 int code_hamming_distance(uint16_t P)
 {
-    (void)P;
     int distance = K;
     for (int i = 1; i < Nk; i++) {
-        uint16_t word = encode(G, i << C);
+        uint16_t word = encode_lfsr(P, i << C);
         int w = weight(word);
         if (w < distance)
             distance = w;
@@ -131,7 +126,7 @@ int code_hamming_distance(uint16_t P)
 void add_control_bits(Message *msg)
 {
     for (uint32_t i = 0; i < msg->msg_length; i++) {
-        uint8_t control = encode(G, msg->msg[i] << C);
+        uint8_t control = encode_lfsr(P, msg->msg[i] << C);
         msg->control[i] = control;
     }
 }
