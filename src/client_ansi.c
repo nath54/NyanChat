@@ -45,9 +45,13 @@ void on_received_message_default_channel(ClientState* cstate, Message* msg){
         CHKN( cstate->msgs_default_channel
                 = realloc(cstate->msgs_default_channel,
                           sizeof(Message) * cstate->tot_msgs_default_channel) );
+        CHKN( cstate->heights_msgs_default_channel
+                = realloc(cstate->heights_msgs_default_channel,
+                          sizeof(Message) * cstate->tot_msgs_default_channel) );
         //
         for(size_t i=tmp; i<cstate->tot_msgs_default_channel; i++){
             init_empty_message(&(cstate->msgs_default_channel[i]));
+            cstate->heights_msgs_default_channel[i] = 0;
         }
     }
     //
@@ -63,6 +67,40 @@ void on_received_message_default_channel(ClientState* cstate, Message* msg){
 */
 
 #define MSG_HOVER_COLOR GREEN_YELLOW
+
+
+// Compute the total displayed height of one message
+int calc_one_msg_tot_height(Message* msg, int max_text_line_length){
+    //
+    int height = 3;
+    int i = 0;
+    //
+    while((int)msg->msg_length - i > max_text_line_length){
+        i+=max_text_line_length;
+        height++;
+    }
+    if(msg->msg_length - i > 0){
+        height++;
+    }
+    //
+    return height;
+}
+
+
+// Compute the total displayed height of all the msgs in the default channel
+void calc_msgs_tot_height(ClientState* cstate,
+                          int tot_width
+){
+    //
+    int max_text_line_length = tot_width - 3;
+    //
+    for(size_t j=0; j<cstate->nb_msgs_default_channel; j++){
+        cstate->heights_msgs_default_channel[j]
+            = calc_one_msg_tot_height(&(cstate->msgs_default_channel[j]),
+                                        max_text_line_length);
+    }
+}
+
 
 // Prints a message, visible only on a certain boundary limit,
 //   and returns the y coordinate of the last message printed line
@@ -136,10 +174,10 @@ int print_message(ClientState* cstate, Message* msg,
     // Display the message content
     int cy = y + 3;
     int i = 0;
-    while((int)msg->msg_length - i > tot_width - 3){
+    int max_text_line_length = tot_width - 3;
+    while((int)msg->msg_length - i > max_text_line_length){
 
         if( cy >= min_y_show && cy <= max_y_show ){ 
-            int p_end = i+tot_width-3;
             set_cursor_position(x, cy);
 
             // Print the msg border decoration
@@ -152,13 +190,14 @@ int print_message(ClientState* cstate, Message* msg,
                 { reset_ansi(); }
             
             // Print the current line of the message
+            int p_end = i + max_text_line_length;
             char tmp = msg->msg[p_end];
             msg->msg[p_end] = '\0';
             printf("%s", msg->msg + i);
             msg->msg[p_end] = tmp;
         }
 
-        i += tot_width;
+        i += max_text_line_length;
         cy += 1;
     }
     
@@ -185,8 +224,132 @@ int print_message(ClientState* cstate, Message* msg,
 
 // Display the left panel: the messages of the current channel
 void display_left_panel(ClientState* cstate){
+    // Requirements
+    int x_barriere_top = cstate->win_width - cstate->logo_main->tx - 1;
+    int y_barriere_bottom = cstate->win_height - 4;
+    //
+    int panel_x_start = 3;
+    int panel_x_end = x_barriere_top-1;
+    int panel_y_start = 3;
+    int panel_y_end = y_barriere_bottom - 1;
+    int panel_width = panel_x_end - panel_x_start;
+    int panel_height = panel_y_end - panel_y_start;
+    //
+    int spaces_between_msgs = 1;
+    //
+    int y_0 = 0;
+    int id_first_msg_disp = 0;
+    int id_last_msg_disp = 0;
+    //
     if(cstate->type_current_dest == MSG_FLAG_DEFAULT_CHANNEL){
+        if(cstate->nb_msgs_default_channel == 0){
+            return;
+        }
+        //
+        calc_msgs_tot_height(cstate, panel_width);
 
+        // Current Message Height
+        int cmh = cstate->heights_msgs_default_channel[cstate->disp_msgs_cursor];
+
+        // Sum of the height of precedents and post messages to the focused msg 
+        int sum_pre = 0;
+        int sum_post = 0;
+        for(int i=0; i<cstate->disp_msgs_cursor; i++){
+            sum_pre += cstate->heights_msgs_default_channel[i];
+        }
+        for(size_t i=cstate->disp_msgs_cursor+1; i<cstate->nb_msgs_default_channel; i++){
+            sum_post += cstate->heights_msgs_default_channel[i];
+        }
+        
+        // Differents messages positions cases
+        if(sum_pre + cmh < panel_height / 2){
+            y_0 = 0;
+            id_first_msg_disp = 0;
+            int cy = 0;
+            id_last_msg_disp = -1;
+            //
+            for(size_t i = 0; i<cstate->nb_msgs_default_channel; i++){
+                //
+                cy += cstate->heights_msgs_default_channel[i];
+                cy += spaces_between_msgs;
+                //
+                if(cy > panel_width){
+                    id_last_msg_disp = i;
+                    break;
+                }
+            }
+            if(id_last_msg_disp == -1){
+                id_last_msg_disp = cstate->nb_msgs_default_channel-1;
+            }
+        }
+        else if(sum_post + cmh < panel_height / 2){
+            id_last_msg_disp = cstate->nb_msgs_default_channel - 1;
+            id_first_msg_disp = -1;
+            int cy = 0;
+            //
+            for(int i = id_last_msg_disp; i>=0; i--){
+                //
+                cy += cstate->heights_msgs_default_channel[i];
+                cy += spaces_between_msgs;
+                //
+                if(cy > panel_width){
+                    id_first_msg_disp = i;
+                    break;
+                }
+            }
+            if(id_first_msg_disp == -1){
+                id_last_msg_disp = 0;
+            }
+            y_0 = panel_height - cy;
+        }
+        else{
+            int cy = panel_height / 2 - cmh / 2;
+            // Top part
+            y_0 = cy;
+            id_first_msg_disp = -1;
+            for(int i=cstate->disp_msgs_cursor-1; i>=0; i--){
+                y_0 -= cstate->heights_msgs_default_channel[i];
+                y_0 -= spaces_between_msgs;
+                //
+                if(y_0 <= 0){
+                    id_first_msg_disp = i;
+                    break;
+                }
+            }
+            // Bottom part
+            cy += cmh;
+            id_last_msg_disp = -1;
+            //
+            for(size_t i = cstate->disp_msgs_cursor+1; i<cstate->nb_msgs_default_channel; i++){
+                //
+                cy += cstate->heights_msgs_default_channel[i];
+                cy += spaces_between_msgs;
+                //
+                if(cy > panel_width){
+                    id_last_msg_disp = i;
+                    break;
+                }
+            }
+            if(id_last_msg_disp == -1){
+                id_last_msg_disp = cstate->nb_msgs_default_channel-1;
+            }
+        }
+
+        // We now have theses three variables initialised:
+        //   y_0 - id_first_msg_dispo - id_last_msg_dispo
+
+        // We can now FINALLY DISPLAYS THE MESSAGES
+        int cy = y_0;
+        for(int i=id_first_msg_disp; i<=id_last_msg_disp; i++){
+            print_message(cstate,
+                          &(cstate->msgs_default_channel[i]),
+                          panel_x_start, cy,
+                          panel_x_end,
+                          panel_y_start,
+                          panel_y_end,
+                          i == cstate->disp_msgs_cursor);
+        }
+        //
     }
     else{
         // TODO
@@ -227,7 +390,7 @@ void display_input_text(ClientState* cstate, int x, int y, int max_x){
         cstate->cursor_x = x + cstate->input_cursor;
         cstate->cursor_y = y;
     }
-    // 
+    //
     else{
         int p_start;
         int p_end;
@@ -883,6 +1046,10 @@ void on_msg_client(TcpConnection* con, SOCKET sock,
         {
             case MSG_SERVER_CLIENT:
                 // TODO: recevoir les messages
+                if(msg->dst_flag == MSG_FLAG_DEFAULT_CHANNEL){
+                    on_received_message_default_channel(cstate, msg);
+                    display_client(cstate);
+                }
                 // printf("Received message from %s : \"%s\"\n",
                 //                         msg->src_pseudo, msg->msg);
                 break;
@@ -1031,6 +1198,8 @@ void free_cstate(ClientState* cstate)
 // Main entry point of the client
 int main(int argc, char* argv[]) {
     
+    fprintf(stderr, "testt\n");
+
     // Base variables, containers for ClientState and TcpConnection
     ClientState cstate;
     TcpConnection con;

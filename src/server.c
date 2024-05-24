@@ -300,13 +300,14 @@ void on_msg_received(TcpConnection* con, SOCKET sock,
 
         // Error detection test
         bool msg_bon = true;
-        switch (code_detect_error(msg))
+        uint16_t err = 0;
+        switch (code_detect_error(msg, &err))
         {
             case 0:  // No detected error
                 break;
             
             case 1:
-                if(code_correct_error(msg) != 0)
+                if(code_correct_error(msg, err) != 0)
                     msg_bon = false;
                 break;
 

@@ -64,6 +64,9 @@ typedef struct {
     Message* msgs_default_channel;
     size_t tot_msgs_default_channel;
     size_t nb_msgs_default_channel;
+    // Calculated height of all theses msgs by the fct `calc_msgs_heights()`
+    //  It is tje total height of the displayed message, including the header
+    int* heights_msgs_default_channel;
 
     // For knowing where the user focus is
     int user_focus;

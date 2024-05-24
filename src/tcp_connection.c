@@ -170,14 +170,14 @@ bool test_poll_errors(int rc)
 // Listening to all new connection requests
 void new_clients_acceptation(TcpConnection* con) {
     // Variable to stock sockets
-    SOCKET new_sock;
+    SOCKET new_sock = -1;
 
     do {
 
         if (con->nb_poll_fds < MAX_POLL_SOCKETS) {
 
-            SOCKADDR_IN connected_addr;
-            socklen_t con_addr_len;
+            SOCKADDR_IN connected_addr = {0};
+            socklen_t con_addr_len = sizeof(SOCKADDR);
 
             if(con->enable_debug_print)
                 { printf("On accepte.\n"); }
@@ -408,14 +408,13 @@ void tcp_connection_mainloop(TcpConnection* con,
                 if(!con->ansi_stdin){
                     // Standard stdin
                     bytes_read = read(stdin_fd, buffer, MAX_MSG_LENGTH);
+                    //
                     if (bytes_read == 0) {
-
-                        if(con->enable_debug_print) {
-                            printf("User closed input\n");
-                        }
-
+                        if(con->enable_debug_print)
+                            { printf("User closed input\n"); }
                         break;
-                    } else if (bytes_read == -1) {
+                    }
+                    else if (bytes_read == -1) {
                         perror("read");
                         break;
                     }
@@ -425,6 +424,8 @@ void tcp_connection_mainloop(TcpConnection* con,
                 } else{
                     // Raw Ansi stdin
                     CHKERRNO( bytes_read = read(STDIN_FILENO, buffer, 1), EAGAIN );
+
+                    fprintf(stderr, "test\n");
 
                     if (bytes_read == 0) {
                         fprintf(stderr, "0 bytes read\n");
