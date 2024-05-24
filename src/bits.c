@@ -36,12 +36,3 @@ int weight(uint16_t x)
     return x;
 }
 
-char reverse_bits(char x)
-{
-    char r = 0;
-    for (int i = 0; i < 8; i++) {
-        r = (r << 1) | (x & 1);
-        x >>= 1;
-    }
-    return r;
-}

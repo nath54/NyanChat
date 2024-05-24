@@ -41,7 +41,7 @@ void test_encode(void)
         {0,0,0,0,0,0,0,1,1,0,1,1,1,0,0,1}
     };
     uint16_t word = encode(G, 0b0000000100000000);
-    TEST_ASSERT_EQUAL_INT16(0b0000000110111001, word);
+    TEST_ASSERT_EQUAL_UINT16(0b0000000110111001, word);
 }
 
 void test_code_hamming_distance(void)
@@ -52,19 +52,21 @@ void test_code_hamming_distance(void)
 }
 
 
-void test_lfsr(void)
+void test_rem_lfsr(void)
 {
-    uint16_t P = 11;
-    uint16_t x = 229;
-    uint16_t encoded = rem_lfsr(P, x);
-    TEST_ASSERT_EQUAL(1, encoded);
+    uint16_t P = 0b110111001;
+    uint16_t x = 0b100000000;
+    uint16_t syndrome = rem_lfsr(P, x);
+    TEST_ASSERT_EQUAL_UINT16(0b10111001, syndrome);
 }
 
 int main(void)
 {
     UNITY_BEGIN();
+    create_syndrome_array();
+
     RUN_TEST(test_code_insert_error);
-    RUN_TEST(test_lfsr);
+    RUN_TEST(test_rem_lfsr);
     RUN_TEST(test_code_hamming_distance);
     RUN_TEST(test_encode);
     return UNITY_END();

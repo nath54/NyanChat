@@ -40,12 +40,12 @@ uint16_t rem_lfsr(uint16_t p, uint16_t x);
 /**
  * Encode a 8-bit word with polynomial generator P using LFSR
 */
-uint16_t encode_lfsr(uint16_t P, char m);
+uint16_t encode_lfsr(uint16_t P, uint16_t m);
 
 // Fill the generator matrix `G` from the polynomial `p`.
 void create_generator_matrix(uint16_t G[K][N], uint16_t p);
 
-void create_syndrome_array(uint16_t p, uint16_t S[Nc]);
+void create_syndrome_array();
 
 // Function to detect an error in the message
 // Returns 0 : No errors, or errors corrected
