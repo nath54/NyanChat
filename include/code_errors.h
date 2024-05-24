@@ -13,22 +13,30 @@
 #define Nk 256
 #define Nn 65536
 
-// Encoding function
+/**
+ * Renvoie un mot du code sur 8 + c bits (c étant le degré de votre polynôme),
+ * rajoutant au mot m les bits de parité décrit par la matrice G dérivée de votre code polynomial.*
+ * Le mot à encoder (sur 8 bits) sera placé sur les premiers bits de la variable m et complété
+ * par 8 bits de padding avant d’être fourni en argument à la fonction.
+ * Vous privilégierez des opérateurs bit à bit en évitant les opérations arithmétiques.
+*/
 uint16_t encode(uint16_t G[8][16], uint16_t m);
+
+void add_control_bits(Message *msg);
 
 /**
  * @brief Calculate the Hamming distance of the polynomial code.
  * 
- * @param g the generator matrix representing the polynomial code
+ * @param P The polynomial generator
  * @return `int` the minimal distance between word 0 and any other word.
  */
-int code_hamming_distance(uint16_t G[8][16]);
+int code_hamming_distance(uint16_t P);
 
 /*
 Calculate the remainder of the division of the word `x`
 by the polynomial `p` using the shift register method.
 */
-uint16_t shift_register(uint16_t p, uint16_t x);
+uint16_t rem_lfsr(uint16_t p, uint16_t x);
 
 // Fill the generator matrix `G` from the polynomial `p`.
 void create_generator_matrix(uint16_t G[8][16], uint16_t p);
@@ -36,17 +44,9 @@ void create_generator_matrix(uint16_t G[8][16], uint16_t p);
 void create_syndrome_array(uint16_t p, uint16_t S[256]);
 
 // Function to detect an error in the message
-// Returns 0 if no errors are detected,
-// otherwise a positive value that can for example indicate whether or not it is possible to
-// correct the error, idk if it's possible
-int code_detect_error(Message* msg, uint16_t* err);
-
-
-// Function that directly corrects the error in msg
-// Returns 0 if everything went well
-// Otherwise, returns -1
-int code_correct_error(Message* msg, uint16_t err);
-
+// Returns 0 : No errors, or errors corrected
+//         -1 : Errors detected but not corrected
+int code_correct_error(Message* msg);
 
 /**
  * @brief Add errors to a message.
