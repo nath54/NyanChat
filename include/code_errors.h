@@ -34,13 +34,13 @@ void create_generator_matrix(uint16_t **g, uint16_t p);
 // Returns 0 if no errors are detected,
 // otherwise a positive value that can for example indicate whether or not it is possible to
 // correct the error, idk if it's possible
-int code_detect_error(Message* msg);
+int code_detect_error(Message* msg, uint16_t* err);
 
 
 // Function that directly corrects the error in msg
 // Returns 0 if everything went well
 // Otherwise, returns -1
-int code_correct_error(Message* msg);
+int code_correct_error(Message* msg, uint16_t err);
 
 
 /**

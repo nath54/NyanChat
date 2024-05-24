@@ -96,14 +96,18 @@ void create_generator_matrix(uint16_t **g, uint16_t p)
 
 // Function to detect an error in the message
 // Returns 0 if no errors are detected,
-// otherwise a positive value that can for example indicate whether or not it is possible to
-// correct the error, idk if it's possible
-int code_detect_error(Message* msg)
+//         1 if errors are detected and can be corrected
+//         2 if errors are detected but cannot be corrected
+int code_detect_error(Message* msg, uint16_t *err)
 {
-    (void)msg;
-    
-    // TODO: compléter cette fonction
-
+    uint16_t word;
+    for (uint32_t c = 0; c < msg->msg_length; c++) {
+        // Cast the word to (possibly) add errors to it
+        word = (uint16_t)(msg->msg[c]) << 8;
+        uint16_t syndrome = encode(H, word);
+        if (S[syndrome] != 0)
+            return -1;
+    }
     return 0;
 }
 
@@ -111,7 +115,7 @@ int code_detect_error(Message* msg)
 // Function that directly corrects the error in msg
 // Returns 0 if everything went well
 // Otherwise, returns -1
-int code_correct_error(Message* msg)
+int code_correct_error(Message* msg, uint16_t err)
 {
     (void)msg;
 
