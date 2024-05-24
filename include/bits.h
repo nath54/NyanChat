@@ -12,3 +12,5 @@ uint16_t chg_nth_bit(int n, uint16_t m);
 void print_word(int k, uint16_t m);
 
 int weight(uint16_t m);
+
+uint8_t reverse_bits(uint8_t x);

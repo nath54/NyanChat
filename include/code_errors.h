@@ -37,7 +37,7 @@ int code_hamming_distance(uint16_t P);
 Calculate the remainder of the division of the word `x`
 by the polynomial `p` using the shift register method.
 */
-uint16_t rem_lfsr(uint16_t p, uint16_t x);
+uint8_t rem_lfsr(uint16_t p, uint16_t x);
 
 /**
  * Encode a 8-bit word with polynomial generator P using LFSR

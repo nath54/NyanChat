@@ -97,13 +97,15 @@ uint8_t decode(uint16_t H[C][N], uint16_t m)
     return syndrome;
 }
 
-uint16_t rem_lfsr(uint16_t P, uint16_t x)
+uint8_t rem_lfsr(uint16_t P, uint16_t x)
 {
-    for (int i = 0; i < K; i++) {
+    x = x << C;
+    P = P << (K-1);
+    for (int e = 0; e < C; e++) {
         x ^= P;
-        x = x >> 1;
+        P = P >> 1;
     }
-    return x;
+    return (uint8_t)x;
 }
 
 uint16_t encode_lfsr(uint16_t P, uint16_t m)

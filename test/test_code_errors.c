@@ -56,7 +56,7 @@ void test_rem_lfsr(void)
     uint16_t P = 0b110111001;
     uint16_t x = 0b1110010;
     uint16_t encoded = rem_lfsr(P, x);
-    TEST_ASSERT_EQUAL_UINT16(0b11101001, encoded);
+    TEST_ASSERT_EQUAL_UINT16(0b10001101, encoded);
 }
 
 void test_code_correct_error(void)

@@ -36,3 +36,12 @@ int weight(uint16_t x)
     return x;
 }
 
+uint8_t reverse_bits(uint8_t x)
+{
+    uint8_t r = 0;
+    for (int i = 0; i < 8; i++) {
+        r = (r << 1) | (x & 1);
+        x >>= 1;
+    }
+    return r;
+}
