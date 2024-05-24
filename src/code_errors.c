@@ -12,28 +12,41 @@ Le mot à encoder (sur 8 bits) sera placé sur les premiers bits de la variable 
 par 8 bits de padding avant d’être fourni en argument à la fonction.
 Vous privilégierez des opérateurs bit à bit en évitant les opérations arithmétiques.
 */
-uint16_t encode(uint16_t** g, int n, uint16_t m)
+uint16_t encode_G(uint16_t** g, uint16_t m)
 {
-    for (int i = 8; i < n; i++) {
+    for (int j = 8; j < 16; j++) {
         uint16_t parity_bit = 0;
-        for (int j = 0; j < 8; j++)
-            parity_bit ^= g[j][i] & get_nth_bit(n-j-1, m);
+        for (int i = 0; i < 8; i++)
+            parity_bit ^= g[i][j] & get_nth_bit(i, m);
 
-        set_nth_bit(n-i-1, m);
+        if (parity_bit)
+            m = set_nth_bit(j, m);
     }
     return m;
 }
 
-int code_hamming_distance(uint16_t **g, int n)
+int code_hamming_distance(uint16_t **g)
 {
     int distance = 8;
-    for (int i = 0; i < 256; i++) {
-        uint16_t word = encode(g, n, i << 8);
+    for (int i = 1; i < 256; i++) {
+        uint16_t word = encode_G(g, i << 8);
         int w = weight(word);
         if (w < distance)
             distance = w;
     }
     return distance;
+}
+
+void create_check_matrix(uint16_t **g, uint16_t **h)
+{
+    for (int i = 0; i < 8; i++) {
+        for (int j = 0; j < 8; j++) {
+            // A transpose matrix
+            h[i][j] = g[j][i+8];
+            // Identity matrix
+            h[i][j+8] = (i == j) ? 1 : 0;
+        }
+    }
 }
 
 // Function to detect an error in the message
@@ -63,13 +76,18 @@ int code_correct_error(Message* msg)
 }
 
 
-void code_add_errors_to_msg(Message* msg, int nb_errors)
+void code_add_errors_to_msg(Message* msg)
 {
-    for (int i = 0; i < nb_errors; i++) {
-        // Choose a random word to change
-        int word = randint(msg->msg_length);
-        // Add an error to the message
-        msg->msg[word] = chg_nth_bit(randint(8), (uint16_t)(msg->msg[word] << 8));
+    uint16_t word;
+    for (uint32_t c = 0; c < msg->msg_length; c++) {
+        // Cast the word to (possibly) add errors to it
+        word = (uint16_t)(msg->msg[c]) << 8;
+        for (int b = 0; b < 8; b++) {
+            if (randint(100) < BIT_ERROR_RATE * 100)
+                // Add an error to the message
+                word = chg_nth_bit(b, word);
+        }
+        msg->msg[c] = (char)(word >> 8);
     }
 }
 

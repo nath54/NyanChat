@@ -4,12 +4,11 @@
 #include "tcp_connection.h"
 
 
-#define PROXY_ERROR_RATE 10   // In %, the rate of creating errors
-#define PROXY_MAX_ERROR_CREATED 4  // The maximum number of created errors
+#define BIT_ERROR_RATE 0.1    // In %, the rate of creating errors
 
 
 // Encoding function
-uint16_t encode_G(uint16_t **g, int l, uint16_t m);
+uint16_t encode_G(uint16_t **g, uint16_t m);
 
 /**
  * @brief Calculate the Hamming distance of the polynomial code
@@ -17,7 +16,15 @@ uint16_t encode_G(uint16_t **g, int l, uint16_t m);
  * @param g the generator matrix representing the polynomial code
  * @return `int` the minimal distance between words 0 and any other word
  */
-int code_hamming_distance(uint16_t **g, int l);
+int code_hamming_distance(uint16_t **g);
+
+/**
+ * @brief Fill the check matrix from the generator matrix
+ * 
+ * @param g the generator matrix
+ * @param h the check matrix
+ */
+void create_check_matrix(uint16_t **g, uint16_t **h);
 
 // Function to detect an error in the message
 // Returns 0 if no errors are detected,
@@ -37,7 +44,6 @@ int code_correct_error(Message* msg);
  * @note This function is called by the proxy.
  * 
  * @param msg The message to add noise to.
- * @param nb_errors The number of errors to add.
  */
-void code_add_errors_to_msg(Message* msg, int nb_errors);
+void code_add_errors_to_msg(Message* msg);
 
