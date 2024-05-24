@@ -8,7 +8,7 @@
 
 
 // Encoding function
-uint16_t encode_G(uint16_t **g, int l, uint16_t m);
+uint16_t encode(uint16_t** g, int n, uint16_t m);
 
 /**
  * @brief Calculate the Hamming distance of the polynomial code
