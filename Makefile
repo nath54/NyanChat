@@ -37,7 +37,7 @@ doc::
 	@printf "$(GREEN)Generating documentation...$(DEFAULT)\n"
 	@doxygen Doxyfile
 
-test: test_hashmap
+test: test_hashmap test_code_errors
 	@for test in $^; do \
 		printf "$(GREEN)Running $$test:$(DEFAULT)\n"; \
 		./$(BDIR)$$test; \

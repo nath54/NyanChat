@@ -2,13 +2,15 @@
 
 #include "tcp_connection.h"
 
-#define BIT_ERROR_RATE 0.01  // In %
 #define N 16 // Taille du mot de code
 #define K 8  // Taille du mot d'information
 #define C 8  // Nombre de bits de parité
 
 #define Nc 256
 #define Nk 256
+
+extern double BIT_ERROR_RATE; // in %
+
 
 /**
  * Renvoie un mot du code sur 8 + c bits (c étant le degré de votre polynôme),

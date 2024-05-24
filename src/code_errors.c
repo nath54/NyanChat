@@ -7,6 +7,8 @@ const int HD = 4; // Hamming distance of P
 const int CORRECTION = 1;
 const int DETECTION = 3;
 
+double BIT_ERROR_RATE = 0.01; // in % 
+
 // Matrice génératrice de P
 uint16_t G[K][N] = {
     {1,0,0,0,0,0,0,0,0,1,1,1,0,1,1,0},
@@ -135,12 +137,13 @@ int code_correct_error(Message* msg)
 
 void code_insert_error(Message* msg)
 {
+    srand(msg->msg_length);
     uint16_t byte;
     for (uint32_t i = 0; i < msg->msg_length; i++) {
         // Cast the byte to (possibly) add errors to it
         byte = (uint16_t)msg->msg[i] << C;
         for (int b = 0; b < N; b++) {
-            if ((rand() / RAND_MAX) < BIT_ERROR_RATE)
+            if (((double)rand() / RAND_MAX) < BIT_ERROR_RATE)
                 byte = chg_nth_bit(b, byte);  // Add an error to the message
         }
         msg->msg[i] = byte >> C;
