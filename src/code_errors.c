@@ -75,7 +75,7 @@ void create_check_matrix(uint16_t **g, uint16_t **h)
     }
 }
 
-uint16_t shift_register(uint16_t p, uint16_t m)
+uint16_t shift_register(uint16_t p, uint16_t x)
 {
     uint16_t remainder = 0;
     (void)p;
@@ -88,7 +88,7 @@ void create_generator_matrix(uint16_t **g, uint16_t p)
     uint16_t remainder;
     for (int i = 0; i < 8; i++) {
         g[i][i] = 1; // Identity matrix
-        remainder = shift_register(p, (i+8) << 8);
+        remainder = shift_register(p, 1 << (15-i));
         for (int j = 0; j < 8; j++)
             { g[i][j+8] = get_nth_bit(j, remainder); }
     }

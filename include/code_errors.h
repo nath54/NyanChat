@@ -26,7 +26,7 @@ int code_hamming_distance(uint16_t **g);
  */
 void create_check_matrix(uint16_t **g, uint16_t **h);
 
-uint16_t shift_register(uint16_t p, uint16_t m);
+uint16_t shift_register(uint16_t p, uint16_t x);
 
 void create_generator_matrix(uint16_t **g, uint16_t p);
 
