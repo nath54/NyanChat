@@ -27,7 +27,7 @@ uint16_t encode(uint16_t** g, int n, uint16_t m)
 int code_hamming_distance(uint16_t **g, int n)
 {
     int distance = 8;
-    for (int i = 0; i < 256; i++) {
+    for (int i = 1; i < 256; i++) {
         uint16_t word = encode(g, n, i << 8);
         int w = weight(word);
         if (w < distance)
