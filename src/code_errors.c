@@ -87,9 +87,9 @@ void create_generator_matrix(uint16_t G[8][16], uint16_t p)
 {
     uint16_t remainder;
     for (int i = 0; i < 8; i++) {
-        G[i][i] = 1; // Identity matrix
         remainder = shift_register(p, 1 << (15-i));
         for (int j = 0; j < 8; j++) {
+            G[i][j] = (i == j) ? 1 : 0; // Identity matrix
             G[i][j+8] = get_nth_bit(j, remainder);
         }
     }
