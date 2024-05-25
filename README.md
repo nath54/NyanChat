@@ -67,6 +67,11 @@ In case the application does not launch, check `log.txt` (with `cat log.txt` for
 
 Once everything is set, you will be first invited to enter your pseudo. Then you can send as many messages as desired!
 
+## Additional content
+
+- Run tests with `make test`.
+- Find the Doxygen documentation at https://nath54.github.io/NyanChat/.
+
 ## Architecture
 
 Only one server, only one proxy (theorically more) and many clients.
