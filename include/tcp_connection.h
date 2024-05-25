@@ -30,10 +30,8 @@ typedef struct in_addr IN_ADDR;
 
 typedef u_int32_t uint32;
 
-// #define BUFFER_SIZE 1024
 
-
-// Taille max d'un pseudo de clients ou d'un nom de salon
+// Max size of a client's pseudo or a channel's name
 #define MAX_NAME_LENGTH 64
 #define MIN_NAME_LENGTH 4
 
@@ -138,7 +136,6 @@ typedef struct TcpConnection {
                                2 = proxy server side, 3 = proxy clients side
                             */
 
-    //
     bool enable_debug_print;
     bool ansi_stdin;
 
@@ -156,9 +153,6 @@ typedef void(fn_on_msg)(TcpConnection* con, SOCKET sock,
 typedef void(fn_on_stdin)(TcpConnection* con,
                           char msg[MAX_MSG_LENGTH], size_t msg_len,
                           void* custom_args);
-
-
-// static socklen_t sockaddr_size = sizeof(SOCKADDR_IN);
 
 // static int stdin_fd = fileno(stdin);
 #define stdin_fd fileno(stdin)
