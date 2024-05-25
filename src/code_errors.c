@@ -63,9 +63,8 @@ void create_syndrome_array()
     for (uint16_t i = 0; i < Nc; i++)
         S[i] = Nc-1;
 
-    for (uint16_t e = 0; e < Nc; e++) {
+    for (uint32_t e = 0; e < Nc-1; e++) {
         uint8_t syndrome = decode_lfsr(P, e << C);
-        printf("Syndrome %d : %d\n", syndrome, e);
         S[syndrome] &= e;
     }
 }
@@ -82,7 +81,6 @@ uint16_t encode(uint16_t G[K][N], uint16_t m)
     }
     return m;
 }
-
 
 uint8_t decode(uint16_t H[C][N], uint16_t m)
 {
@@ -136,13 +134,17 @@ void add_control_bits(Message *msg)
     }
 }
 
+static uint16_t codeword(Message* msg, uint32_t i)
+{
+    return ((uint16_t)msg->msg[i] << C) + (uint8_t)msg->control[i];
+}
+
 int code_correct_error(Message* msg)
 {
     int rc = 0;
-
-    for (uint32_t i = 0; i < msg->msg_length; i++) {
-        uint16_t word = ((uint16_t)msg->msg[i] << C) + (uint8_t)msg->control[i];
-        uint8_t syndrome = decode_lfsr(P, word);
+    for (uint32_t i = 0; i < msg->msg_length; i++) 
+    {
+        uint8_t syndrome = decode_lfsr(P, codeword(msg, i));
         uint16_t err = S[syndrome];
         if (weight(err) <= CORRECTION)
             msg->error[i] = false;
@@ -157,15 +159,15 @@ int code_correct_error(Message* msg)
 
 void code_insert_error(Message* msg)
 {
-    uint16_t codeword;
-    for (uint32_t i = 0; i < msg->msg_length; i++) {
+    uint16_t cw;
+    for (uint32_t i = 0; i < msg->msg_length; i++){
         // Cast the word to (possibly) add errors to it
-        codeword = ((uint16_t)msg->msg[i] << C); // + msg->control[i];
+        cw = codeword(msg, i);
         for (int b = 0; b < N; b++) {
             if (((double)rand() / RAND_MAX) < BIT_ERROR_RATE)
-                codeword = chg_nth_bit(b, codeword);  // Add an error
+                cw = chg_nth_bit(b, cw);  // Add an error
         }
-        msg->msg[i] = codeword >> C;
-        // msg->control[i] = codeword & (Nc - 1);
+        msg->msg[i] = cw >> C;
+        msg->control[i] = cw & (Nc - 1);
     }
 }
