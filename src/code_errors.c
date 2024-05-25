@@ -37,9 +37,8 @@ uint16_t S[Nc];
 
 void create_generator_matrix(uint16_t G[K][N], uint16_t P)
 {
-    uint16_t remainder;
     for (int i = 0; i < K; i++) {
-        remainder = encode_lfsr(P, 1 << (N-1-i));
+        uint8_t remainder = decode_lfsr(P, 1 << (N-1-i));
         for (int j = 0; j < K; j++) {
             G[i][j] = (i == j) ? 1 : 0; // Identity matrix
         }
@@ -65,7 +64,8 @@ void create_syndrome_array()
         S[i] = Nc-1;
 
     for (uint16_t e = 0; e < Nc; e++) {
-        uint8_t syndrome = encode_lfsr(P, e << C);
+        uint8_t syndrome = decode_lfsr(P, e << C);
+        printf("Syndrome %d : %d\n", syndrome, e);
         S[syndrome] &= e;
     }
 }
@@ -99,6 +99,11 @@ uint8_t decode(uint16_t H[C][N], uint16_t m)
 
 uint16_t encode_lfsr(uint16_t P, uint16_t m)
 {
+    return m + decode_lfsr(P, m);
+}
+
+uint8_t decode_lfsr(uint16_t P, uint16_t m)
+{
     uint16_t r = m;
     P = P << (K-1);
     for (int i = 0; i < C; i++) {
@@ -106,7 +111,7 @@ uint16_t encode_lfsr(uint16_t P, uint16_t m)
             r ^= P;
         P = P >> 1;
     }
-    return m + (uint8_t)r;
+    return r;
 }
 
 int code_hamming_distance(uint16_t P)
@@ -126,7 +131,7 @@ int code_hamming_distance(uint16_t P)
 void add_control_bits(Message *msg)
 {
     for (uint32_t i = 0; i < msg->msg_length; i++) {
-        uint8_t control = encode_lfsr(P, msg->msg[i] << C);
+        uint8_t control = decode_lfsr(P, msg->msg[i] << C);
         msg->control[i] = control;
     }
 }
@@ -137,7 +142,7 @@ int code_correct_error(Message* msg)
 
     for (uint32_t i = 0; i < msg->msg_length; i++) {
         uint16_t word = ((uint16_t)msg->msg[i] << C) + (uint8_t)msg->control[i];
-        uint8_t syndrome = decode(H, word);
+        uint8_t syndrome = decode_lfsr(P, word);
         uint16_t err = S[syndrome];
         if (weight(err) <= CORRECTION)
             msg->error[i] = false;
@@ -152,14 +157,15 @@ int code_correct_error(Message* msg)
 
 void code_insert_error(Message* msg)
 {
-    uint16_t word;
+    uint16_t codeword;
     for (uint32_t i = 0; i < msg->msg_length; i++) {
         // Cast the word to (possibly) add errors to it
-        word = (uint16_t)msg->msg[i] << C;
+        codeword = ((uint16_t)msg->msg[i] << C); // + msg->control[i];
         for (int b = 0; b < N; b++) {
             if (((double)rand() / RAND_MAX) < BIT_ERROR_RATE)
-                word = chg_nth_bit(b, word);  // Add an error to the message
+                codeword = chg_nth_bit(b, codeword);  // Add an error
         }
-        msg->msg[i] = word >> C;
+        msg->msg[i] = codeword >> C;
+        // msg->control[i] = codeword & (Nc - 1);
     }
 }

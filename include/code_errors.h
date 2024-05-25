@@ -44,6 +44,8 @@ uint8_t rem_lfsr(uint16_t p, uint16_t x);
 */
 uint16_t encode_lfsr(uint16_t P, uint16_t m);
 
+uint8_t decode_lfsr(uint16_t P, uint16_t m);
+
 // Fill the generator matrix `G` from the polynomial `p`.
 void create_generator_matrix(uint16_t G[K][N], uint16_t p);
 

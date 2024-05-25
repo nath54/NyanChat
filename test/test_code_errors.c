@@ -61,19 +61,34 @@ void test_encode_lfsr(void)
     TEST_ASSERT_EQUAL_UINT8(0b11001011, (uint8_t)encode_lfsr(P, x9));
 }
 
+static void print_detected_errors(Message* msg)
+{
+    printf("Potential errors : ");
+    for (uint32_t i = 0; i < msg->msg_length; i++) {
+        if (msg->error[i])
+            printf("\033[0;31m%c\033[0m", msg->msg[i]);
+        else
+            printf("\033[0;32m%c\033[0m", msg->msg[i]);
+    }
+    printf("\n");
+}
+
 void test_code_correct_error(void)
 {
+    BIT_ERROR_RATE = 0.50;
+
     Message msg = { 0 };
-    strncpy(msg.msg, "This is a test.", MAX_MSG_LENGTH);
+    char str[] = "Les oiseaux chantent au printemps pour profiter du beau temps.";
+    strncpy(msg.msg, str, MAX_MSG_LENGTH);
     msg.msg_length = strlen(msg.msg);
     srand(msg.msg_length);
     add_control_bits(&msg);
-    // test BER 1%
-    BIT_ERROR_RATE = 0.01;
     code_insert_error(&msg);
+    printf("Received message : %s\n", msg.msg);
     int rc = code_correct_error(&msg);
-    TEST_ASSERT_EQUAL_INT(0, rc);
-    TEST_ASSERT_EQUAL_STRING("This is a test.", msg.msg);
+    print_detected_errors(&msg);
+    TEST_ASSERT_EQUAL_INT(-1, rc);
+    TEST_ASSERT_EQUAL_STRING(str, msg.msg);
 }
 
 int main(void)
