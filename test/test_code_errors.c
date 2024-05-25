@@ -1,5 +1,6 @@
 #include "unity.h"
 #include "code_errors.h"
+#include "bits.h"
 
 void setUp(void) {}
 void tearDown(void) {}
